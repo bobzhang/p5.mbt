@@ -1,0 +1,112 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/io"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn parse_csv(String, separator? : Char, delimiter? : Char) -> Array[Array[String]] raise CsvError
+
+pub fn parse_float(String) -> Double
+
+pub fn stringify_csv(ArrayView[Array[String]], separator? : Char, delimiter? : Char, eof? : Bool) -> String
+
+// Errors
+#derive(@debug.Debug)
+pub suberror CsvError {
+  CsvError(String)
+}
+
+#derive(@debug.Debug)
+pub suberror XmlError {
+  XmlError(String)
+}
+
+// Types and methods
+pub(all) enum Column {
+  Index(Int32)
+  Title(String)
+}
+
+pub struct Table {
+  // private fields
+}
+pub fn Table::add_column(Self, title? : String) -> Unit
+pub fn Table::add_row(Self, row? : TableRow) -> TableRow
+pub fn Table::clear_rows(Self) -> Unit
+pub fn Table::columns(Self) -> Array[String?]
+pub fn Table::find_row(Self, String, Column) -> TableRow?
+pub fn Table::find_rows(Self, String, Column) -> Array[TableRow]
+pub fn Table::from_csv(String, header? : Bool, separator? : Char) -> Self raise CsvError
+pub fn Table::get(Self, Int32, Column) -> String
+pub fn Table::get_array(Self) -> Array[Array[String]]
+pub fn Table::get_column(Self, Column) -> Array[String]
+pub fn Table::get_column_count(Self) -> Int32
+pub fn Table::get_num(Self, Int32, Column) -> Double
+pub fn Table::get_object(Self, header_column? : String) -> @json.Json
+pub fn Table::get_row(Self, Int32) -> TableRow?
+pub fn Table::get_row_count(Self) -> Int32
+pub fn Table::get_rows(Self) -> Array[TableRow]
+pub fn Table::get_string(Self, Int32, Column) -> String
+pub fn Table::match_row(Self, (String) -> Bool, Column) -> TableRow?
+pub fn Table::match_rows(Self, (String) -> Bool, Column) -> Array[TableRow]
+pub fn Table::new() -> Self
+pub fn Table::remove_column(Self, Column) -> Unit
+pub fn Table::remove_row(Self, Int32) -> Unit
+pub fn Table::remove_tokens(Self, String, column? : Column) -> Unit
+pub fn Table::set(Self, Int32, Column, String) -> Unit
+pub fn Table::set_num(Self, Int32, Column, Double) -> Unit
+pub fn Table::set_string(Self, Int32, Column, String) -> Unit
+pub fn Table::to_csv(Self, separator? : Char) -> String
+pub fn Table::trim(Self, column? : Column) -> Unit
+
+pub struct TableRow {
+  // private fields
+}
+pub fn TableRow::cells(Self) -> Array[String]
+pub fn TableRow::get(Self, Column) -> String
+pub fn TableRow::get_num(Self, Column) -> Double
+pub fn TableRow::get_string(Self, Column) -> String
+pub fn TableRow::new(cells? : Array[String]) -> Self
+pub fn TableRow::set(Self, Column, String) -> Unit
+pub fn TableRow::set_num(Self, Column, Double) -> Unit
+pub fn TableRow::set_string(Self, Column, String) -> Unit
+
+pub struct Xml {
+  // private fields
+}
+pub fn Xml::add_child(Self, Self) -> Unit
+pub fn Xml::get_attribute_count(Self) -> Int32
+pub fn Xml::get_child(Self, Int32) -> Self?
+pub fn Xml::get_child_by_name(Self, String) -> Self?
+pub fn Xml::get_children(Self, name? : String) -> Array[Self]
+pub fn Xml::get_content(Self, default? : String) -> String?
+pub fn Xml::get_name(Self) -> String
+pub fn Xml::get_num(Self, String, default? : Double) -> Double
+pub fn Xml::get_parent(Self) -> Self
+pub fn Xml::get_string(Self, String, default? : String) -> String?
+pub fn Xml::has_attribute(Self, String) -> Bool
+pub fn Xml::has_children(Self) -> Bool
+pub fn Xml::list_attributes(Self) -> Array[String]
+pub fn Xml::list_children(Self) -> Array[String]
+pub fn Xml::new(name? : String) -> Self
+pub fn Xml::parse(String) -> Self raise XmlError
+pub fn Xml::remove_child(Self, Int32) -> Unit
+pub fn Xml::remove_child_by_name(Self, String) -> Unit
+pub fn Xml::serialize(Self) -> String
+pub fn Xml::set_attribute(Self, String, String) -> Unit
+pub fn Xml::set_content(Self, String) -> Unit
+pub fn Xml::set_name(Self, String) -> Unit
+
+pub(all) enum XmlNode {
+  Element(Xml)
+  Text(String)
+  CData(String)
+  Comment(String)
+}
+
+// Type aliases
+
+// Traits

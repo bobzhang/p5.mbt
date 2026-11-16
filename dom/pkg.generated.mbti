@@ -104,6 +104,8 @@ pub fn has_class(Element, String) -> Bool
 
 pub fn has_query_param(String) -> Bool
 
+pub fn http_request(String, String, String, String, (Int32, String) -> Unit, (String) -> Unit) -> Unit
+
 pub fn image_data_copy_from(ImageData, FixedArray[Byte]) -> Unit
 
 pub fn image_data_copy_to(ImageData, FixedArray[Byte]) -> Unit
@@ -283,6 +285,10 @@ pub fn set_value(Element, String) -> Unit
 pub fn storage_clear() -> Unit
 
 pub fn storage_get(String) -> String
+
+pub fn storage_has(String) -> Bool
+
+pub fn storage_keys() -> FixedArray[String]
 
 pub fn storage_remove(String) -> Unit
 

@@ -265,32 +265,3 @@ pub fn minute() -> Int32 {
 pub fn second() -> Int32 {
   @dom.date_part(5)
 }
-
-///|
-/// Saves a string in the browser's local storage.
-pub fn store_item(key : String, value : String) -> Unit {
-  @dom.storage_set(key, value)
-}
-
-///|
-/// Reads a string from local storage (`None` when missing).
-pub fn get_item(key : String) -> String? {
-  let v = @dom.storage_get(key)
-  if v == "" {
-    None
-  } else {
-    Some(v)
-  }
-}
-
-///|
-/// Removes an item from local storage.
-pub fn remove_item(key : String) -> Unit {
-  @dom.storage_remove(key)
-}
-
-///|
-/// Clears local storage.
-pub fn clear_storage() -> Unit {
-  @dom.storage_clear()
-}

@@ -11,6 +11,8 @@ fn main {
   let title = Ref("")
   let planets : Array[Planet] = []
   let poem : Ref[Array[String]] = Ref([])
+  let moons : Ref[@p5.Table?] = Ref(None)
+  let discoveries : Ref[@p5.Xml?] = Ref(None)
   @p5.run(
     preload=p => {
       p.load_json("../assets/planets.json", json => {
@@ -31,9 +33,11 @@ fn main {
         }
       })
       poem.val = p.load_strings("../assets/haiku.txt")
+      p.load_table("../assets/moons.csv", header=true, t => moons.val = Some(t))
+      p.load_xml("../assets/discoverers.xml", x => discoveries.val = Some(x))
     },
     setup=p => {
-      p.create_canvas(640, 360)
+      p.create_canvas(640, 460)
       @p5.set_title("p5.mbt — data")
       p.no_loop()
     },
@@ -63,6 +67,33 @@ fn main {
       for i, line in poem.val {
         p.text(line, 30, 280 + i.to_double() * 22)
       }
+      p.text_style(Normal)
+      p.text_size(13)
+      if moons.val is Some(t) {
+        let counts = t.get_column(Title("moons")).map(@p5.parse_float)
+        let total = counts.fold(init=0.0, (a, b) => a + b)
+        p.fill(amber_color())
+        p.text(
+          "moons.csv: \{t.get_row_count()} rows, \{total} moons in all; most: \{t.find_row("146", Title("moons")).map(r => r.get(Title("planet"))).unwrap_or("?")}",
+          30,
+          370,
+        )
+      }
+      if discoveries.val is Some(x) {
+        for i, planet in x.get_children(name="planet") {
+          p.fill(200)
+          p.text(
+            "\{planet.get_string("name").unwrap_or("")} (\{planet.get_num("year")}): \{planet.get_content().unwrap_or("")}",
+            30,
+            400 + i.to_double() * 20,
+          )
+        }
+      }
     },
   )
+}
+
+///|
+fn amber_color() -> (Int32, Int32, Int32) {
+  (255, 176, 70)
 }

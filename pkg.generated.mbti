@@ -4,6 +4,7 @@ package "bobzhang/p5"
 import {
   "bobzhang/p5/color",
   "bobzhang/p5/dom",
+  "bobzhang/p5/io",
   "bobzhang/p5/math",
   "bobzhang/p5/shape",
   "moonbitlang/core/debug",
@@ -47,6 +48,16 @@ pub fn fract(Double) -> Double
 
 pub fn get_item(String) -> String?
 
+pub fn get_item_bool(String) -> Bool?
+
+pub fn get_item_color(String) -> @color.Color?
+
+pub fn get_item_json(String) -> @json.Json?
+
+pub fn get_item_number(String) -> Double?
+
+pub fn get_item_vector(String) -> @math.Vector?
+
 pub fn hex(Int32, digits? : Int32) -> String
 
 pub fn hour() -> Int32
@@ -79,6 +90,8 @@ pub fn norm(Double, Double, Double) -> Double
 
 pub fn palette_lerp(ArrayView[(@color.Color, Double)], Double) -> @color.Color
 
+pub fn parse_float(String) -> Double
+
 pub fn print(String) -> Unit
 
 pub fn query_param(String) -> String?
@@ -94,6 +107,10 @@ pub fn run(preload? : (P5) -> Unit, setup? : (P5) -> Unit, draw? : (P5) -> Unit,
 pub fn save_json(@json.Json, String, pretty? : Bool) -> Unit
 
 pub fn save_strings(ArrayView[String], String, ext? : String) -> Unit
+
+pub fn save_table(@io.Table, String, ext? : String) -> Unit
+
+pub fn save_xml(@io.Xml, String) -> Unit
 
 pub fn second() -> Int32
 
@@ -111,7 +128,7 @@ pub fn split_tokens(String, delims? : String) -> Array[String]
 
 pub fn sq(Double) -> Double
 
-pub fn store_item(String, String) -> Unit
+pub fn[T : Storable] store_item(String, T) -> Unit
 
 pub fn unbinary(String) -> Int32
 
@@ -421,6 +438,7 @@ pub fn P5::create_slider(Self, Double, Double, value? : Double, step? : Double) 
 pub fn P5::create_span(Self, html? : String) -> Element
 pub fn P5::create_vector(Self, Double, Double, z? : Double) -> @math.Vector
 pub fn P5::create_video(Self, Array[String], on_load? : (MediaElement) -> Unit) -> MediaElement
+pub fn P5::create_writer(Self, String, ext? : String) -> PrintWriter
 pub fn P5::cursor(Self, kind? : String) -> Unit
 pub fn P5::curve(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::curve_tightness(Self, Double) -> Unit
@@ -458,6 +476,9 @@ pub fn P5::get_text_size(Self) -> Double
 pub fn P5::get_text_weight(Self) -> String
 pub fn[C : ColorArg] P5::green(Self, C) -> Double
 pub fn P5::headless(&Surface, Double, Double, pixel_density? : Double, seed? : Double) -> Self
+pub fn P5::http_do(Self, String, http_method? : String, body? : String, content_type? : String, on_response~ : (String) -> Unit, on_error? : (String) -> Unit) -> Unit
+pub fn P5::http_get(Self, String, (String) -> Unit, on_error? : (String) -> Unit) -> Unit
+pub fn P5::http_post(Self, String, String, (String) -> Unit, on_error? : (String) -> Unit, content_type? : String) -> Unit
 pub fn[C : ColorArg] P5::hue(Self, C) -> Double
 pub fn[I : ImageSource] P5::image(Self, I, Double, Double, w? : Double, h? : Double) -> Unit
 pub fn P5::image_mode(Self, @shape.ShapeMode) -> Unit
@@ -469,12 +490,15 @@ pub fn P5::key_is_down(Self, String) -> Bool
 pub fn P5::lerp_color(Self, @color.Color, @color.Color, Double) -> @color.Color
 pub fn[C : ColorArg] P5::lightness(Self, C) -> Double
 pub fn P5::line(Self, Double, Double, Double, Double) -> Unit
+pub fn P5::load_bytes(Self, String, (Bytes) -> Unit) -> Unit
 pub fn P5::load_font(Self, String, family? : String, on_load? : (Font) -> Unit) -> Font
 pub fn P5::load_image(Self, String, on_load? : (Image) -> Unit) -> Image
 pub fn P5::load_json(Self, String, (@json.Json) -> Unit) -> Unit
 pub fn P5::load_pixels(Self) -> Unit
 pub fn P5::load_strings(Self, String, on_load? : (Array[String]) -> Unit) -> Array[String]
+pub fn P5::load_table(Self, String, (@io.Table) -> Unit, header? : Bool, separator? : Char) -> Unit
 pub fn P5::load_text(Self, String, on_load? : (String) -> Unit) -> Unit
+pub fn P5::load_xml(Self, String, (@io.Xml) -> Unit) -> Unit
 pub fn P5::loop_(Self) -> Unit
 pub fn P5::millis(Self) -> Double
 pub fn P5::no_cursor(Self) -> Unit
@@ -566,6 +590,14 @@ pub fn P5::with_push(Self, () -> Unit) -> Unit
 pub fn P5::world_to_screen(Self, Double, Double) -> (Double, Double)
 pub impl ImageSource for P5
 
+pub struct PrintWriter {
+  // private fields
+}
+pub fn PrintWriter::clear(Self) -> Unit
+pub fn PrintWriter::close(Self) -> Unit
+pub fn PrintWriter::print(Self, String) -> Unit
+pub fn PrintWriter::write(Self, String) -> Unit
+
 pub struct Recorder {
   log : Array[String]
   // private fields
@@ -648,6 +680,8 @@ pub using @color {type Color}
 
 pub using @color {type ColorMode}
 
+pub using @io {type Column}
+
 pub using @math {type Matrix2D}
 
 pub using @math {type Noise}
@@ -662,7 +696,15 @@ pub using @shape {type ShapeMode}
 
 pub using @shape {type SplineEnds}
 
+pub using @io {type Table}
+
+pub using @io {type TableRow}
+
 pub using @math {type Vector}
+
+pub using @io {type Xml}
+
+pub using @io {type XmlNode}
 
 // Traits
 pub(open) trait ColorArg {
@@ -687,6 +729,17 @@ pub(open) trait Num {
 }
 pub impl Num for Int32
 pub impl Num for Double
+
+pub(open) trait Storable {
+  fn to_storage(Self) -> (String, String)
+}
+pub impl Storable for Bool
+pub impl Storable for Int32
+pub impl Storable for Double
+pub impl Storable for String
+pub impl Storable for @color.Color
+pub impl Storable for @math.Vector
+pub impl Storable for @json.Json
 
 pub(open) trait Surface {
   fn set_transform(Self, @math.Matrix2D) -> Unit

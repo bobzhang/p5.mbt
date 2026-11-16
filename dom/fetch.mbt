@@ -47,3 +47,29 @@ pub extern "js" fn download_bytes(
   #|  const a = document.createElement('a'); a.href = url; a.download = name;
   #|  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   #|}
+
+///|
+/// A general HTTP request; `done(status, body_text)` or `failed(message)`.
+pub extern "js" fn http_request(
+  url : String,
+  http_method : String,
+  body : String,
+  content_type : String,
+  done : (Int32, String) -> Unit,
+  failed : (String) -> Unit,
+) -> Unit =
+  #|(url, method, body, ct, done, failed) => {
+  #|  const opts = { method };
+  #|  if (method !== 'GET' && method !== 'HEAD') { opts.body = body; if (ct) opts.headers = { 'Content-Type': ct }; }
+  #|  fetch(url, opts).then(r => r.text().then(t => {
+  #|    if (!r.ok) failed(r.status + ' ' + r.statusText); else done(r.status, t);
+  #|  })).catch(e => failed(String(e)));
+  #|}
+
+///|
+/// The keys stored in `localStorage`.
+pub extern "js" fn storage_keys() -> FixedArray[String] = "() => { try { return Object.keys(localStorage); } catch { return []; } }"
+
+///|
+/// Whether a `localStorage` key exists.
+pub extern "js" fn storage_has(key : String) -> Bool = "(k) => { try { return localStorage.getItem(k) !== null; } catch { return false; } }"
