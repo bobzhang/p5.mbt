@@ -1,0 +1,234 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/webgl"
+
+import {
+  "bobzhang/p5/gl",
+  "bobzhang/p5/math",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn box_geometry(Int32, Int32) -> Geometry
+
+pub fn cone_geometry(Int32, Int32, Bool) -> Geometry
+
+pub fn cylinder_geometry(Int32, Int32, Bool, Bool) -> Geometry
+
+pub fn ellipsoid_geometry(Int32, Int32) -> Geometry
+
+pub fn plane_geometry(Int32, Int32) -> Geometry
+
+pub fn torus_geometry(Double, Int32, Int32) -> Geometry
+
+// Errors
+
+// Types and methods
+pub struct Camera {
+  mut width : Double
+  mut height : Double
+  mut camera_type_default : Bool
+  mut use_line_perspective : Bool
+  camera_matrix : @math.Matrix
+  mut proj_matrix : @math.Matrix
+  y_scale : Double
+  mut eye_x : Double
+  mut eye_y : Double
+  mut eye_z : Double
+  mut center_x : Double
+  mut center_y : Double
+  mut center_z : Double
+  mut up_x : Double
+  mut up_y : Double
+  mut up_z : Double
+  mut camera_fov : Double
+  mut aspect_ratio : Double
+  mut camera_near : Double
+  mut camera_far : Double
+  mut default_aspect_ratio : Double
+  mut default_eye_z : Double
+  mut default_camera_fov : Double
+  mut default_camera_near : Double
+  mut default_camera_far : Double
+}
+pub fn Camera::camera(Self, eye? : (Double, Double, Double), center? : (Double, Double, Double), up? : (Double, Double, Double)) -> Unit
+pub fn Camera::copy(Self) -> Self
+pub fn Camera::frustum(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
+pub fn Camera::look_at(Self, Double, Double, Double) -> Unit
+pub fn Camera::move_by(Self, Double, Double, Double) -> Unit
+pub fn Camera::new(Double, Double) -> Self
+pub fn Camera::orbit(Self, Double, Double, Double) -> Unit
+pub fn Camera::ortho(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
+pub fn Camera::pan(Self, Double) -> Unit
+pub fn Camera::perspective(Self, fovy? : Double, aspect? : Double, near? : Double, far? : Double) -> Unit
+pub fn Camera::resize(Self, Double, Double) -> Unit
+pub fn Camera::set_position(Self, Double, Double, Double) -> Unit
+pub fn Camera::tilt(Self, Double) -> Unit
+
+pub(all) enum DrawMode {
+  Triangles
+  TriangleStrip
+  TriangleFan
+}
+
+pub struct GLState {
+  mut model : @math.Matrix
+  mut view : @math.Matrix
+  mut proj : @math.Matrix
+  mut camera : Camera
+  mut normal_material : Bool
+  mut enable_lighting : Bool
+  mut ambient_light_colors : Array[Double]
+  mut specular_colors : Array[Double]
+  mut directional_directions : Array[Double]
+  mut directional_diffuse : Array[Double]
+  mut directional_specular : Array[Double]
+  mut point_positions : Array[Double]
+  mut point_diffuse : Array[Double]
+  mut point_specular : Array[Double]
+  mut spot_positions : Array[Double]
+  mut spot_directions : Array[Double]
+  mut spot_diffuse : Array[Double]
+  mut spot_specular : Array[Double]
+  mut spot_angle : Array[Double]
+  mut spot_conc : Array[Double]
+  mut constant_attenuation : Double
+  mut linear_attenuation : Double
+  mut quadratic_attenuation : Double
+  mut ambient_color : FixedArray[Double]
+  mut specular_color : FixedArray[Double]
+  mut emissive_color : FixedArray[Double]
+  mut has_set_ambient : Bool
+  mut use_specular : Bool
+  mut use_emissive : Bool
+  mut shininess : Double
+  mut metalness : Double
+  mut tint : FixedArray[Double]
+  mut fill_shader : Shader?
+  mut stroke_shader : Shader?
+}
+
+pub struct Geometry {
+  mut gid : String
+  detail_x : Int32
+  detail_y : Int32
+  vertices : Array[Vec3]
+  vertex_normals : Array[Vec3]
+  uvs : Array[Double]
+  faces : Array[(Int32, Int32, Int32)]
+  edges : Array[(Int32, Int32)]
+  vertex_colors : Array[Double]
+  vertex_stroke_colors : Array[Double]
+  line_vertices : Array[Double]
+  line_tangents_in : Array[Double]
+  line_tangents_out : Array[Double]
+  line_sides : Array[Double]
+  line_vertex_colors : Array[Double]
+  // private fields
+}
+pub fn Geometry::compute_faces(Self) -> Self
+pub fn Geometry::compute_normals(Self, mode? : NormalMode, round_to_precision? : Int32) -> Self
+pub fn Geometry::edges_to_vertices(Self, simple_lines? : Bool) -> Self
+pub fn Geometry::has_fill_transparency(Self) -> Bool
+pub fn Geometry::has_stroke_transparency(Self) -> Bool
+pub fn Geometry::make_triangle_edges(Self) -> Self
+pub fn Geometry::mark_dirty(Self) -> Unit
+pub fn Geometry::new(detail_x? : Int32, detail_y? : Int32) -> Self
+
+pub(all) enum NormalMode {
+  KeepConnections
+  Smooth
+}
+
+pub struct Renderer3D {
+  gl : @gl.GL
+  mut width : Double
+  mut height : Double
+  mut density : Double
+  mut state : GLState
+  main_camera : Camera
+  simple_lines : Bool
+  // private fields
+}
+pub fn Renderer3D::ambient_light(Self, Double, Double, Double) -> Unit
+pub fn Renderer3D::ambient_material(Self, FixedArray[Double]) -> Unit
+pub fn Renderer3D::apply_matrix(Self, ArrayView[Double]) -> Unit
+pub fn Renderer3D::cached_geometry(Self, String, () -> Geometry) -> Geometry
+pub fn Renderer3D::camera(Self, eye? : (Double, Double, Double), center? : (Double, Double, Double), up? : (Double, Double, Double)) -> Unit
+pub fn Renderer3D::clear(Self, Double, Double, Double, Double) -> Unit
+pub fn Renderer3D::clear_depth(Self, depth? : Double) -> Unit
+pub fn Renderer3D::create_camera(Self) -> Camera
+pub fn Renderer3D::current_camera(Self) -> Camera
+pub fn Renderer3D::directional_light(Self, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn Renderer3D::draw_geometry(Self, Geometry, Style, mode? : DrawMode, count? : Int32) -> Unit
+pub fn Renderer3D::draw_scaled(Self, Geometry, Double, Double, Double, Style) -> Unit
+pub fn Renderer3D::emissive_material(Self, FixedArray[Double]) -> Unit
+pub fn Renderer3D::free_geometry(Self, Geometry) -> Unit
+pub fn Renderer3D::frustum(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
+pub fn Renderer3D::geometry(Self, String) -> Geometry?
+pub fn Renderer3D::has_geometry(Self, String) -> Bool
+pub fn Renderer3D::light_falloff(Self, Double, Double, Double) -> Unit
+pub fn Renderer3D::lights(Self) -> Unit
+pub fn Renderer3D::line_perspective(Self, Bool) -> Unit
+pub fn Renderer3D::metalness(Self, Double) -> Unit
+pub fn Renderer3D::model_matrix(Self) -> @math.Matrix
+pub fn Renderer3D::new(@gl.GL, Double, Double, Double) -> Self
+pub fn Renderer3D::no_lights(Self) -> Unit
+pub fn Renderer3D::on_fill(Self) -> Unit
+pub fn Renderer3D::ortho(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
+pub fn Renderer3D::perspective(Self, fovy? : Double, aspect? : Double, near? : Double, far? : Double) -> Unit
+pub fn Renderer3D::point_light(Self, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn Renderer3D::pop(Self) -> Unit
+pub fn Renderer3D::push(Self) -> Unit
+pub fn Renderer3D::read_pixels(Self, Int32, Int32, Int32, Int32) -> FixedArray[Byte]
+pub fn Renderer3D::reset_matrix(Self) -> Unit
+pub fn Renderer3D::resize(Self, Double, Double, Double) -> Unit
+pub fn Renderer3D::rotate(Self, Double, Double, Double, Double) -> Unit
+pub fn Renderer3D::scale(Self, Double, Double, Double) -> Unit
+pub fn Renderer3D::set_camera(Self, Camera) -> Unit
+pub fn Renderer3D::set_fill_shader(Self, Shader?) -> Unit
+pub fn Renderer3D::set_stroke_shader(Self, Shader?) -> Unit
+pub fn Renderer3D::set_tint(Self, FixedArray[Double]) -> Unit
+pub fn Renderer3D::shininess(Self, Double) -> Unit
+pub fn Renderer3D::specular_color(Self, Double, Double, Double) -> Unit
+pub fn Renderer3D::specular_material(Self, FixedArray[Double]) -> Unit
+pub fn Renderer3D::spot_light(Self, Double, Double, Double, (Double, Double, Double), (Double, Double, Double), angle? : Double, concentration? : Double) -> Unit
+pub fn Renderer3D::sync_camera(Self) -> Unit
+pub fn Renderer3D::translate(Self, Double, Double, Double) -> Unit
+pub fn Renderer3D::update(Self) -> Unit
+pub fn Renderer3D::use_normal_material(Self) -> Unit
+
+pub struct Shader {
+  vert : String
+  frag : String
+  vertex_hooks : Array[(String, String)]
+  fragment_hooks : Array[(String, String)]
+  modified : Array[String]
+  // private fields
+}
+pub fn Shader::frag_src(Self) -> String
+pub fn Shader::modify(Self, vertex? : Array[(String, String)], fragment? : Array[(String, String)]) -> Self
+pub fn Shader::new(String, String) -> Self
+pub fn Shader::vert_src(Self) -> String
+
+pub(all) struct Style {
+  fill : FixedArray[Double]?
+  stroke : FixedArray[Double]?
+  stroke_weight : Double
+  stroke_cap : Int32
+  stroke_join : Int32
+  blend_mode : String
+  erasing : Bool
+}
+
+#derive(@debug.Debug)
+pub struct Vec3 {
+  mut x : Double
+  mut y : Double
+  mut z : Double
+}
+pub fn Vec3::copy(Self) -> Self
+pub fn Vec3::new(Double, Double, Double) -> Self
+
+// Type aliases
+
+// Traits

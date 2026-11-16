@@ -492,12 +492,22 @@ pub fn P5::stroke_weight(self : P5, w : Double) -> Unit {
 ///|
 /// Sets the style of line ends.
 pub fn P5::stroke_cap(self : P5, cap : StrokeCap) -> Unit {
+  self.gl_cap = match cap {
+    Round => 0
+    Project => 1
+    Square => 2
+  }
   self.state.stroke_cap = cap
 }
 
 ///|
 /// Sets the style of line joints.
 pub fn P5::stroke_join(self : P5, join : StrokeJoin) -> Unit {
+  self.gl_join = match join {
+    RoundJoin => 0
+    Miter => 1
+    Bevel => 2
+  }
   self.state.stroke_join = join
 }
 

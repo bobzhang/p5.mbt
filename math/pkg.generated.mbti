@@ -60,6 +60,30 @@ pub fn to_uint32(Double) -> UInt32
 // Errors
 
 // Types and methods
+pub struct Matrix {
+  dim : Int32
+  // private fields
+}
+pub fn Matrix::apply(Self, ArrayView[Double]) -> Self
+pub fn Matrix::copy(Self) -> Self
+pub fn Matrix::floats(Self) -> FixedArray[Float]
+pub fn Matrix::from_array(ArrayView[Double]) -> Self
+pub fn Matrix::get(Self, Int32) -> Double
+pub fn Matrix::inverse_transpose4x4(Self, Self) -> Self
+pub fn Matrix::invert_from(Self, Self) -> Self?
+pub fn Matrix::mult(Self, Self) -> Self
+pub fn Matrix::multiply_vec4(Self, Double, Double, Double, Double) -> (Double, Double, Double, Double)
+pub fn Matrix::new(Int32) -> Self
+pub fn Matrix::reset(Self) -> Unit
+pub fn Matrix::rotate(Self, Double, Double, Double, Double) -> Self
+pub fn Matrix::scale(Self, Double, Double, Double) -> Self
+pub fn Matrix::set(Self, Self) -> Unit
+pub fn Matrix::set_element(Self, Int32, Double) -> Unit
+pub fn Matrix::set_values(Self, ArrayView[Double]) -> Unit
+pub fn Matrix::to_array(Self) -> Array[Double]
+pub fn Matrix::translate(Self, Double, Double, Double) -> Self
+pub fn Matrix::transpose_from(Self, Self) -> Self
+
 #derive(Eq, @debug.Debug)
 pub(all) struct Matrix2D {
   a : Double

@@ -241,6 +241,33 @@ export const cases = {
   }],
 };
 
+export const glCases = {
+  gl_primitives: [260, 200, p => {
+    p.background(220); p.fill(200, 100, 50); p.stroke(0);
+    p.push(); p.translate(-80, -45); p.rotateX(0.5); p.rotateY(0.6); p.box(50); p.pop();
+    p.push(); p.translate(0, -45); p.sphere(32); p.pop();
+    p.push(); p.translate(85, -45); p.rotateX(1); p.cylinder(22, 50); p.pop();
+    p.push(); p.translate(-80, 50); p.rotateX(0.7); p.cone(25, 50); p.pop();
+    p.push(); p.translate(0, 50); p.rotateX(1.1); p.torus(28, 9); p.pop();
+    p.push(); p.translate(85, 50); p.rotateY(0.8); p.normalMaterial(); p.ellipsoid(32, 22, 16); p.pop();
+  }],
+  gl_lights: [260, 200, p => {
+    p.background(25); p.noStroke();
+    p.ambientLight(50); p.directionalLight(255, 255, 255, 0.3, 0.5, -1);
+    p.pointLight(255, 0, 0, 100, -100, 100);
+    p.push(); p.translate(-70, 0); p.fill(255); p.specularMaterial(250); p.shininess(20); p.sphere(55); p.pop();
+    p.push(); p.translate(70, 0); p.rotateX(0.6); p.rotateY(0.4); p.fill(60, 140, 255); p.ambientMaterial(100, 200, 50); p.box(70); p.pop();
+    p.push(); p.translate(0, 75); p.emissiveMaterial(40, 0, 60); p.fill(200); p.torus(30, 8); p.pop();
+  }],
+  gl_camera: [260, 200, p => {
+    p.background(240); p.stroke(30); p.strokeWeight(2); p.fill(250, 200, 0);
+    p.camera(150, -120, 260, 0, 0, 0, 0, 1, 0);
+    p.perspective(p.PI / 4, 260 / 200, 10, 2000);
+    p.box(80); p.translate(90, 0, -60); p.fill(0, 150, 200); p.sphere(30, 12, 8);
+    p.translate(-180, 0, 120); p.ortho(); p.fill(220, 60, 90); p.cone(30, 60);
+  }],
+};
+
 export const dataCases = {
   font_points_ttf: ['Inconsolata-Bold.ttf', (p, f) => {
     p.textSize(48);

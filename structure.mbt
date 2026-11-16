@@ -217,6 +217,9 @@ fn P5::redraw_once(self : P5) -> Unit {
 ///|
 fn P5::redraw_frame(self : P5, draw : (P5) -> Unit) -> Unit {
   self.reset_matrix()
+  if self.gl is Some(r) {
+    r.update()
+  }
   self.frame_count += 1
   self.in_draw = true
   // Clipping applied during a frame ends with the frame.

@@ -219,6 +219,9 @@ pub fn P5::lerp_color(self : P5, c1 : Color, c2 : Color, amt : Double) -> Color 
 pub fn[C : ColorArg] P5::fill(self : P5, c : C) -> Unit {
   self.state.fill = Some(c.to_color(self))
   self.state.fill_set = true
+  if self.gl is Some(r) {
+    r.on_fill()
+  }
 }
 
 ///|
@@ -256,6 +259,11 @@ pub fn P5::get_stroke(self : P5) -> Color? {
 /// Fills the whole canvas with a color (ignores the current transform).
 pub fn[C : ColorArg] P5::background(self : P5, c : C) -> Unit {
   let color = c.to_color(self)
+  if self.gl is Some(r) {
+    let (red, g, b, a) = color.to_srgb()
+    r.clear(red, g, b, a)
+    return
+  }
   self.surface.save()
   self.surface.set_transform(@math.identity.scale(self.density, self.density))
   if self.state.erasing {
@@ -268,6 +276,10 @@ pub fn[C : ColorArg] P5::background(self : P5, c : C) -> Unit {
 ///|
 /// Makes every pixel of the canvas transparent.
 pub fn P5::clear(self : P5) -> Unit {
+  if self.gl is Some(r) {
+    r.clear(0, 0, 0, 0)
+    return
+  }
   self.surface.save()
   self.surface.set_transform(@math.identity)
   self.surface.clear_rect(

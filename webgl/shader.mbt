@@ -1,0 +1,273 @@
+// p5.Shader for the WEBGL renderer: sources plus hook implementations,
+// assembled like p5's populateGLSLHooks and compiled on first use.
+
+///|
+/// A shader program: vertex and fragment sources with hooks.
+pub struct Shader {
+  vert : String
+  frag : String
+  /// `(\"type name\", body)` pairs filling `HOOK_name` in the vertex shader.
+  vertex_hooks : Array[(String, String)]
+  fragment_hooks : Array[(String, String)]
+  /// Hook keys replaced by `modify` (they get `AUGMENTED_HOOK_` defines).
+  modified : Array[String]
+  priv mut program : @gl.Program?
+  priv mut kind : String
+}
+
+///|
+/// A shader from GLSL sources (no hooks).
+pub fn Shader::new(vert : String, frag : String) -> Shader {
+  {
+    vert,
+    frag,
+    vertex_hooks: [],
+    fragment_hooks: [],
+    modified: [],
+    program: None,
+    kind: "",
+  }
+}
+
+///|
+fn Shader::with_hooks(
+  vert : String,
+  frag : String,
+  vertex : Array[(String, String)],
+  fragment : Array[(String, String)],
+) -> Shader {
+  { ..Shader::new(vert, frag), vertex_hooks: vertex, fragment_hooks: fragment, }
+}
+
+///|
+/// A copy whose hooks are replaced by `vertex`/`fragment` entries (keys as
+/// `"type name"`), like `shader.modify({...})` with string hooks.
+pub fn Shader::modify(
+  self : Shader,
+  vertex~ : Array[(String, String)] = [],
+  fragment~ : Array[(String, String)] = [],
+) -> Shader {
+  let replace = (
+    hooks : Array[(String, String)],
+    with_ : Array[(String, String)],
+  ) => {
+    hooks.map(h => {
+      match
+        with_.search_by(w => w.0 == h.0 || hook_name(w.0) == hook_name(h.0)) {
+        Some(i) => (h.0, with_[i].1)
+        None => h
+      }
+    })
+  }
+  let modified = self.modified.copy()
+  for h in vertex {
+    modified.push(full_key(self.vertex_hooks, h.0))
+  }
+  for h in fragment {
+    modified.push(full_key(self.fragment_hooks, h.0))
+  }
+  {
+    ..self,
+    vertex_hooks: replace(self.vertex_hooks, vertex),
+    fragment_hooks: replace(self.fragment_hooks, fragment),
+    modified,
+    program: None,
+    kind: "",
+  }
+}
+
+///|
+fn hook_name(key : String) -> String {
+  let parts = key.split(" ").map(s => s.to_string()).collect()
+  parts.last().unwrap_or(key)
+}
+
+///|
+fn full_key(hooks : Array[(String, String)], key : String) -> String {
+  match hooks.search_by(h => h.0 == key || hook_name(h.0) == hook_name(key)) {
+    Some(i) => hooks[i].0
+    None => key
+  }
+}
+
+///|
+/// p5's populateGLSLHooks.
+fn populate_hooks(
+  src : String,
+  hooks_list : Array[(String, String)],
+  modified : Array[String],
+) -> String {
+  let main = "void main"
+  guard src.find(main) is Some(at) else { return src }
+  let chars = src.to_array()
+  let pre = String::from_array(chars[:at])
+  // `split(main)` keeps only the text up to a second "void main"
+  let rest = String::from_array(chars[at + main.length():])
+  let post = match rest.find(main) {
+    Some(j) => String::from_array(rest.to_array()[:j])
+    None => rest
+  }
+  let hooks = StringBuilder()
+  let defines = StringBuilder()
+  for h in hooks_list {
+    let (key, body) = h
+    let parts = key.split(" ").map(s => s.to_string()).collect()
+    let typ = parts.get(0).unwrap_or("")
+    let name = parts.get(1).unwrap_or("")
+    if modified.contains(key) {
+      defines.write_string("#define AUGMENTED_HOOK_" + name + "\n")
+    }
+    hooks.write_string(typ + " HOOK_" + name + body + "\n")
+  }
+  let mut pre = pre
+  let mut defs = defines.to_string()
+  if pre.find("#define HOOK_DEFINES") is Some(_) {
+    pre = pre.replace(old="#define HOOK_DEFINES", new="\n" + defs + "\n")
+    defs = ""
+  }
+  pre + "\n" + defs + hooks.to_string() + main + post
+}
+
+///|
+/// The vertex source with hooks filled in.
+pub fn Shader::vert_src(self : Shader) -> String {
+  populate_hooks(self.vert, self.vertex_hooks, self.modified)
+}
+
+///|
+/// The fragment source with hooks filled in.
+pub fn Shader::frag_src(self : Shader) -> String {
+  populate_hooks(self.frag, self.fragment_hooks, self.modified)
+}
+
+///|
+fn Shader::init(self : Shader, gl : @gl.GL) -> @gl.Program? {
+  match self.program {
+    Some(p) => Some(p)
+    None =>
+      match @gl.compile_program(gl, self.vert_src(), self.frag_src()) {
+        Ok(p) => {
+          self.program = Some(p)
+          Some(p)
+        }
+        Err(msg) => {
+          println(
+            "Whoops! Something went wrong initializing the shader:\n" + msg,
+          )
+          None
+        }
+      }
+  }
+}
+
+///|
+/// p5's `_webGL2CompatibilityPrefix`.
+fn compat_prefix(webgl2 : Bool, vertex : Bool) -> String {
+  (if webgl2 { "#version 300 es\n#define WEBGL2\n" } else { "" }) +
+  (if vertex { "#define VERTEX_SHADER\n" } else { "#define FRAGMENT_SHADER\n" }) +
+  "precision highp float;\n"
+}
+
+///|
+let stroke_defs : String = "#define STROKE_CAP_ROUND 0\n#define STROKE_CAP_PROJECT 1\n#define STROKE_CAP_SQUARE 2\n#define STROKE_JOIN_ROUND 0\n#define STROKE_JOIN_MITER 1\n#define STROKE_JOIN_BEVEL 2\n"
+
+///|
+let vertex_hooks_default : Array[(String, String)] = [
+  ("void beforeVertex", "() {}"),
+  ("Vertex getObjectInputs", "(Vertex inputs) { return inputs; }"),
+  ("Vertex getWorldInputs", "(Vertex inputs) { return inputs; }"),
+  ("Vertex getCameraInputs", "(Vertex inputs) { return inputs; }"),
+  ("void afterVertex", "() {}"),
+]
+
+///|
+fn default_shader(webgl2 : Bool, kind : String) -> Shader {
+  let c = glsl_webgl2compatibility_glsl
+  let v = compat_prefix(webgl2, true)
+  let f = compat_prefix(webgl2, false)
+  let final_color = (
+    "vec4 getFinalColor", "(vec4 color, vec2 texCoord) { return color; }",
+  )
+  match kind {
+    "color" =>
+      Shader::with_hooks(
+        v + c + glsl_normal_vert,
+        f + c + glsl_basic_frag,
+        vertex_hooks_default,
+        [
+          ("void beforeFragment", "() {}"),
+          final_color,
+          ("void afterFragment", "() {}"),
+        ],
+      )
+    "normal" =>
+      Shader::with_hooks(
+        v + c + glsl_normal_vert,
+        f + c + glsl_normal_frag,
+        vertex_hooks_default,
+        [
+          ("void beforeFragment", "() {}"),
+          final_color,
+          ("void afterFragment", "() {}"),
+        ],
+      )
+    "light" | "light_maps" => {
+      let maps = if kind == "light_maps" {
+        "#define USE_TEXTURE_MAPS\n"
+      } else {
+        ""
+      }
+      Shader::with_hooks(
+        v + maps + c + glsl_phong_vert,
+        f + maps + c + glsl_lighting_glsl + glsl_phong_frag,
+        vertex_hooks_default,
+        [
+          ("void beforeFragment", "() {}"),
+          ("Inputs getPixelInputs", "(Inputs inputs) { return inputs; }"),
+          (
+            "vec4 combineColors",
+            (
+              #|(ColorComponents components) {
+              #|                vec4 color = vec4(0.);
+              #|                color.rgb += components.diffuse * components.baseColor;
+              #|                color.rgb += components.ambient * components.ambientColor;
+              #|                color.rgb += components.specular * components.specularColor;
+              #|                color.rgb += components.emissive;
+              #|                color.a = components.opacity;
+              #|                return color;
+              #|              }
+            ),
+          ),
+          final_color,
+          ("void afterFragment", "() {}"),
+        ],
+      )
+    }
+    "line" =>
+      Shader::with_hooks(
+        v + c + stroke_defs + glsl_line_vert,
+        f + c + stroke_defs + glsl_line_frag,
+        [
+          ("void beforeVertex", "() {}"),
+          (
+            "StrokeVertex getObjectInputs", "(StrokeVertex inputs) { return inputs; }",
+          ),
+          (
+            "StrokeVertex getWorldInputs", "(StrokeVertex inputs) { return inputs; }",
+          ),
+          (
+            "StrokeVertex getCameraInputs", "(StrokeVertex inputs) { return inputs; }",
+          ),
+          ("void afterVertex", "() {}"),
+        ],
+        [
+          ("void beforeFragment", "() {}"),
+          ("Inputs getPixelInputs", "(Inputs inputs) { return inputs; }"),
+          final_color,
+          ("bool shouldDiscard", "(bool outside) { return outside; }"),
+          ("void afterFragment", "() {}"),
+        ],
+      )
+    _ => Shader::new(v + c + glsl_normal_vert, f + c + glsl_basic_frag)
+  }
+}

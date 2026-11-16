@@ -1,18 +1,18 @@
 // Renders every case with p5.js and with p5.mbt and compares the pixels.
 // A pixel "differs" when any channel differs by more than TOLERANCE.
-import { cases, svgCases, dataCases } from './cases.js';
+import { cases, svgCases, dataCases, glCases } from './cases.js';
 
 const TOLERANCE = 2;
 const only = new URLSearchParams(location.search).get('case');
 
 function cell(row) { const td = document.createElement('td'); row.appendChild(td); return td; }
 
-function renderP5(draw, w, h, host, load) {
+function renderP5(draw, w, h, host, load, webgl) {
   return new Promise((resolve, reject) => {
     new p5(p => {
       p.setup = async () => {
         try {
-          p.createCanvas(w, h);
+          if (webgl) p.createCanvas(w, h, p.WEBGL); else p.createCanvas(w, h);
           p.pixelDensity(1);
           p.randomSeed(1);
           p.noLoop();
@@ -37,12 +37,16 @@ function renderMbt(name, host) {
 }
 
 function pixelsOf(canvas) {
-  return canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+  const c = document.createElement('canvas'); c.width = canvas.width; c.height = canvas.height;
+  const ctx = c.getContext('2d'); ctx.drawImage(canvas, 0, 0);
+  return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 }
 
 async function run() {
   const results = [];
-  for (const [name, [w, h, draw, load]] of Object.entries(cases)) {
+  const all = [...Object.entries(cases).map(([n, c]) => [n, c, false]),
+    ...Object.entries(glCases).map(([n, c]) => [n, c, true])];
+  for (const [name, [w, h, draw, load], webgl] of all) {
     if (only && only !== name) continue;
     const row = document.createElement('tr');
     document.getElementById('rows').appendChild(row);
@@ -53,7 +57,7 @@ async function run() {
     const r = cell(row);
     let jsCanvas, mbtCanvas;
     try {
-      jsCanvas = await renderP5(draw, w, h, a, load);
+      jsCanvas = await renderP5(draw, w, h, a, load, webgl);
     } catch (e) { r.innerHTML = `<span class=bad>p5.js error: ${e}</span>`; results.push({ name, error: String(e) }); continue; }
     try {
       mbtCanvas = await renderMbt(name, b);

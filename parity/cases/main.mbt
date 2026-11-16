@@ -7,6 +7,7 @@ struct Case {
   h : Double
   draw : (@p5.P5) -> Unit
   preload : ((@p5.P5) -> Unit)?
+  webgl : Bool
 }
 
 ///|
@@ -44,7 +45,7 @@ fn cases() -> Map[String, Case] {
   }
   let all : Map[String, Case] = Map([])
   for name, c in sync {
-    all[name] = { w: c.0, h: c.1, draw: c.2, preload: None, }
+    all[name] = { w: c.0, h: c.1, draw: c.2, preload: None, webgl: false, }
   }
   // gif_frames needs the image loaded first
   let img : Ref[@p5.Image?] = Ref(None)
@@ -55,6 +56,7 @@ fn cases() -> Map[String, Case] {
       img.val = Some(p.load_image("../examples/assets/testcard.gif"))
     }),
     draw: p => if img.val is Some(img) { gif_frames(p, img) },
+    webgl: false,
   }
   let svg : Ref[@p5.ShapeCollection?] = Ref(None)
   all["svg_import"] = {
@@ -69,8 +71,15 @@ fn cases() -> Map[String, Case] {
         p.shape(c)
       }
     },
+    webgl: false,
   }
-  all["svg_replay"] = { w: 220, h: 160, preload: None, draw: svg_replay, }
+  all["svg_replay"] = {
+    w: 220,
+    h: 160,
+    preload: None,
+    draw: svg_replay,
+    webgl: false,
+  }
   let inconsolata : Ref[@p5.Font?] = Ref(None)
   all["font_points"] = {
     w: 260,
@@ -81,6 +90,7 @@ fn cases() -> Map[String, Case] {
       )
     }),
     draw: p => if inconsolata.val is Some(f) { font_points(p, f) },
+    webgl: false,
   }
   let source_sans : Ref[@p5.Font?] = Ref(None)
   all["font_text"] = {
@@ -92,8 +102,107 @@ fn cases() -> Map[String, Case] {
       )
     }),
     draw: p => if source_sans.val is Some(f) { font_text(p, f) },
+    webgl: false,
+  }
+  for name, c in gl_cases() {
+    all[name] = { w: c.0, h: c.1, draw: c.2, preload: None, webgl: true, }
   }
   all
+}
+
+///|
+fn gl_cases() -> Map[String, (Double, Double, (@p5.P5) -> Unit)] {
+  {
+    "gl_primitives": (260, 200, gl_primitives),
+    "gl_lights": (260, 200, gl_lights),
+    "gl_camera": (260, 200, gl_camera),
+  }
+}
+
+///|
+fn gl_primitives(p : @p5.P5) -> Unit {
+  p.background(220)
+  p.fill((200, 100, 50))
+  p.stroke(0)
+  p.push()
+  p.translate(-80, -45)
+  p.rotate_x(0.5)
+  p.rotate_y(0.6)
+  p.box(w=50)
+  p.pop()
+  p.push()
+  p.translate(0, -45)
+  p.sphere(r=32)
+  p.pop()
+  p.push()
+  p.translate(85, -45)
+  p.rotate_x(1)
+  p.cylinder(r=22, h=50)
+  p.pop()
+  p.push()
+  p.translate(-80, 50)
+  p.rotate_x(0.7)
+  p.cone(r=25, h=50)
+  p.pop()
+  p.push()
+  p.translate(0, 50)
+  p.rotate_x(1.1)
+  p.torus(r=28, tube=9)
+  p.pop()
+  p.push()
+  p.translate(85, 50)
+  p.rotate_y(0.8)
+  p.normal_material()
+  p.ellipsoid(rx=32, ry=22, rz=16)
+  p.pop()
+}
+
+///|
+fn gl_lights(p : @p5.P5) -> Unit {
+  p.background(25)
+  p.no_stroke()
+  p.ambient_light(50)
+  p.directional_light((255, 255, 255), 0.3, 0.5, -1)
+  p.point_light((255, 0, 0), 100, -100, 100)
+  p.push()
+  p.translate(-70, 0)
+  p.fill(255)
+  p.specular_material(250)
+  p.shininess(20)
+  p.sphere(r=55)
+  p.pop()
+  p.push()
+  p.translate(70, 0)
+  p.rotate_x(0.6)
+  p.rotate_y(0.4)
+  p.fill((60, 140, 255))
+  p.ambient_material((100, 200, 50))
+  p.box(w=70)
+  p.pop()
+  p.push()
+  p.translate(0, 75)
+  p.emissive_material((40, 0, 60))
+  p.fill(200)
+  p.torus(r=30, tube=8)
+  p.pop()
+}
+
+///|
+fn gl_camera(p : @p5.P5) -> Unit {
+  p.background(240)
+  p.stroke(30)
+  p.stroke_weight(2)
+  p.fill((250, 200, 0))
+  p.camera(eye=(150, -120, 260), center=(0, 0, 0), up=(0, 1, 0))
+  p.perspective(fovy=@p5.PI / 4, aspect=260.0 / 200.0, near=10, far=2000)
+  p.box(w=80)
+  p.translate(90, 0, z=-60)
+  p.fill((0, 150, 200))
+  p.sphere(r=30, detail_x=12, detail_y=8)
+  p.translate(-180, 0, z=120)
+  p.ortho()
+  p.fill((220, 60, 90))
+  p.cone(r=30, h=60)
 }
 
 ///|
@@ -844,8 +953,8 @@ fn main {
       seed=1,
       preload?=c.preload,
       setup=p => {
-        p.create_canvas(c.w, c.h)
         p.pixel_density(1)
+        p.create_canvas(c.w, c.h, renderer=if c.webgl { WebGL } else { P2D })
         p.no_loop()
       },
       draw=p => {

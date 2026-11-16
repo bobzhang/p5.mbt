@@ -1,0 +1,95 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/gl"
+
+import {
+  "bobzhang/p5/dom",
+}
+
+// Values
+pub fn apply_blend_mode(GL, String) -> Unit
+
+pub fn array_buffer_data(GL, Buffer, FixedArray[Double]) -> Unit
+
+pub fn attrib_pointer(GL, Buffer, Int32, Int32) -> Unit
+
+pub fn attribute_location(Program, String) -> Int32
+
+pub fn bind_textures(Program, Texture) -> Unit
+
+pub fn clear(GL, Double, Double, Double, Double) -> Unit
+
+pub fn clear_depth(GL, Double) -> Unit
+
+pub fn compile_program(GL, String, String) -> Result[Program, String]
+
+pub fn compile_program_js(GL, String, String, (Program) -> Unit, (String) -> Unit) -> Unit
+
+pub fn create_buffer(GL) -> Buffer
+
+pub fn create_context(@dom.Canvas, Bool, Bool, Bool, Bool, Bool, Bool) -> GL
+
+pub fn create_white_texture(GL) -> Texture
+
+pub fn default_antialias() -> Bool
+
+pub fn delete_buffer(GL, Buffer) -> Unit
+
+pub fn disable_attrib(GL, Int32) -> Unit
+
+pub fn disable_other_attribs(Program) -> Unit
+
+pub fn draw_arrays(GL, Int32, Int32, Int32) -> Unit
+
+pub fn draw_elements(GL, Buffer, Int32, Bool, Int32) -> Unit
+
+pub fn drawing_buffer_height(GL) -> Int32
+
+pub fn drawing_buffer_width(GL) -> Int32
+
+pub fn has_attribute(Program, String) -> Bool
+
+pub fn has_uniform(Program, String) -> Bool
+
+pub fn index_buffer_data(GL, Buffer, FixedArray[Int32], Bool) -> Unit
+
+pub fn max_texture_size(GL) -> Int32
+
+pub fn read_pixels(GL, Int32, Int32, Int32, Int32) -> FixedArray[Byte]
+
+pub fn reset_depth_stencil(GL) -> Unit
+
+pub fn set_blending(GL, Bool) -> Unit
+
+pub fn set_uniform(Program, String, FixedArray[Double]) -> Unit
+
+pub fn set_uniform_floats(Program, String, FixedArray[Float]) -> Unit
+
+pub fn set_uniform_texture(Program, String, Texture) -> Unit
+
+pub fn use_program(Program) -> Unit
+
+pub fn version(GL) -> Int32
+
+pub fn viewport(GL, Int32, Int32, Int32, Int32) -> Unit
+
+// Errors
+
+// Types and methods
+#external
+pub type Buffer
+
+#external
+pub type Framebuffer
+
+#external
+pub type GL
+
+#external
+pub type Program
+
+#external
+pub type Texture
+
+// Type aliases
+
+// Traits

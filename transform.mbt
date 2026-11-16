@@ -2,20 +2,34 @@
 
 ///|
 /// Moves the origin by `(x, y)`.
-pub fn P5::translate(self : P5, x : Double, y : Double) -> Unit {
-  self.state.matrix = self.state.matrix.translate(x, y)
+pub fn P5::translate(
+  self : P5,
+  x : Double,
+  y : Double,
+  z~ : Double = 0,
+) -> Unit {
+  match self.gl {
+    Some(r) => r.translate(x, y, z)
+    None => self.state.matrix = self.state.matrix.translate(x, y)
+  }
 }
 
 ///|
 /// Rotates the coordinate system by `angle` (in the current angle mode).
 pub fn P5::rotate(self : P5, angle : Double) -> Unit {
-  self.state.matrix = self.state.matrix.rotate(self.to_radians(angle))
+  match self.gl {
+    Some(r) => r.rotate(self.to_radians(angle), 0, 0, 1)
+    None => self.state.matrix = self.state.matrix.rotate(self.to_radians(angle))
+  }
 }
 
 ///|
 /// Scales the coordinate system. `y` defaults to `x`.
-pub fn P5::scale(self : P5, x : Double, y? : Double) -> Unit {
-  self.state.matrix = self.state.matrix.scale(x, y.unwrap_or(x))
+pub fn P5::scale(self : P5, x : Double, y? : Double, z? : Double) -> Unit {
+  match self.gl {
+    Some(r) => r.scale(x, y.unwrap_or(x), z.unwrap_or(1))
+    None => self.state.matrix = self.state.matrix.scale(x, y.unwrap_or(x))
+  }
 }
 
 ///|
@@ -41,13 +55,20 @@ pub fn P5::apply_matrix(
   e : Double,
   f : Double,
 ) -> Unit {
-  self.state.matrix = self.state.matrix.multiply({ a, b, c, d, e, f, })
+  match self.gl {
+    Some(r) => r.apply_matrix([a, b, 0, 0, c, d, 0, 0, 0, 0, 1, 0, e, f, 0, 1])
+    None =>
+      self.state.matrix = self.state.matrix.multiply({ a, b, c, d, e, f, })
+  }
 }
 
 ///|
 /// Resets the coordinate system to the identity.
 pub fn P5::reset_matrix(self : P5) -> Unit {
   self.state.matrix = @math.identity
+  if self.gl is Some(r) {
+    r.reset_matrix()
+  }
 }
 
 ///|
@@ -83,6 +104,9 @@ pub fn P5::screen_to_world(
 /// Saves the drawing style and transform.
 pub fn P5::push(self : P5) -> Unit {
   self.stack.push(self.state.copy())
+  if self.gl is Some(r) {
+    r.push()
+  }
   self.surface.save()
 }
 
@@ -93,6 +117,9 @@ pub fn P5::pop(self : P5) -> Unit {
   match self.stack.pop() {
     Some(s) => {
       self.state = s
+      if self.gl is Some(r) {
+        r.pop()
+      }
       self.surface.restore()
       self.surface.set_blend_mode(if s.erasing { Remove } else { s.blend_mode })
       self.surface.set_smoothing(s.smooth)

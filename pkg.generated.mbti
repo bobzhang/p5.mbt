@@ -8,6 +8,7 @@ import {
   "bobzhang/p5/io",
   "bobzhang/p5/math",
   "bobzhang/p5/shape",
+  "bobzhang/p5/webgl",
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
 }
@@ -418,8 +419,11 @@ pub struct P5 {
 }
 pub fn P5::acos(Self, Double) -> Double
 pub fn[C : ColorArg] P5::alpha(Self, C) -> Double
+pub fn[C : ColorArg] P5::ambient_light(Self, C) -> Unit
+pub fn[C : ColorArg] P5::ambient_material(Self, C) -> Unit
 pub fn P5::angle_mode(Self, AngleMode) -> Unit
 pub fn P5::apply_matrix(Self, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::apply_matrix4(Self, ArrayView[Double]) -> Unit
 pub fn P5::arc(Self, Double, Double, Double, Double, Double, Double, mode? : @shape.ArcMode) -> Unit
 pub fn P5::asin(Self, Double) -> Double
 pub fn P5::atan(Self, Double) -> Double
@@ -435,8 +439,10 @@ pub fn P5::bezier_vertex3(Self, Double, Double, Double, Double, Double, Double) 
 pub fn[I : ImageSource] P5::blend(Self, I, Double, Double, Double, Double, Double, Double, Double, Double, BlendMode) -> Unit
 pub fn P5::blend_mode(Self, BlendMode) -> Unit
 pub fn[C : ColorArg] P5::blue(Self, C) -> Double
+pub fn P5::box(Self, w? : Double, h? : Double, d? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
 pub fn[C : ColorArg] P5::brightness(Self, C) -> Double
 pub fn P5::build_shape(Self, () -> Unit, draw? : Bool) -> ShapeCollection
+pub fn P5::camera(Self, eye? : (Double, Double, Double), center? : (Double, Double, Double), up? : (Double, Double, Double)) -> Unit
 pub fn P5::canvas(Self) -> @dom.Canvas?
 pub fn P5::canvas_element(Self) -> Element?
 pub fn P5::circle(Self, Double, Double, Double) -> Unit
@@ -446,12 +452,14 @@ pub fn[C : ColorArg] P5::color(Self, C) -> @color.Color
 pub fn P5::color_mode(Self, @color.ColorMode) -> Unit
 pub fn P5::color_mode_max(Self, @color.ColorMode, Double) -> Unit
 pub fn P5::color_mode_maxes(Self, @color.ColorMode, Double, Double, Double, max_alpha? : Double) -> Unit
+pub fn P5::cone(Self, r? : Double, h? : Double, detail_x? : Int32, detail_y? : Int32, cap? : Bool) -> Unit
 pub fn[I : ImageSource] P5::copy(Self, I, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::cos(Self, Double) -> Double
 pub fn P5::create_a(Self, String, String, target? : String) -> Element
 pub fn P5::create_audio(Self, Array[String], on_load? : (MediaElement) -> Unit) -> MediaElement
 pub fn P5::create_button(Self, String) -> Element
-pub fn P5::create_canvas(Self, Double, Double) -> Unit
+pub fn P5::create_camera(Self) -> @webgl.Camera?
+pub fn P5::create_canvas(Self, Double, Double, renderer? : RendererKind) -> Unit
 pub fn P5::create_capture(Self, video? : Bool, audio? : Bool, flipped? : Bool, on_ready? : (MediaElement) -> Unit) -> MediaElement
 pub fn P5::create_checkbox(Self, label? : String, checked? : Bool) -> Element
 pub fn P5::create_color_picker(Self, value? : String) -> Element
@@ -474,11 +482,15 @@ pub fn P5::cursor(Self, kind? : String) -> Unit
 pub fn P5::curve(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::curve_tightness(Self, Double) -> Unit
 pub fn P5::curve_vertex(Self, Double, Double) -> Unit
+pub fn P5::cylinder(Self, r? : Double, h? : Double, detail_x? : Int32, detail_y? : Int32, bottom_cap? : Bool, top_cap? : Bool) -> Unit
+pub fn[C : ColorArg] P5::directional_light(Self, C, Double, Double, Double) -> Unit
 pub fn P5::display_density(Self) -> Double
 pub fn P5::display_height(Self) -> Double
 pub fn P5::display_width(Self) -> Double
 pub fn P5::ellipse(Self, Double, Double, Double, h? : Double) -> Unit
 pub fn P5::ellipse_mode(Self, @shape.ShapeMode) -> Unit
+pub fn P5::ellipsoid(Self, rx? : Double, ry? : Double, rz? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
+pub fn[C : ColorArg] P5::emissive_material(Self, C) -> Unit
 pub fn P5::end_clip(Self) -> Unit
 pub fn P5::end_contour(Self, mode? : @shape.CloseMode) -> Unit
 pub fn P5::end_shape(Self, mode? : @shape.CloseMode) -> Unit
@@ -491,6 +503,8 @@ pub fn P5::font_bounds(Self, String, Double, Double, max_width? : Double, max_he
 pub fn P5::font_descent(Self) -> Double
 pub fn P5::font_width(Self, String) -> Double
 pub fn P5::frame_rate(Self, Double) -> Unit
+pub fn P5::free_geometry(Self, @webgl.Geometry) -> Unit
+pub fn P5::frustum(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
 pub fn P5::fullscreen(Self, Bool) -> Unit
 pub fn P5::get(Self, Double, Double) -> @color.Color
 pub fn P5::get_angle_mode(Self) -> AngleMode
@@ -518,10 +532,14 @@ pub fn[I : ImageSource] P5::image_region(Self, I, Double, Double, Double, Double
 pub fn P5::is_fullscreen(Self) -> Bool
 pub fn P5::is_looping(Self) -> Bool
 pub fn P5::is_recording(Self) -> Bool
+pub fn P5::is_webgl(Self) -> Bool
 pub fn P5::key_is_down(Self, String) -> Bool
 pub fn P5::lerp_color(Self, @color.Color, @color.Color, Double) -> @color.Color
+pub fn P5::light_falloff(Self, Double, Double, Double) -> Unit
 pub fn[C : ColorArg] P5::lightness(Self, C) -> Double
+pub fn P5::lights(Self) -> Unit
 pub fn P5::line(Self, Double, Double, Double, Double) -> Unit
+pub fn P5::line_perspective(Self, Bool) -> Unit
 pub fn P5::load_bytes(Self, String, (Bytes) -> Unit) -> Unit
 pub fn P5::load_font(Self, String, family? : String, on_load? : (Font) -> Unit) -> Font
 pub fn P5::load_image(Self, String, on_load? : (Image) -> Unit) -> Image
@@ -533,10 +551,13 @@ pub fn P5::load_table(Self, String, (@io.Table) -> Unit, header? : Bool, separat
 pub fn P5::load_text(Self, String, on_load? : (String) -> Unit) -> Unit
 pub fn P5::load_xml(Self, String, (@io.Xml) -> Unit) -> Unit
 pub fn P5::loop_(Self) -> Unit
+pub fn P5::metalness(Self, Double) -> Unit
 pub fn P5::millis(Self) -> Double
+pub fn P5::model(Self, @webgl.Geometry, count? : Int32) -> Unit
 pub fn P5::no_cursor(Self) -> Unit
 pub fn P5::no_erase(Self) -> Unit
 pub fn P5::no_fill(Self) -> Unit
+pub fn P5::no_lights(Self) -> Unit
 pub fn P5::no_loop(Self) -> Unit
 pub fn P5::no_smooth(Self) -> Unit
 pub fn P5::no_stroke(Self) -> Unit
@@ -544,8 +565,13 @@ pub fn P5::no_tint(Self) -> Unit
 pub fn P5::noise(Self, Double, y? : Double, z? : Double) -> Double
 pub fn P5::noise_detail(Self, Int32, falloff? : Double) -> Unit
 pub fn P5::noise_seed(Self, Double) -> Unit
+pub fn P5::normal_material(Self) -> Unit
+pub fn P5::ortho(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
+pub fn P5::perspective(Self, fovy? : Double, aspect? : Double, near? : Double, far? : Double) -> Unit
 pub fn P5::pixel_density(Self, Double) -> Unit
+pub fn P5::plane(Self, w? : Double, h? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
 pub fn P5::point(Self, Double, Double) -> Unit
+pub fn[C : ColorArg] P5::point_light(Self, C, Double, Double, Double) -> Unit
 pub fn P5::point_vec(Self, @math.Vector) -> Unit
 pub fn P5::pop(Self) -> Unit
 pub fn P5::push(Self) -> Unit
@@ -571,30 +597,40 @@ pub fn P5::reset_matrix(Self) -> Unit
 pub fn P5::resize_canvas(Self, Double, Double) -> Unit
 pub fn P5::rng(Self) -> @math.Random
 pub fn P5::rotate(Self, Double) -> Unit
+pub fn P5::rotate_axis(Self, Double, Double, Double, Double) -> Unit
+pub fn P5::rotate_x(Self, Double) -> Unit
+pub fn P5::rotate_y(Self, Double) -> Unit
+pub fn P5::rotate_z(Self, Double) -> Unit
 pub fn[C : ColorArg] P5::saturation(Self, C) -> Double
 pub fn P5::save_canvas(Self, filename? : String, ext? : String) -> Unit
 pub fn P5::save_frames(Self, String, String, duration? : Double, fps? : Double, on_done? : (Array[SavedFrame]) -> Unit) -> Unit
 pub fn P5::save_gif(Self, String, Double, delay? : Double, units? : String, silent? : Bool, reset? : Bool, on_done? : () -> Unit) -> Unit
 pub fn P5::save_svg(Self, ShapeCollection, filename? : String) -> Unit
 pub fn P5::save_svg_frame(Self, filename? : String) -> Unit
-pub fn P5::scale(Self, Double, y? : Double) -> Unit
+pub fn P5::scale(Self, Double, y? : Double, z? : Double) -> Unit
 pub fn P5::screen_to_world(Self, Double, Double) -> (Double, Double)
 pub fn[C : ColorArg] P5::set(Self, Double, Double, C) -> Unit
+pub fn P5::set_camera(Self, @webgl.Camera) -> Unit
 pub fn P5::set_draw(Self, (Self) -> Unit) -> Unit
 pub fn P5::set_move_threshold(Self, Double) -> Unit
 pub fn P5::set_shake_threshold(Self, Double) -> Unit
 pub fn P5::shape(Self, ShapeCollection, x? : Double, y? : Double, scale? : Double, scale_x? : Double, scale_y? : Double, align? : ShapeAlign) -> Unit
 pub fn P5::shear_x(Self, Double) -> Unit
 pub fn P5::shear_y(Self, Double) -> Unit
+pub fn P5::shininess(Self, Double) -> Unit
 pub fn[T] P5::shuffle(Self, ArrayView[T]) -> Array[T]
 pub fn P5::sin(Self, Double) -> Double
 pub fn P5::smooth(Self) -> Unit
+pub fn[C : ColorArg] P5::specular_color(Self, C) -> Unit
+pub fn[C : ColorArg] P5::specular_material(Self, C) -> Unit
+pub fn P5::sphere(Self, r? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
 pub fn P5::spline(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::spline_ends(Self, @shape.SplineEnds) -> Unit
 pub fn P5::spline_point(Self, Double, Double, Double, Double, Double) -> Double
 pub fn P5::spline_tangent(Self, Double, Double, Double, Double, Double) -> Double
 pub fn P5::spline_tightness(Self, Double) -> Unit
 pub fn P5::spline_vertex(Self, Double, Double) -> Unit
+pub fn[C : ColorArg] P5::spot_light(Self, C, (Double, Double, Double), (Double, Double, Double), angle? : Double, concentration? : Double) -> Unit
 pub fn P5::square(Self, Double, Double, Double, tl? : Double, tr? : Double, br? : Double, bl? : Double) -> Unit
 pub fn[C : ColorArg] P5::stroke(Self, C) -> Unit
 pub fn P5::stroke_cap(Self, StrokeCap) -> Unit
@@ -618,7 +654,8 @@ pub fn P5::text_weight(Self, Double) -> Unit
 pub fn P5::text_width(Self, String) -> Double
 pub fn P5::text_wrap(Self, TextWrap) -> Unit
 pub fn[C : ColorArg] P5::tint(Self, C) -> Unit
-pub fn P5::translate(Self, Double, Double) -> Unit
+pub fn P5::torus(Self, r? : Double, tube? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
+pub fn P5::translate(Self, Double, Double, z? : Double) -> Unit
 pub fn P5::triangle(Self, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::update_pixels(Self) -> Unit
 pub fn P5::vertex(Self, Double, Double) -> Unit
@@ -641,6 +678,11 @@ pub struct Recorder {
 pub fn Recorder::new() -> Self
 pub fn Recorder::take(Self) -> Array[String]
 pub impl Surface for Recorder
+
+pub(all) enum RendererKind {
+  P2D
+  WebGL
+}
 
 pub(all) struct SavedFrame {
   image_data : String
@@ -730,6 +772,8 @@ pub(all) enum VAlign {
 // Type aliases
 pub using @shape {type ArcMode}
 
+pub using @webgl {type Camera}
+
 pub using @shape {type CloseMode}
 
 pub using @color {type Color}
@@ -737,6 +781,8 @@ pub using @color {type Color}
 pub using @color {type ColorMode}
 
 pub using @io {type Column}
+
+pub using @webgl {type Geometry}
 
 pub using @math {type Matrix2D}
 

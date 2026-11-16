@@ -77,3 +77,23 @@ pub extern "js" fn download_url(url : String, filename : String) -> Unit =
   #|  const a = document.createElement('a');
   #|  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   #|}
+
+///|
+/// Creates a new canvas in place of `old` (which is hidden and kept for
+/// text measurement), like p5 replacing the canvas for a WEBGL context.
+pub extern "js" fn replace_canvas(
+  old : Canvas,
+  w : Double,
+  h : Double,
+  density : Double,
+) -> Canvas =
+  #|(old, w, h, d) => {
+  #|  const c = document.createElement('canvas');
+  #|  c.width = w * d; c.height = h * d;
+  #|  c.style.width = w + 'px'; c.style.height = h + 'px';
+  #|  c.id = old.id; old.id = '';
+  #|  c.classList.add('p5Canvas');
+  #|  if (old.parentNode) old.parentNode.insertBefore(c, old);
+  #|  old.style.display = 'none';
+  #|  return c;
+  #|}

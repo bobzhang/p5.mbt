@@ -230,6 +230,8 @@ pub fn remove_element(Element) -> Unit
 
 pub fn remove_radio_option(Element) -> Unit
 
+pub fn replace_canvas(Canvas, Double, Double, Double) -> Canvas
+
 pub fn request_animation_frame((Double) -> Unit) -> Unit
 
 pub fn request_pointer_lock(Canvas) -> Bool

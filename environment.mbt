@@ -3,11 +3,19 @@
 ///|
 /// Resizes the canvas to `w`×`h` and resets the drawing state. Call it in
 /// `setup`.
-pub fn P5::create_canvas(self : P5, w : Double, h : Double) -> Unit {
+pub fn P5::create_canvas(
+  self : P5,
+  w : Double,
+  h : Double,
+  renderer~ : RendererKind = P2D,
+) -> Unit {
   self.width = w
   self.height = h
   self.surface.resize(w, h, self.density)
   self.apply_defaults()
+  if renderer is WebGL && self.gl is None {
+    self.create_webgl_canvas(w, h)
+  }
 }
 
 ///|
@@ -16,6 +24,10 @@ pub fn P5::resize_canvas(self : P5, w : Double, h : Double) -> Unit {
   self.width = w
   self.height = h
   self.surface.resize(w, h, self.density)
+  if self.gl is Some(r) && self.gl_canvas is Some(c) {
+    @dom.resize_canvas(c, w, h, self.density)
+    r.resize(w, h, self.density)
+  }
   self.surface.set_blend_mode(self.state.blend_mode)
   self.surface.set_smoothing(self.state.smooth)
   if self.is_main && self.setup_done && !self.looping {

@@ -8,6 +8,8 @@ import {
   "bobzhang/p5/gif",
   "bobzhang/p5/io",
   "bobzhang/p5/font",
+  "bobzhang/p5/webgl",
+  "bobzhang/p5/gl",
   "moonbitlang/core/string",
   "moonbitlang/core/json",
   "moonbitlang/core/double",

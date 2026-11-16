@@ -1,0 +1,7 @@
+import {
+  "moonbitlang/core/math" @cmath,
+  "bobzhang/p5/math",
+  "bobzhang/p5/gl",
+}
+
+supported_targets = "js"
