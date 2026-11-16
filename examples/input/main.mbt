@@ -56,7 +56,7 @@ fn main {
       p.text_size(14)
       p.text_font("monospace")
       p.text(
-        "arrows: move   wheel: resize   drag: move   type: log keys", 12, 22,
+        "arrows or drag: move   wheel: resize", 12, 22,
       )
       for i, line in log {
         p.text(line, 12, 50 + i.to_double() * 18)
