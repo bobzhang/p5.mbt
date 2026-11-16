@@ -1,0 +1,4 @@
+import {
+  "moonbitlang/core/math" @cmath,
+  "bobzhang/p5/math",
+}

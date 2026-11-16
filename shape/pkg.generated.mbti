@@ -1,0 +1,124 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/shape"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn bezier_point(Double, Double, Double, Double, Double) -> Double
+
+pub fn bezier_tangent(Double, Double, Double, Double, Double) -> Double
+
+pub fn mode_adjust(Double, Double, Double, Double, ShapeMode) -> (Double, Double, Double, Double)
+
+pub fn normalize_arc_angles(Double, Double, Double, Double, correct_for_scaling? : Bool) -> ArcAngles
+
+pub fn spline_point(Double, Double, Double, Double, Double, tightness? : Double) -> Double
+
+pub fn spline_tangent(Double, Double, Double, Double, Double, tightness? : Double) -> Double
+
+// Errors
+
+// Types and methods
+pub struct ArcAngles {
+  start : Double
+  stop : Double
+  same_point : Bool
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ArcMode {
+  Open
+  Chord
+  Pie
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum CloseMode {
+  Open
+  Close
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum PathCmd {
+  MoveTo(Double, Double)
+  LineTo(Double, Double)
+  QuadraticCurveTo(Double, Double, Double, Double)
+  BezierCurveTo(Double, Double, Double, Double, Double, Double)
+  Ellipse(Double, Double, Double, Double, Double, Double, Double)
+  Rect(Double, Double, Double, Double)
+  RoundRect(Double, Double, Double, Double, Double, Double, Double, Double)
+  ClosePath
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Pt {
+  x : Double
+  y : Double
+}
+
+pub struct Shape {
+  // private fields
+}
+pub fn Shape::arc(Self, Double, Double, Double, Double, Double, Double, ArcMode) -> Unit
+pub fn Shape::begin_contour(Self, kind? : ShapeKind) -> Unit
+pub fn Shape::begin_shape(Self, kind? : ShapeKind) -> Unit
+pub fn Shape::bezier_vertex(Self, Double, Double) -> Unit
+pub fn Shape::ellipse(Self, Double, Double, Double, Double) -> Unit
+pub fn Shape::end_contour(Self, mode? : CloseMode) -> Unit
+pub fn Shape::end_shape(Self, mode? : CloseMode) -> Unit
+pub fn Shape::kind(Self) -> ShapeKind
+pub fn Shape::line(Self, Double, Double, Double, Double) -> Unit
+pub fn Shape::new() -> Self
+pub fn Shape::point(Self, Double, Double) -> Unit
+pub fn Shape::quad(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn Shape::rect(Self, Double, Double, Double, Double, radii? : (Double, Double, Double, Double)) -> Unit
+pub fn Shape::reset(Self) -> Unit
+pub fn Shape::set_bezier_order(Self, Int32) -> Unit
+pub fn Shape::set_spline_ends(Self, SplineEnds) -> Unit
+pub fn Shape::set_spline_tightness(Self, Double) -> Unit
+pub fn Shape::spline_vertex(Self, Double, Double) -> Unit
+pub fn Shape::to_paths(Self, has_fill? : Bool, has_stroke? : Bool) -> ShapePaths
+pub fn Shape::triangle(Self, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn Shape::vertex(Self, Double, Double) -> Unit
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ShapeKind {
+  Path
+  Points
+  Lines
+  Triangles
+  Quads
+  TriangleFan
+  TriangleStrip
+  QuadStrip
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ShapeMode {
+  Corner
+  Corners
+  Center
+  Radius
+}
+
+pub struct ShapePaths {
+  path : Array[PathCmd]
+  fill : Array[PathCmd]?
+  stroke : Array[PathCmd]?
+}
+pub fn ShapePaths::fill_path(Self) -> Array[PathCmd]
+pub fn ShapePaths::stroke_path(Self) -> Array[PathCmd]
+
+#derive(Eq, @debug.Debug)
+pub(all) enum SplineEnds {
+  Include
+  Exclude
+  Join
+}
+
+// Type aliases
+pub type Path = Array[PathCmd]
+
+// Traits
