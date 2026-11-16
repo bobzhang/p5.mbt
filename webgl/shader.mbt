@@ -13,6 +13,26 @@ pub struct Shader {
   modified : Array[String]
   priv mut program : @gl.Program?
   priv mut kind : String
+  priv uniforms : Map[String, UniformValue]
+}
+
+///|
+/// A uniform value set with `set_uniform`.
+pub(all) enum UniformValue {
+  /// Numbers (a scalar, vector, matrix or array; booleans as 0/1).
+  Floats(FixedArray[Double])
+  /// A texture from an image source.
+  Tex(TexSource)
+}
+
+///|
+/// Sets a uniform; it is uploaded when the shader is next used.
+pub fn Shader::set_uniform(
+  self : Shader,
+  name : String,
+  value : UniformValue,
+) -> Unit {
+  self.uniforms[name] = value
 }
 
 ///|
@@ -26,6 +46,7 @@ pub fn Shader::new(vert : String, frag : String) -> Shader {
     modified: [],
     program: None,
     kind: "",
+    uniforms: Map([]),
   }
 }
 
@@ -73,6 +94,7 @@ pub fn Shader::modify(
     modified,
     program: None,
     kind: "",
+    uniforms: Map([]),
   }
 }
 

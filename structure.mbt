@@ -219,6 +219,7 @@ fn P5::redraw_frame(self : P5, draw : (P5) -> Unit) -> Unit {
   self.reset_matrix()
   if self.gl is Some(r) {
     r.update()
+    self.state.tint = None
   }
   self.frame_count += 1
   self.in_draw = true

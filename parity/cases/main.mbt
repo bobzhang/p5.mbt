@@ -115,10 +115,110 @@ fn gl_cases() -> Map[String, (Double, Double, (@p5.P5) -> Unit)] {
   {
     "gl_primitives": (260, 200, gl_primitives),
     "gl_2d": (280, 200, gl_2d),
+    "gl_textures": (280, 200, gl_textures),
+    "gl_shader": (240, 160, gl_shader),
     "gl_shapes": (280, 200, gl_shapes),
     "gl_lights": (260, 200, gl_lights),
     "gl_camera": (260, 200, gl_camera),
   }
+}
+
+///|
+fn checker(p : @p5.P5) -> @p5.Image {
+  let img = p.create_image(32, 32)
+  img.load_pixels()
+  for y in 0..<32 {
+    for x in 0..<32 {
+      let i = 4 * (y * 32 + x)
+      let on = ((x >> 2) + (y >> 2)) % 2 == 1
+      img.pixels[i] = (if on { 250 } else { 40 }).to_byte()
+      img.pixels[i + 1] = (x * 8).to_byte()
+      img.pixels[i + 2] = (y * 8).to_byte()
+      img.pixels[i + 3] = 255
+    }
+  }
+  img.update_pixels()
+  img
+}
+
+///|
+fn gl_textures(p : @p5.P5) -> Unit {
+  let img = checker(p)
+  p.background(200)
+  p.no_stroke()
+  p.push()
+  p.translate(-90, -40)
+  p.rotate_x(0.5)
+  p.rotate_y(0.7)
+  p.texture(img)
+  p.box(w=60)
+  p.pop()
+  p.push()
+  p.translate(0, -40)
+  p.texture(img)
+  p.sphere(r=35)
+  p.pop()
+  p.push()
+  p.translate(90, -40)
+  p.texture_mode(Normal)
+  p.texture_wrap(Repeat)
+  p.texture(img)
+  p.begin_shape()
+  p.vertex(-40, -30, u=0, v=0)
+  p.vertex(40, -30, u=3, v=0)
+  p.vertex(40, 30, u=3, v=2)
+  p.vertex(-40, 30, u=0, v=2)
+  p.end_shape(mode=Close)
+  p.pop()
+  p.image(img, -130, 30, w=60, h=60)
+  p.tint((255, 120, 120))
+  p.image_region(img, -60, 30, 60, 60, 8, 8, 16, 16)
+  p.no_tint()
+  p.push()
+  p.translate(70, 60)
+  p.texture(img)
+  p.texture_mode(Image)
+  p.ellipse(0, 0, 70, h=50)
+  p.pop()
+}
+
+///|
+fn gl_shader(p : @p5.P5) -> Unit {
+  let img = checker(p)
+  let sh = p.create_shader(
+    (
+      #|
+      #|precision highp float;
+      #|attribute vec3 aPosition; attribute vec2 aTexCoord;
+      #|uniform mat4 uModelViewMatrix; uniform mat4 uProjectionMatrix;
+      #|varying vec2 vUv;
+      #|void main() { vUv = aTexCoord; gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aPosition, 1.0); }
+    ),
+    (
+      #|
+      #|precision highp float;
+      #|varying vec2 vUv; uniform float uMix; uniform vec3 uTint; uniform sampler2D uTex;
+      #|void main() { vec4 t = texture2D(uTex, vUv); gl_FragColor = vec4(mix(t.rgb, uTint * vUv.x, uMix), 1.0); }
+    ),
+  )
+  p.background(30)
+  p.no_stroke()
+  p.shader(sh)
+  p.set_uniform(sh, "uMix", [0.4])
+  p.set_uniform(sh, "uTint", [1.0, 0.5, 0.2])
+  p.set_uniform_texture(sh, "uTex", img)
+  p.push()
+  p.translate(-60, 0)
+  p.rotate_y(0.6)
+  p.box(w=70)
+  p.pop()
+  p.push()
+  p.translate(60, 0)
+  p.sphere(r=45)
+  p.pop()
+  p.reset_shader()
+  p.fill(255)
+  p.circle(0, 60, 20)
 }
 
 ///|

@@ -253,22 +253,22 @@ fn tessellate_into(g : Geometry, contour_indices : Array[Int32]) -> Bool {
       }
     }
   }
-  let tris = tessellate(contours)
-  if tris.is_empty() {
+  let flat = libtess_triangulate(contours, 12)
+  if flat.is_empty() {
     return false
   }
   g.vertices.clear()
   g.vertex_normals.clear()
   g.uvs.clear()
   g.vertex_colors.clear()
-  for a in tris {
-    g.vertices.push(Vec3::new(a[0], a[1], a[2]))
-    g.uvs.push(a[3])
-    g.uvs.push(a[4])
+  for j = 0; j + 12 <= flat.length(); j = j + 12 {
     for k in 5..<9 {
-      g.vertex_colors.push(a[k])
+      g.vertex_colors.push(flat[j + k])
     }
-    g.vertex_normals.push(Vec3::new(a[9], a[10], a[11]))
+    g.vertex_normals.push(Vec3::new(flat[j + 9], flat[j + 10], flat[j + 11]))
+    g.vertices.push(Vec3::new(flat[j], flat[j + 1], flat[j + 2]))
+    g.uvs.push(flat[j + 3])
+    g.uvs.push(flat[j + 4])
   }
   true
 }

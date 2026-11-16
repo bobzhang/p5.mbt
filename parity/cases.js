@@ -241,7 +241,45 @@ export const cases = {
   }],
 };
 
+function checker(p) {
+  const img = p.createImage(32, 32); img.loadPixels();
+  for (let y = 0; y < 32; y++) for (let x = 0; x < 32; x++) {
+    const i = 4 * (y * 32 + x), on = ((x >> 2) + (y >> 2)) % 2;
+    img.pixels[i] = on ? 250 : 40; img.pixels[i + 1] = x * 8; img.pixels[i + 2] = y * 8; img.pixels[i + 3] = 255;
+  }
+  img.updatePixels();
+  return img;
+}
+
 export const glCases = {
+  gl_textures: [280, 200, p => {
+    const img = checker(p);
+    p.background(200); p.noStroke();
+    p.push(); p.translate(-90, -40); p.rotateX(0.5); p.rotateY(0.7); p.texture(img); p.box(60); p.pop();
+    p.push(); p.translate(0, -40); p.texture(img); p.sphere(35); p.pop();
+    p.push(); p.translate(90, -40); p.textureMode(p.NORMAL); p.textureWrap(p.REPEAT); p.texture(img);
+    p.beginShape(); p.vertex(-40, -30, 0, 0, 0); p.vertex(40, -30, 0, 3, 0); p.vertex(40, 30, 0, 3, 2); p.vertex(-40, 30, 0, 0, 2); p.endShape(p.CLOSE); p.pop();
+    p.image(img, -130, 30, 60, 60);
+    p.tint(255, 120, 120); p.image(img, -60, 30, 60, 60, 8, 8, 16, 16);
+    p.noTint(); p.push(); p.translate(70, 60); p.texture(img); p.textureMode(p.IMAGE); p.ellipse(0, 0, 70, 50); p.pop();
+  }],
+  gl_shader: [240, 160, p => {
+    const img = checker(p);
+    const sh = p.createShader(`
+precision highp float;
+attribute vec3 aPosition; attribute vec2 aTexCoord;
+uniform mat4 uModelViewMatrix; uniform mat4 uProjectionMatrix;
+varying vec2 vUv;
+void main() { vUv = aTexCoord; gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aPosition, 1.0); }`, `
+precision highp float;
+varying vec2 vUv; uniform float uMix; uniform vec3 uTint; uniform sampler2D uTex;
+void main() { vec4 t = texture2D(uTex, vUv); gl_FragColor = vec4(mix(t.rgb, uTint * vUv.x, uMix), 1.0); }`);
+    p.background(30); p.noStroke();
+    p.shader(sh); sh.setUniform('uMix', 0.4); sh.setUniform('uTint', [1.0, 0.5, 0.2]); sh.setUniform('uTex', img);
+    p.push(); p.translate(-60, 0); p.rotateY(0.6); p.box(70); p.pop();
+    p.push(); p.translate(60, 0); p.sphere(45); p.pop();
+    p.resetShader(); p.fill(255); p.circle(0, 60, 20);
+  }],
   gl_2d: [280, 200, p => {
     p.background(250); p.translate(-140, -100); p.stroke(20); p.strokeWeight(3); p.fill(240, 120, 60);
     p.rect(10, 10, 60, 40); p.rect(80, 10, 60, 40, 12); p.ellipse(190, 30, 60, 40);

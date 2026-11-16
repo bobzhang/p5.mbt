@@ -55,6 +55,11 @@ pub struct GLState {
   mut tint : FixedArray[Double]
   mut fill_shader : Shader?
   mut stroke_shader : Shader?
+  mut tex : TexSource?
+  mut image_shader : Shader?
+  mut texture_mode_normal : Bool
+  mut wrap_x : String
+  mut wrap_y : String
 }
 
 ///|
@@ -87,6 +92,8 @@ pub struct Renderer3D {
   priv mut cached_blend : String
   main_camera : Camera
   priv immediate : Geometry
+  priv mut drawing_image : Bool
+  priv mut user_sampler : Bool
   /// Points per unit length when sampling curves (`curveDetail`, 1/4).
   mut curve_detail : Double
   simple_lines : Bool
@@ -129,6 +136,11 @@ fn default_state(cam : Camera) -> GLState {
     tint: [255, 255, 255, 255],
     fill_shader: None,
     stroke_shader: None,
+    tex: None,
+    image_shader: None,
+    texture_mode_normal: false,
+    wrap_x: "clamp",
+    wrap_y: "clamp",
   }
 }
 
@@ -155,6 +167,8 @@ pub fn Renderer3D::new(
     cached_blend: "",
     main_camera: cam,
     immediate: { ..Geometry::new(), gid: "__IMMEDIATE_MODE_GEOMETRY__", },
+    drawing_image: false,
+    user_sampler: false,
     curve_detail: 0.25,
     simple_lines: false,
   }
@@ -403,9 +417,54 @@ pub fn Renderer3D::sync_camera(self : Renderer3D) -> Unit {
 // ---- materials ----
 
 ///|
+/// An image source used as a texture: the element and its logical size.
+pub(all) struct TexSource {
+  elt : @dom.ImageElement
+  width : Double
+  height : Double
+}
+
+///|
 /// Called by the sketch's `fill()`: back to a plain fill color.
 pub fn Renderer3D::on_fill(self : Renderer3D) -> Unit {
   self.state.normal_material = false
+  self.state.tex = None
+}
+
+///|
+/// Textures subsequent shapes (`texture()`).
+pub fn Renderer3D::texture(self : Renderer3D, src : TexSource) -> Unit {
+  self.state.normal_material = false
+  self.state.tex = Some(src)
+}
+
+///|
+/// Texture coordinates in pixels (`IMAGE`, false) or in [0, 1] (`NORMAL`).
+pub fn Renderer3D::texture_mode(self : Renderer3D, normal : Bool) -> Unit {
+  self.state.texture_mode_normal = normal
+}
+
+///|
+/// Wrap modes: "clamp", "repeat" or "mirror".
+pub fn Renderer3D::texture_wrap(
+  self : Renderer3D,
+  x : String,
+  y : String,
+) -> Unit {
+  self.state.wrap_x = x
+  self.state.wrap_y = y
+  @gl.set_all_wrap(self.gl, x, y)
+}
+
+///|
+fn Renderer3D::gl_texture(self : Renderer3D, src : TexSource) -> @gl.Texture {
+  @gl.texture_for(
+    self.gl,
+    src.elt,
+    self.state.wrap_x,
+    self.state.wrap_y,
+    "linear",
+  )
 }
 
 ///|
@@ -635,8 +694,14 @@ fn Renderer3D::set_fill_uniforms(
   let empty = self.empty_texture()
   @gl.set_uniform(p, "uUseVertexColor", bool_u(use_vertex_color))
   @gl.set_uniform(p, "uMaterialColor", fill)
-  @gl.set_uniform(p, "isTexture", bool_u(false))
-  @gl.set_uniform_texture(p, "uSampler", empty)
+  @gl.set_uniform(p, "isTexture", bool_u(s.tex is Some(_)))
+  match s.tex {
+    Some(t) => @gl.set_uniform_texture(p, "uSampler", self.gl_texture(t))
+    None =>
+      if !self.user_sampler {
+        @gl.set_uniform_texture(p, "uSampler", empty)
+      }
+  }
   @gl.set_uniform(p, "uTint", s.tint)
   @gl.set_uniform(p, "uHasSetAmbient", bool_u(s.has_set_ambient))
   @gl.set_uniform(p, "uAmbientMatColor", s.ambient_color)
@@ -700,6 +765,7 @@ fn Renderer3D::apply_color_blend(
 ) -> Unit {
   let s = self.state
   let do_blend = transparency ||
+    s.tex is Some(_) ||
     s.fill_shader is Some(_) ||
     s.stroke_shader is Some(_) ||
     style.blend_mode != "blend" ||
@@ -722,12 +788,18 @@ fn Renderer3D::apply_color_blend(
 ///|
 fn Renderer3D::fill_shader_for(self : Renderer3D) -> Shader {
   let s = self.state
+  if self.drawing_image {
+    return match s.image_shader {
+      Some(sh) => sh
+      None => self.shader("light")
+    }
+  }
   match s.fill_shader {
     Some(sh) => sh
     None =>
       if s.normal_material {
         self.shader("normal")
-      } else if s.enable_lighting {
+      } else if s.enable_lighting || s.tex is Some(_) {
         self.shader("light")
       } else {
         self.shader("color")
@@ -780,6 +852,7 @@ fn Renderer3D::draw_fills(
   sh.kind = "fill"
   guard sh.init(self.gl) is Some(p) else { return }
   @gl.use_program(p)
+  self.user_sampler = self.apply_user_uniforms(sh, p)
   self.set_global_uniforms(p)
   self.set_fill_uniforms(p, fill, use_vertex_color)
   @gl.bind_textures(p, self.empty_texture())
@@ -861,6 +934,7 @@ fn Renderer3D::draw_strokes(
   sh.kind = "stroke"
   guard sh.init(self.gl) is Some(p) else { return }
   @gl.use_program(p)
+  ignore(self.apply_user_uniforms(sh, p))
   self.set_global_uniforms(p)
   @gl.set_uniform(p, "uSimpleLines", bool_u(self.simple_lines))
   @gl.set_uniform(
@@ -996,6 +1070,18 @@ pub fn Renderer3D::draw_shape(
     style.stroke is Some(_),
     self.simple_lines,
   )
+  if !self.state.texture_mode_normal &&
+    self.state.tex is Some(t) &&
+    t.width > 0 &&
+    t.height > 0 {
+    for i in 0..<g.uvs.length() {
+      g.uvs[i] = if i % 2 == 0 {
+        g.uvs[i] / t.width
+      } else {
+        g.uvs[i] / t.height
+      }
+    }
+  }
   let (draw_mode, skip_fill) = match mode {
     TriangleFanMode => (TriangleFan, false)
     TriangleStripMode | PathMode => (TriangleStrip, false)
@@ -1018,4 +1104,97 @@ pub fn Renderer3D::set_model_matrix(
   m : @math.Matrix,
 ) -> Unit {
   self.state.model = m
+}
+
+///|
+fn Renderer3D::apply_user_uniforms(
+  self : Renderer3D,
+  sh : Shader,
+  p : @gl.Program,
+) -> Bool {
+  let mut sampler = false
+  for name, v in sh.uniforms {
+    match v {
+      Floats(data) => @gl.set_uniform(p, name, data)
+      Tex(src) => {
+        @gl.set_uniform_texture(p, name, self.gl_texture(src))
+        if name == "uSampler" {
+          sampler = true
+        }
+      }
+    }
+  }
+  sampler
+}
+
+///|
+/// Draws an image source into the rectangle `(dx, dy, dw, dh)` taking the
+/// region `(sx, sy, sw, sh)` (`image()` in WEBGL): a textured quad.
+pub fn Renderer3D::image(
+  self : Renderer3D,
+  src : TexSource,
+  sx : Double,
+  sy : Double,
+  sw : Double,
+  sh : Double,
+  dx : Double,
+  dy : Double,
+  dw : Double,
+  dh : Double,
+  style : Style,
+) -> Unit {
+  self.push()
+  self.no_lights()
+  self.texture(src)
+  self.state.texture_mode_normal = true
+  let u0 = if sx <= src.width { sx / src.width } else { 0.0 }
+  let u1 = if sx + sw <= src.width { (sx + sw) / src.width } else { 1.0 }
+  let v0 = if sy <= src.height { sy / src.height } else { 0.0 }
+  let v1 = if sy + sh <= src.height { (sy + sh) / src.height } else { 1.0 }
+  self.drawing_image = true
+  let shape = @shape.Shape::new()
+  shape.begin_shape()
+  let white : FixedArray[Double] = [1, 1, 1, 1]
+  let pt = (x : Double, y : Double, u : Double, v : Double) => {
+    let extra = FixedArray::make(extra_size, 0.0)
+    extra[extra_u] = u
+    extra[extra_u + 1] = v
+    extra[extra_normal + 2] = 1
+    for k in 0..<4 {
+      extra[extra_fill + k] = white[k]
+    }
+    ({ x, y, z: 0.0, extra, } : @shape.Pt)
+  }
+  shape.vertex_pt(pt(dx, dy, u0, v0))
+  shape.vertex_pt(pt(dx + dw, dy, u1, v0))
+  shape.vertex_pt(pt(dx + dw, dy + dh, u1, v1))
+  shape.vertex_pt(pt(dx, dy + dh, u0, v1))
+  shape.end_shape(mode=Close)
+  let blend = if style.erasing { { ..style, erasing: false, } } else { style }
+  self.draw_shape(
+    shape.first_contour_kind(),
+    shape.to_vertices(curve_detail=self.curve_detail),
+    { ..blend, fill: Some(white), stroke: None, },
+  )
+  self.drawing_image = false
+  self.pop()
+}
+
+///|
+/// Sets a user shader for `image()` (`imageShader`), or `None`.
+pub fn Renderer3D::set_image_shader(self : Renderer3D, s : Shader?) -> Unit {
+  self.state.image_shader = s
+}
+
+///|
+/// Called when a user fill shader is set (`shader()` turns off
+/// `normalMaterial`).
+pub fn Renderer3D::on_shader(self : Renderer3D) -> Unit {
+  self.state.normal_material = false
+}
+
+///|
+/// One of p5's default shaders: "color", "normal", "light" or "line".
+pub fn Renderer3D::base_shader(self : Renderer3D, kind : String) -> Shader {
+  self.shader(kind)
 }

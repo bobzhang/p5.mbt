@@ -384,3 +384,74 @@ pub extern "js" fn read_pixels(
   #|  for (let i = 0; i < h; i++) out.set(buf.subarray((h - 1 - i) * row, (h - i) * row), i * row);
   #|  return out;
   #|}
+
+///|
+/// The texture for an image source (canvas, image, video), created on first
+/// use and re-uploaded on each use (sources may change between frames).
+/// `wrap_s`/`wrap_t` ("clamp", "repeat" or "mirror") and `filter`
+/// ("linear" or "nearest") apply when the texture is created.
+pub extern "js" fn texture_for(
+  gl : GL,
+  source : @dom.ImageElement,
+  wrap_s : String,
+  wrap_t : String,
+  filter : String,
+) -> Texture =
+  #|(gl, src, ws, wt, filter) => {
+  #|  if (!gl.__p5mbtTextures) gl.__p5mbtTextures = new Map();
+  #|  let t = gl.__p5mbtTextures.get(src);
+  #|  const prev = gl.getParameter(gl.TEXTURE_BINDING_2D);
+  #|  const fresh = !t;
+  #|  if (fresh) { t = gl.createTexture(); gl.__p5mbtTextures.set(src, t); }
+  #|  gl.bindTexture(gl.TEXTURE_2D, t);
+  #|  const isVideo = typeof HTMLVideoElement !== 'undefined' && src instanceof HTMLVideoElement;
+  #|  const w = isVideo ? src.videoWidth : src.width, h = isVideo ? src.videoHeight : src.height;
+  #|  if (w > 0 && h > 0) {
+  #|    if (!(isVideo && !fresh && t.__time === src.currentTime)) {
+  #|      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+  #|      t.__time = isVideo ? src.currentTime : undefined;
+  #|    }
+  #|  } else if (fresh) {
+  #|    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+  #|  }
+  #|  if (fresh) {
+  #|    const wrap = m => m === 'repeat' ? gl.REPEAT : m === 'mirror' ? gl.MIRRORED_REPEAT : gl.CLAMP_TO_EDGE;
+  #|    const f = filter === 'nearest' ? gl.NEAREST : gl.LINEAR;
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, f);
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, f);
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap(ws));
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap(wt));
+  #|  }
+  #|  gl.bindTexture(gl.TEXTURE_2D, prev);
+  #|  return t;
+  #|}
+
+///|
+/// Whether `p` has a sampler uniform named `name`.
+pub extern "js" fn has_sampler(p : Program, name : String) -> Bool =
+  #|(p, n) => !!(p.uniforms[n] && p.uniforms[n].isSampler)
+
+///|
+/// Clears the texture assigned to a sampler uniform.
+pub extern "js" fn clear_sampler(p : Program, name : String) -> Unit =
+  #|(p, n) => { const u = p.uniforms[n]; if (u) u.texture = undefined; }
+
+///|
+/// Sets the wrap mode of every texture created so far (p5's `textureWrap`
+/// updates all existing textures).
+pub extern "js" fn set_all_wrap(
+  gl : GL,
+  wrap_s : String,
+  wrap_t : String,
+) -> Unit =
+  #|(gl, ws, wt) => {
+  #|  if (!gl.__p5mbtTextures) return;
+  #|  const wrap = m => m === 'repeat' ? gl.REPEAT : m === 'mirror' ? gl.MIRRORED_REPEAT : gl.CLAMP_TO_EDGE;
+  #|  const prev = gl.getParameter(gl.TEXTURE_BINDING_2D);
+  #|  for (const t of gl.__p5mbtTextures.values()) {
+  #|    gl.bindTexture(gl.TEXTURE_2D, t);
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap(ws));
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap(wt));
+  #|  }
+  #|  gl.bindTexture(gl.TEXTURE_2D, prev);
+  #|}

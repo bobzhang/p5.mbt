@@ -419,10 +419,26 @@ pub fn[I : ImageSource] P5::image_region(
       @dom.now()
     },
   )
-  guard img.image_source() is Some((elt, pw, ph, lw, _)) else { return }
+  guard img.image_source() is Some((elt, pw, ph, lw, lh)) else { return }
   let (x, y, w, h) = @shape.mode_adjust(dx, dy, dw, dh, self.state.image_mode)
   let (w, h) = if self.state.image_mode is Corner { (dw, dh) } else { (w, h) }
   let s = pw.to_double() / lw
+  if self.gl is Some(r) {
+    self.gl_sync_tint()
+    r.image(
+      { elt, width: lw, height: lh, },
+      sx * s,
+      sy * s,
+      sw * s,
+      sh * s,
+      x,
+      y,
+      w,
+      h,
+      self.gl_style(),
+    )
+    return
+  }
   let tint = self.state.tint.map(c => c.rgba())
   self.sync_transform()
   if self.state.erasing {

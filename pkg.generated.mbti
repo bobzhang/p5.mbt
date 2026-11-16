@@ -429,6 +429,10 @@ pub fn P5::asin(Self, Double) -> Double
 pub fn P5::atan(Self, Double) -> Double
 pub fn P5::atan2(Self, Double, Double) -> Double
 pub fn[C : ColorArg] P5::background(Self, C) -> Unit
+pub fn P5::base_color_shader(Self) -> @webgl.Shader?
+pub fn P5::base_material_shader(Self) -> @webgl.Shader?
+pub fn P5::base_normal_shader(Self) -> @webgl.Shader?
+pub fn P5::base_stroke_shader(Self) -> @webgl.Shader?
 pub fn P5::begin_clip(Self, invert? : Bool) -> Unit
 pub fn P5::begin_contour(Self, kind? : @shape.ShapeKind) -> Unit
 pub fn P5::begin_shape(Self, kind? : @shape.ShapeKind) -> Unit
@@ -473,6 +477,7 @@ pub fn P5::create_input(Self, value? : String, kind? : String) -> Element
 pub fn P5::create_p(Self, html? : String) -> Element
 pub fn P5::create_radio(Self, name? : String) -> Element
 pub fn P5::create_select(Self) -> Element
+pub fn P5::create_shader(Self, String, String) -> @webgl.Shader
 pub fn P5::create_slider(Self, Double, Double, value? : Double, step? : Double) -> Element
 pub fn P5::create_span(Self, html? : String) -> Element
 pub fn P5::create_vector(Self, Double, Double, z? : Double) -> @math.Vector
@@ -530,6 +535,7 @@ pub fn[C : ColorArg] P5::hue(Self, C) -> Double
 pub fn[I : ImageSource] P5::image(Self, I, Double, Double, w? : Double, h? : Double) -> Unit
 pub fn P5::image_mode(Self, @shape.ShapeMode) -> Unit
 pub fn[I : ImageSource] P5::image_region(Self, I, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::image_shader(Self, @webgl.Shader) -> Unit
 pub fn P5::is_fullscreen(Self) -> Bool
 pub fn P5::is_looping(Self) -> Bool
 pub fn P5::is_recording(Self) -> Bool
@@ -596,6 +602,7 @@ pub fn P5::remove(Self) -> Unit
 pub fn P5::remove_elements(Self) -> Unit
 pub fn P5::request_pointer_lock(Self) -> Bool
 pub fn P5::reset_matrix(Self) -> Unit
+pub fn P5::reset_shader(Self) -> Unit
 pub fn P5::resize_canvas(Self, Double, Double) -> Unit
 pub fn P5::rng(Self) -> @math.Random
 pub fn P5::rotate(Self, Double) -> Unit
@@ -616,6 +623,9 @@ pub fn P5::set_camera(Self, @webgl.Camera) -> Unit
 pub fn P5::set_draw(Self, (Self) -> Unit) -> Unit
 pub fn P5::set_move_threshold(Self, Double) -> Unit
 pub fn P5::set_shake_threshold(Self, Double) -> Unit
+pub fn P5::set_uniform(Self, @webgl.Shader, String, ArrayView[Double]) -> Unit
+pub fn[I : ImageSource] P5::set_uniform_texture(Self, @webgl.Shader, String, I) -> Unit
+pub fn P5::shader(Self, @webgl.Shader) -> Unit
 pub fn P5::shape(Self, ShapeCollection, x? : Double, y? : Double, scale? : Double, scale_x? : Double, scale_y? : Double, align? : ShapeAlign) -> Unit
 pub fn P5::shear_x(Self, Double) -> Unit
 pub fn P5::shear_y(Self, Double) -> Unit
@@ -637,6 +647,7 @@ pub fn P5::square(Self, Double, Double, Double, tl? : Double, tr? : Double, br? 
 pub fn[C : ColorArg] P5::stroke(Self, C) -> Unit
 pub fn P5::stroke_cap(Self, StrokeCap) -> Unit
 pub fn P5::stroke_join(Self, StrokeJoin) -> Unit
+pub fn P5::stroke_shader(Self, @webgl.Shader) -> Unit
 pub fn P5::stroke_weight(Self, Double) -> Unit
 pub fn P5::surface(Self) -> &Surface
 pub fn P5::tan(Self, Double) -> Double
@@ -655,6 +666,9 @@ pub fn P5::text_variant(Self, String) -> Unit
 pub fn P5::text_weight(Self, Double) -> Unit
 pub fn P5::text_width(Self, String) -> Double
 pub fn P5::text_wrap(Self, TextWrap) -> Unit
+pub fn[I : ImageSource] P5::texture(Self, I) -> Unit
+pub fn P5::texture_mode(Self, TextureMode) -> Unit
+pub fn P5::texture_wrap(Self, TextureWrap, y? : TextureWrap) -> Unit
 pub fn[C : ColorArg] P5::tint(Self, C) -> Unit
 pub fn P5::torus(Self, r? : Double, tube? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
 pub fn P5::translate(Self, Double, Double, z? : Double) -> Unit
@@ -752,6 +766,17 @@ pub(all) enum TextWrap {
   Char
 }
 
+pub(all) enum TextureMode {
+  Image
+  Normal
+}
+
+pub(all) enum TextureWrap {
+  Clamp
+  Repeat
+  Mirror
+}
+
 #derive(Eq, @debug.Debug)
 pub(all) struct Touch {
   x : Double
@@ -791,6 +816,8 @@ pub using @math {type Matrix2D}
 pub using @math {type Noise}
 
 pub using @math {type Random}
+
+pub using @webgl {type Shader}
 
 pub using @shape {type Shape}
 

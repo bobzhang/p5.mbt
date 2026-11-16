@@ -2,6 +2,7 @@
 package "bobzhang/p5/webgl"
 
 import {
+  "bobzhang/p5/dom",
   "bobzhang/p5/gl",
   "bobzhang/p5/math",
   "bobzhang/p5/shape",
@@ -33,13 +34,13 @@ pub let extra_u : Int32
 
 pub fn js_string(Double) -> String
 
+pub fn libtess_triangulate(Array[Array[FixedArray[Double]]], Int32) -> Array[Double]
+
 pub fn plane_geometry(Int32, Int32) -> Geometry
 
 pub fn quad_geometry((Double, Double, Double), (Double, Double, Double), (Double, Double, Double), (Double, Double, Double), Int32, Int32) -> Geometry
 
 pub fn rect_geometry(Int32, Int32) -> Geometry
-
-pub fn tessellate(Array[Array[FixedArray[Double]]]) -> Array[FixedArray[Double]]
 
 pub fn torus_geometry(Double, Int32, Int32) -> Geometry
 
@@ -130,6 +131,11 @@ pub struct GLState {
   mut tint : FixedArray[Double]
   mut fill_shader : Shader?
   mut stroke_shader : Shader?
+  mut tex : TexSource?
+  mut image_shader : Shader?
+  mut texture_mode_normal : Bool
+  mut wrap_x : String
+  mut wrap_y : String
 }
 
 pub struct Geometry {
@@ -178,6 +184,7 @@ pub struct Renderer3D {
 pub fn Renderer3D::ambient_light(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::ambient_material(Self, FixedArray[Double]) -> Unit
 pub fn Renderer3D::apply_matrix(Self, ArrayView[Double]) -> Unit
+pub fn Renderer3D::base_shader(Self, String) -> Shader
 pub fn Renderer3D::cached_geometry(Self, String, () -> Geometry) -> Geometry
 pub fn Renderer3D::camera(Self, eye? : (Double, Double, Double), center? : (Double, Double, Double), up? : (Double, Double, Double)) -> Unit
 pub fn Renderer3D::clear(Self, Double, Double, Double, Double) -> Unit
@@ -193,6 +200,7 @@ pub fn Renderer3D::free_geometry(Self, Geometry) -> Unit
 pub fn Renderer3D::frustum(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
 pub fn Renderer3D::geometry(Self, String) -> Geometry?
 pub fn Renderer3D::has_geometry(Self, String) -> Bool
+pub fn Renderer3D::image(Self, TexSource, Double, Double, Double, Double, Double, Double, Double, Double, Style) -> Unit
 pub fn Renderer3D::light_falloff(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::lights(Self) -> Unit
 pub fn Renderer3D::line_perspective(Self, Bool) -> Unit
@@ -201,6 +209,7 @@ pub fn Renderer3D::model_matrix(Self) -> @math.Matrix
 pub fn Renderer3D::new(@gl.GL, Double, Double, Double) -> Self
 pub fn Renderer3D::no_lights(Self) -> Unit
 pub fn Renderer3D::on_fill(Self) -> Unit
+pub fn Renderer3D::on_shader(Self) -> Unit
 pub fn Renderer3D::ortho(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
 pub fn Renderer3D::perspective(Self, fovy? : Double, aspect? : Double, near? : Double, far? : Double) -> Unit
 pub fn Renderer3D::point_light(Self, Double, Double, Double, Double, Double, Double) -> Unit
@@ -214,6 +223,7 @@ pub fn Renderer3D::scale(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::set_camera(Self, Camera) -> Unit
 pub fn Renderer3D::set_curve_detail(Self, Double) -> Unit
 pub fn Renderer3D::set_fill_shader(Self, Shader?) -> Unit
+pub fn Renderer3D::set_image_shader(Self, Shader?) -> Unit
 pub fn Renderer3D::set_model_matrix(Self, @math.Matrix) -> Unit
 pub fn Renderer3D::set_stroke_shader(Self, Shader?) -> Unit
 pub fn Renderer3D::set_tint(Self, FixedArray[Double]) -> Unit
@@ -222,6 +232,9 @@ pub fn Renderer3D::specular_color(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::specular_material(Self, FixedArray[Double]) -> Unit
 pub fn Renderer3D::spot_light(Self, Double, Double, Double, (Double, Double, Double), (Double, Double, Double), angle? : Double, concentration? : Double) -> Unit
 pub fn Renderer3D::sync_camera(Self) -> Unit
+pub fn Renderer3D::texture(Self, TexSource) -> Unit
+pub fn Renderer3D::texture_mode(Self, Bool) -> Unit
+pub fn Renderer3D::texture_wrap(Self, String, String) -> Unit
 pub fn Renderer3D::translate(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::update(Self) -> Unit
 pub fn Renderer3D::use_normal_material(Self) -> Unit
@@ -237,6 +250,7 @@ pub struct Shader {
 pub fn Shader::frag_src(Self) -> String
 pub fn Shader::modify(Self, vertex? : Array[(String, String)], fragment? : Array[(String, String)]) -> Self
 pub fn Shader::new(String, String) -> Self
+pub fn Shader::set_uniform(Self, String, UniformValue) -> Unit
 pub fn Shader::vert_src(Self) -> String
 
 pub(all) enum ShapeMode {
@@ -258,6 +272,17 @@ pub(all) struct Style {
   stroke_join : Int32
   blend_mode : String
   erasing : Bool
+}
+
+pub(all) struct TexSource {
+  elt : @dom.ImageElement
+  width : Double
+  height : Double
+}
+
+pub(all) enum UniformValue {
+  Floats(FixedArray[Double])
+  Tex(TexSource)
 }
 
 #derive(@debug.Debug)

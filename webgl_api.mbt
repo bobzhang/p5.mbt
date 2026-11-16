@@ -67,6 +67,7 @@ fn rgba01(c : Color) -> FixedArray[Double] {
 
 ///|
 fn P5::gl_style(self : P5) -> @webgl.Style {
+  self.gl_sync_tint()
   let st = self.state
   let erasing = st.erasing
   let fill : FixedArray[Double]? = match st.fill {
@@ -799,4 +800,177 @@ fn P5::gl_quad(
     @webgl.quad_geometry(p1, p2, p3, p4, detail_x, detail_y)
   })
   r.draw_geometry(g, self.gl_style())
+}
+
+// ---- textures and shaders ----
+
+///|
+/// How texture coordinates passed to `vertex()` are read.
+pub(all) enum TextureMode {
+  /// In pixels of the texture (default).
+  Image
+  /// In [0, 1].
+  Normal
+}
+
+///|
+/// How textures repeat outside [0, 1].
+pub(all) enum TextureWrap {
+  Clamp
+  Repeat
+  Mirror
+}
+
+///|
+/// A shader program (p5.Shader).
+pub type Shader = @webgl.Shader
+
+///|
+fn[I : ImageSource] tex_source(img : I) -> @webgl.TexSource? {
+  img.image_source().map(s => { elt: s.0, width: s.3, height: s.4, })
+}
+
+///|
+fn P5::gl_sync_tint(self : P5) -> Unit {
+  if self.gl is Some(r) {
+    r.set_tint(
+      match self.state.tint {
+        Some(c) => {
+          let (red, g, b, a) = c.to_srgb()
+          [red * 255, g * 255, b * 255, a * 255]
+        }
+        None => [255, 255, 255, 255]
+      },
+    )
+  }
+}
+
+///|
+/// Textures shapes drawn afterwards with an image, video or graphics.
+pub fn[I : ImageSource] P5::texture(self : P5, img : I) -> Unit {
+  guard self.gl_renderer("texture") is Some(r) else { return }
+  img.advance(@dom.now())
+  if tex_source(img) is Some(src) {
+    r.texture(src)
+    self.state.fill = Some(Color::rgb(255, 255, 255))
+  }
+}
+
+///|
+/// Sets how texture coordinates are read: in pixels (`Image`) or [0, 1].
+pub fn P5::texture_mode(self : P5, mode : TextureMode) -> Unit {
+  if self.gl_renderer("texture_mode") is Some(r) {
+    r.texture_mode(mode is Normal)
+  }
+}
+
+///|
+/// Sets how textures wrap horizontally and vertically.
+pub fn P5::texture_wrap(self : P5, x : TextureWrap, y? : TextureWrap) -> Unit {
+  let name = (w : TextureWrap) => {
+    match w {
+      Clamp => "clamp"
+      Repeat => "repeat"
+      Mirror => "mirror"
+    }
+  }
+  if self.gl_renderer("texture_wrap") is Some(r) {
+    r.texture_wrap(name(x), name(y.unwrap_or(x)))
+  }
+}
+
+///|
+/// Creates a shader from GLSL vertex and fragment sources.
+pub fn P5::create_shader(
+  self : P5,
+  vert : String,
+  frag : String,
+) -> @webgl.Shader {
+  ignore(self)
+  @webgl.Shader::new(vert, frag)
+}
+
+///|
+/// Uses `s` to fill shapes drawn afterwards (`shader()`).
+pub fn P5::shader(self : P5, s : @webgl.Shader) -> Unit {
+  if self.gl_renderer("shader") is Some(r) {
+    r.set_fill_shader(Some(s))
+    r.on_shader()
+  }
+}
+
+///|
+/// Uses `s` to draw strokes (`strokeShader()`).
+pub fn P5::stroke_shader(self : P5, s : @webgl.Shader) -> Unit {
+  if self.gl_renderer("stroke_shader") is Some(r) {
+    r.set_stroke_shader(Some(s))
+  }
+}
+
+///|
+/// Uses `s` to draw images (`imageShader()`).
+pub fn P5::image_shader(self : P5, s : @webgl.Shader) -> Unit {
+  if self.gl_renderer("image_shader") is Some(r) {
+    r.set_image_shader(Some(s))
+  }
+}
+
+///|
+/// Back to the default shaders.
+pub fn P5::reset_shader(self : P5) -> Unit {
+  if self.gl is Some(r) {
+    r.set_fill_shader(None)
+    r.set_stroke_shader(None)
+    r.set_image_shader(None)
+  }
+}
+
+///|
+/// p5's material shader (with lights), for `modify`.
+pub fn P5::base_material_shader(self : P5) -> @webgl.Shader? {
+  self.gl_renderer("base_material_shader").map(r => r.base_shader("light"))
+}
+
+///|
+/// p5's flat color shader, for `modify`.
+pub fn P5::base_color_shader(self : P5) -> @webgl.Shader? {
+  self.gl_renderer("base_color_shader").map(r => r.base_shader("color"))
+}
+
+///|
+/// p5's normal-colored shader, for `modify`.
+pub fn P5::base_normal_shader(self : P5) -> @webgl.Shader? {
+  self.gl_renderer("base_normal_shader").map(r => r.base_shader("normal"))
+}
+
+///|
+/// p5's stroke shader, for `modify`.
+pub fn P5::base_stroke_shader(self : P5) -> @webgl.Shader? {
+  self.gl_renderer("base_stroke_shader").map(r => r.base_shader("line"))
+}
+
+///|
+/// Sets a numeric uniform (scalar, vector, matrix or array).
+pub fn P5::set_uniform(
+  self : P5,
+  s : @webgl.Shader,
+  name : String,
+  values : ArrayView[Double],
+) -> Unit {
+  ignore(self)
+  s.set_uniform(name, Floats(FixedArray::from_array(values.to_owned())))
+}
+
+///|
+/// Sets a sampler uniform to an image, video or graphics.
+pub fn[I : ImageSource] P5::set_uniform_texture(
+  self : P5,
+  s : @webgl.Shader,
+  name : String,
+  img : I,
+) -> Unit {
+  ignore(self)
+  if tex_source(img) is Some(src) {
+    s.set_uniform(name, Tex(src))
+  }
 }

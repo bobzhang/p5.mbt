@@ -3,6 +3,7 @@ import {
   "bobzhang/p5/math",
   "bobzhang/p5/gl",
   "bobzhang/p5/shape",
+  "bobzhang/p5/dom",
 }
 
 supported_targets = "js"
