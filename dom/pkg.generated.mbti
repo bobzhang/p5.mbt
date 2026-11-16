@@ -2,6 +2,10 @@
 package "bobzhang/p5/dom"
 
 // Values
+pub fn apply_mask(Canvas, ImageElement) -> Unit
+
+pub fn blit(Canvas, ImageElement, Double, Double) -> Unit
+
 pub fn canvas_as_image(Canvas) -> ImageElement
 
 pub fn canvas_height(Canvas) -> Int32
@@ -15,6 +19,8 @@ pub fn clip_path(Context2D, Path2D) -> Unit
 pub fn console_log(String) -> Unit
 
 pub fn console_warn(String) -> Unit
+
+pub fn copy_region(Canvas, ImageElement, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 
 pub fn create_canvas(Double, Double, Double, String, Bool) -> Canvas
 

@@ -1,0 +1,517 @@
+// Port of p5.js src/image/{p5.Image,image,loading_displaying,pixels}.js for
+// the 2D renderer.
+
+///|
+/// An image (loaded from a file or created with `create_image`), backed by
+/// an off-screen canvas. Use `load_pixels` / `pixels` / `update_pixels` to
+/// edit pixels.
+pub struct Image {
+  /// Width in pixels.
+  mut width : Double
+  /// Height in pixels.
+  mut height : Double
+  /// RGBA pixel data filled by `load_pixels()`.
+  mut pixels : FixedArray[Byte]
+  priv canvas : @dom.Canvas
+  priv surface : CanvasSurface
+}
+
+///|
+fn Image::with_size(w : Double, h : Double) -> Image {
+  let w = w.max(1)
+  let h = h.max(1)
+  let canvas = @dom.create_canvas(w, h, 1, "", false)
+  {
+    width: w,
+    height: h,
+    pixels: [],
+    canvas,
+    surface: CanvasSurface::new(canvas),
+  }
+}
+
+///|
+fn Image::device_w(self : Image) -> Int32 {
+  self.width.to_int()
+}
+
+///|
+fn Image::device_h(self : Image) -> Int32 {
+  self.height.to_int()
+}
+
+///|
+/// Things that can be drawn with `image()`: `Image` and graphics buffers
+/// (`P5` sketches created with `create_graphics`).
+pub(open) trait ImageSource {
+  /// The source element, its size in device pixels and its size in logical
+  /// pixels.
+  fn image_source(Self) -> (@dom.ImageElement, Int32, Int32, Double, Double)?
+}
+
+///|
+pub impl ImageSource for Image with fn image_source(self) {
+  Some(
+    (
+      @dom.canvas_as_image(self.canvas),
+      self.device_w(),
+      self.device_h(),
+      self.width,
+      self.height,
+    ),
+  )
+}
+
+///|
+pub impl ImageSource for P5 with fn image_source(self) {
+  match self.canvas {
+    None => None
+    Some(c) =>
+      Some(
+        (
+          @dom.canvas_as_image(c),
+          @dom.canvas_width(c),
+          @dom.canvas_height(c),
+          self.width,
+          self.height,
+        ),
+      )
+  }
+}
+
+///|
+/// Loads the pixels of the image into `pixels`.
+pub fn Image::load_pixels(self : Image) -> Unit {
+  self.pixels = self.surface.read_pixels(0, 0, self.device_w(), self.device_h())
+}
+
+///|
+/// Writes `pixels` back into the image.
+pub fn Image::update_pixels(self : Image) -> Unit {
+  if self.pixels.length() == self.device_w() * self.device_h() * 4 {
+    self.surface.write_pixels(
+      self.pixels,
+      0,
+      0,
+      self.device_w(),
+      self.device_h(),
+    )
+  }
+}
+
+///|
+fn color_from_bytes(px : FixedArray[Byte], i : Int32) -> Color {
+  Color::rgb(
+    px[i].to_double(),
+    px[i + 1].to_double(),
+    px[i + 2].to_double(),
+    alpha=px[i + 3].to_double(),
+  )
+}
+
+///|
+/// The color of one pixel (transparent black outside the image).
+pub fn Image::get(self : Image, x : Double, y : Double) -> Color {
+  let xi = x.floor().to_int()
+  let yi = y.floor().to_int()
+  if xi < 0 || yi < 0 || xi >= self.device_w() || yi >= self.device_h() {
+    return Color::rgb(0, 0, 0, alpha=0)
+  }
+  color_from_bytes(self.surface.read_pixels(xi, yi, 1, 1), 0)
+}
+
+///|
+/// A copy of a rectangular region (the whole image by default).
+pub fn Image::get_region(
+  self : Image,
+  x : Double,
+  y : Double,
+  w : Double,
+  h : Double,
+) -> Image {
+  let out = Image::with_size(w, h)
+  @dom.copy_region(
+    out.canvas,
+    @dom.canvas_as_image(self.canvas),
+    x,
+    y,
+    w,
+    h,
+    0,
+    0,
+    w,
+    h,
+  )
+  out
+}
+
+///|
+/// A copy of the image.
+pub fn Image::copy(self : Image) -> Image {
+  self.get_region(0, 0, self.width, self.height)
+}
+
+///|
+/// Sets one pixel in `pixels` (loading them first if needed). Call
+/// `update_pixels()` to apply.
+pub fn Image::set(self : Image, x : Double, y : Double, c : Color) -> Unit {
+  if self.pixels.length() == 0 {
+    self.load_pixels()
+  }
+  let xi = x.floor().to_int()
+  let yi = y.floor().to_int()
+  if xi < 0 || yi < 0 || xi >= self.device_w() || yi >= self.device_h() {
+    return
+  }
+  let (r, g, b, a) = c.rgba()
+  let i = (yi * self.device_w() + xi) * 4
+  self.pixels[i] = @filters.clamp_byte(r)
+  self.pixels[i + 1] = @filters.clamp_byte(g)
+  self.pixels[i + 2] = @filters.clamp_byte(b)
+  self.pixels[i + 3] = @filters.clamp_byte(a)
+}
+
+///|
+/// Resizes the image. A size of 0 keeps the aspect ratio.
+pub fn Image::resize(self : Image, w : Double, h : Double) -> Unit {
+  let (w, h) = if w == 0 && h == 0 {
+    (self.width, self.height)
+  } else if w == 0 {
+    (self.width * h / self.height, h)
+  } else if h == 0 {
+    (w, self.height * w / self.width)
+  } else {
+    (w, h)
+  }
+  let w = w.floor().max(1)
+  let h = h.floor().max(1)
+  let tmp = Image::with_size(self.width, self.height)
+  @dom.blit(
+    tmp.canvas,
+    @dom.canvas_as_image(self.canvas),
+    self.width,
+    self.height,
+  )
+  @dom.resize_canvas(self.canvas, w, h, 1)
+  @dom.blit(self.canvas, @dom.canvas_as_image(tmp.canvas), w, h)
+  self.width = w
+  self.height = h
+  if self.pixels.length() > 0 {
+    self.load_pixels()
+  }
+}
+
+///|
+/// Copies a region of `src` into a region of this image, scaling it.
+pub fn[I : ImageSource] Image::copy_from(
+  self : Image,
+  src : I,
+  sx : Double,
+  sy : Double,
+  sw : Double,
+  sh : Double,
+  dx : Double,
+  dy : Double,
+  dw : Double,
+  dh : Double,
+) -> Unit {
+  guard src.image_source() is Some((elt, dw_px, _, lw, _)) else { return }
+  let s = dw_px.to_double() / lw
+  @dom.copy_region(
+    self.canvas,
+    elt,
+    sx * s,
+    sy * s,
+    sw * s,
+    sh * s,
+    dx,
+    dy,
+    dw,
+    dh,
+  )
+}
+
+///|
+/// Uses the alpha channel of `mask` as this image's alpha.
+pub fn[I : ImageSource] Image::mask(self : Image, mask : I) -> Unit {
+  guard mask.image_source() is Some((elt, _, _, _, _)) else { return }
+  @dom.apply_mask(self.canvas, elt)
+}
+
+///|
+fn apply_filter(px : FixedArray[Byte], width : Int32, f : Filter) -> Unit {
+  match f {
+    Threshold(level) => @filters.threshold(px, level~)
+    Gray => @filters.gray(px)
+    Opaque => @filters.make_opaque(px)
+    Invert => @filters.invert(px)
+    Posterize(levels) => @filters.posterize(px, levels~)
+    Blur(radius) => @filters.blur(px, width, radius)
+    Erode => @filters.erode(px, width)
+    Dilate => @filters.dilate(px, width)
+  }
+}
+
+///|
+/// Applies a filter to the image.
+pub fn Image::filter(self : Image, f : Filter) -> Unit {
+  self.load_pixels()
+  apply_filter(self.pixels, self.device_w(), f)
+  self.update_pixels()
+}
+
+///|
+/// Downloads the image as a PNG.
+pub fn Image::save(self : Image, filename~ : String = "untitled") -> Unit {
+  @dom.download_url(
+    @dom.to_data_url(self.canvas, "image/png"),
+    filename + ".png",
+  )
+}
+
+///|
+/// Creates a blank (transparent) image.
+pub fn P5::create_image(_self : P5, w : Double, h : Double) -> Image {
+  Image::with_size(w, h)
+}
+
+///|
+/// Loads an image from a URL. The returned image is 1×1 until it has
+/// loaded; when called in `preload`, `setup` waits for it.
+pub fn P5::load_image(
+  self : P5,
+  url : String,
+  on_load? : (Image) -> Unit,
+) -> Image {
+  let img = Image::with_size(1, 1)
+  self.begin_load()
+  @dom.load_image(
+    url,
+    (elt, w, h) => {
+      img.width = w.to_double()
+      img.height = h.to_double()
+      @dom.resize_canvas(img.canvas, img.width, img.height, 1)
+      @dom.blit(img.canvas, elt, img.width, img.height)
+      if on_load is Some(f) {
+        f(img)
+      }
+      self.end_load()
+    },
+    msg => {
+      warn(msg)
+      self.end_load()
+    },
+  )
+  img
+}
+
+///|
+/// Sets how `image()` interprets its position and size arguments
+/// (`Corner`, `Corners` or `Center`).
+pub fn P5::image_mode(self : P5, mode : ShapeMode) -> Unit {
+  self.state.image_mode = mode
+}
+
+///|
+/// Tints images drawn afterwards with a color (alpha makes them
+/// translucent).
+pub fn[C : ColorArg] P5::tint(self : P5, c : C) -> Unit {
+  self.state.tint = Some(c.to_color(self))
+}
+
+///|
+/// Removes the tint.
+pub fn P5::no_tint(self : P5) -> Unit {
+  self.state.tint = None
+}
+
+///|
+/// Draws an image (or graphics buffer) at `(x, y)`, optionally scaled to
+/// `w`×`h`, following `image_mode()`.
+pub fn[I : ImageSource] P5::image(
+  self : P5,
+  img : I,
+  x : Double,
+  y : Double,
+  w? : Double,
+  h? : Double,
+) -> Unit {
+  guard img.image_source() is Some((_, _, _, lw, lh)) else { return }
+  self.image_region(img, x, y, w.unwrap_or(lw), h.unwrap_or(lh), 0, 0, lw, lh)
+}
+
+///|
+/// Draws the source rectangle `(sx, sy, sw, sh)` of an image into the
+/// destination rectangle `(dx, dy, dw, dh)` (interpreted with
+/// `image_mode()`).
+pub fn[I : ImageSource] P5::image_region(
+  self : P5,
+  img : I,
+  dx : Double,
+  dy : Double,
+  dw : Double,
+  dh : Double,
+  sx : Double,
+  sy : Double,
+  sw : Double,
+  sh : Double,
+) -> Unit {
+  guard img.image_source() is Some((elt, pw, ph, lw, _)) else { return }
+  let (x, y, w, h) = @shape.mode_adjust(dx, dy, dw, dh, self.state.image_mode)
+  let (w, h) = if self.state.image_mode is Corner { (dw, dh) } else { (w, h) }
+  let s = pw.to_double() / lw
+  let tint = self.state.tint.map(c => c.rgba())
+  self.sync_transform()
+  if self.state.erasing {
+    self.surface.set_blend_mode(self.state.blend_mode)
+  }
+  self.surface.draw_image(
+    elt,
+    pw,
+    ph,
+    tint,
+    sx * s,
+    sy * s,
+    sw * s,
+    sh * s,
+    x,
+    y,
+    w,
+    h,
+  )
+  if self.state.erasing {
+    self.surface.set_blend_mode(Remove)
+  }
+}
+
+///|
+fn P5::device_size(self : P5) -> (Int32, Int32) {
+  (
+    (self.width * self.density).round().to_int(),
+    (self.height * self.density).round().to_int(),
+  )
+}
+
+///|
+/// Loads the canvas pixels into `pixels` (RGBA bytes, row by row, in device
+/// pixels: the array is `pixel_density²` times larger than width×height).
+pub fn P5::load_pixels(self : P5) -> Unit {
+  let (w, h) = self.device_size()
+  self.pixels = self.surface.read_pixels(0, 0, w, h)
+}
+
+///|
+/// Writes `pixels` back to the canvas.
+pub fn P5::update_pixels(self : P5) -> Unit {
+  let (w, h) = self.device_size()
+  if self.pixels.length() == w * h * 4 {
+    self.surface.write_pixels(self.pixels, 0, 0, w, h)
+  }
+}
+
+///|
+/// The color of the canvas at `(x, y)`.
+pub fn P5::get(self : P5, x : Double, y : Double) -> Color {
+  let (w, h) = self.device_size()
+  let xi = (x * self.density).floor().to_int()
+  let yi = (y * self.density).floor().to_int()
+  if xi < 0 || yi < 0 || xi >= w || yi >= h {
+    return Color::rgb(0, 0, 0, alpha=0)
+  }
+  color_from_bytes(self.surface.read_pixels(xi, yi, 1, 1), 0)
+}
+
+///|
+/// Copies a region of the canvas into a new image.
+pub fn P5::get_region(
+  self : P5,
+  x : Double,
+  y : Double,
+  w : Double,
+  h : Double,
+) -> Image {
+  let d = self.density
+  let out = Image::with_size(w * d, h * d)
+  if self.canvas is Some(c) {
+    @dom.copy_region(
+      out.canvas,
+      @dom.canvas_as_image(c),
+      x * d,
+      y * d,
+      w * d,
+      h * d,
+      0,
+      0,
+      w * d,
+      h * d,
+    )
+  }
+  out
+}
+
+///|
+/// Sets a pixel in `pixels` (loading them first if needed); call
+/// `update_pixels()` to show the change.
+pub fn[C : ColorArg] P5::set(self : P5, x : Double, y : Double, c : C) -> Unit {
+  let (w, h) = self.device_size()
+  if self.pixels.length() != w * h * 4 {
+    self.load_pixels()
+  }
+  let (r, g, b, a) = c.to_color(self).rgba()
+  let d = self.density.to_int().max(1)
+  let x0 = x.floor().to_int() * d
+  let y0 = y.floor().to_int() * d
+  for j in 0..<d {
+    for i in 0..<d {
+      let px = x0 + i
+      let py = y0 + j
+      if px >= 0 && py >= 0 && px < w && py < h {
+        let idx = (py * w + px) * 4
+        self.pixels[idx] = @filters.clamp_byte(r)
+        self.pixels[idx + 1] = @filters.clamp_byte(g)
+        self.pixels[idx + 2] = @filters.clamp_byte(b)
+        self.pixels[idx + 3] = @filters.clamp_byte(a)
+      }
+    }
+  }
+}
+
+///|
+/// Applies a filter to the whole canvas.
+pub fn P5::filter(self : P5, f : Filter) -> Unit {
+  let (w, _) = self.device_size()
+  self.load_pixels()
+  let f = match f {
+    Blur(r) => Blur(r * self.density)
+    other => other
+  }
+  apply_filter(self.pixels, w, f)
+  self.update_pixels()
+}
+
+///|
+/// Creates an off-screen graphics buffer with the same drawing API as the
+/// sketch. Draw it with `image()`.
+pub fn P5::create_graphics(self : P5, w : Double, h : Double) -> P5 {
+  let canvas = @dom.create_canvas(w, h, self.density, "", false)
+  let g = P5::make(
+    CanvasSurface::new(canvas),
+    w,
+    h,
+    self.density,
+    self.rng.next() * 4294967296.0,
+  )
+  g.canvas = Some(canvas)
+  g.setup_done = true
+  g.apply_defaults()
+  g
+}
+
+///|
+/// Removes the sketch's canvas from the page and stops the draw loop.
+pub fn P5::remove(self : P5) -> Unit {
+  self.looping = false
+  if self.canvas is Some(c) {
+    @dom.remove_canvas(c)
+  }
+}

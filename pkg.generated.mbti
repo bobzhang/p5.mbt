@@ -127,6 +127,25 @@ pub(all) enum HAlign {
   Right
 }
 
+pub struct Image {
+  mut width : Double
+  mut height : Double
+  mut pixels : FixedArray[Byte]
+  // private fields
+}
+pub fn Image::copy(Self) -> Self
+pub fn[I : ImageSource] Image::copy_from(Self, I, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn Image::filter(Self, Filter) -> Unit
+pub fn Image::get(Self, Double, Double) -> @color.Color
+pub fn Image::get_region(Self, Double, Double, Double, Double) -> Self
+pub fn Image::load_pixels(Self) -> Unit
+pub fn[I : ImageSource] Image::mask(Self, I) -> Unit
+pub fn Image::resize(Self, Double, Double) -> Unit
+pub fn Image::save(Self, filename? : String) -> Unit
+pub fn Image::set(Self, Double, Double, @color.Color) -> Unit
+pub fn Image::update_pixels(Self) -> Unit
+pub impl ImageSource for Image
+
 #derive(Eq, @debug.Debug)
 pub(all) struct MouseButtons {
   mut left : Bool
@@ -191,6 +210,8 @@ pub fn P5::color_mode_max(Self, @color.ColorMode, Double) -> Unit
 pub fn P5::color_mode_maxes(Self, @color.ColorMode, Double, Double, Double, max_alpha? : Double) -> Unit
 pub fn P5::cos(Self, Double) -> Double
 pub fn P5::create_canvas(Self, Double, Double) -> Unit
+pub fn P5::create_graphics(Self, Double, Double) -> Self
+pub fn P5::create_image(Self, Double, Double) -> Image
 pub fn P5::create_vector(Self, Double, Double, z? : Double) -> @math.Vector
 pub fn P5::cursor(Self, kind? : String) -> Unit
 pub fn P5::curve(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
@@ -206,14 +227,17 @@ pub fn P5::end_contour(Self, mode? : @shape.CloseMode) -> Unit
 pub fn P5::end_shape(Self, mode? : @shape.CloseMode) -> Unit
 pub fn P5::erase(Self, strength_fill? : Double, strength_stroke? : Double) -> Unit
 pub fn[C : ColorArg] P5::fill(Self, C) -> Unit
+pub fn P5::filter(Self, Filter) -> Unit
 pub fn P5::frame_rate(Self, Double) -> Unit
 pub fn P5::fullscreen(Self, Bool) -> Unit
+pub fn P5::get(Self, Double, Double) -> @color.Color
 pub fn P5::get_angle_mode(Self) -> AngleMode
 pub fn P5::get_color_mode(Self) -> @color.ColorMode
 pub fn P5::get_fill(Self) -> @color.Color?
 pub fn P5::get_frame_rate(Self) -> Double
 pub fn P5::get_matrix(Self) -> @math.Matrix2D
 pub fn P5::get_pixel_density(Self) -> Double
+pub fn P5::get_region(Self, Double, Double, Double, Double) -> Image
 pub fn P5::get_stroke(Self) -> @color.Color?
 pub fn P5::get_target_frame_rate(Self) -> Double
 pub fn P5::get_text_leading(Self) -> Double
@@ -221,6 +245,9 @@ pub fn P5::get_text_size(Self) -> Double
 pub fn[C : ColorArg] P5::green(Self, C) -> Double
 pub fn P5::headless(&Surface, Double, Double, pixel_density? : Double, seed? : Double) -> Self
 pub fn[C : ColorArg] P5::hue(Self, C) -> Double
+pub fn[I : ImageSource] P5::image(Self, I, Double, Double, w? : Double, h? : Double) -> Unit
+pub fn P5::image_mode(Self, @shape.ShapeMode) -> Unit
+pub fn[I : ImageSource] P5::image_region(Self, I, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::is_fullscreen(Self) -> Bool
 pub fn P5::is_looping(Self) -> Bool
 pub fn P5::key_is_down(Self, String) -> Bool
@@ -228,6 +255,8 @@ pub fn P5::lerp_color(Self, @color.Color, @color.Color, Double) -> @color.Color
 pub fn[C : ColorArg] P5::lightness(Self, C) -> Double
 pub fn P5::line(Self, Double, Double, Double, Double) -> Unit
 pub fn P5::load_font(Self, String, family? : String, on_load? : (Font) -> Unit) -> Font
+pub fn P5::load_image(Self, String, on_load? : (Image) -> Unit) -> Image
+pub fn P5::load_pixels(Self) -> Unit
 pub fn P5::loop_(Self) -> Unit
 pub fn P5::millis(Self) -> Double
 pub fn P5::no_cursor(Self) -> Unit
@@ -236,6 +265,7 @@ pub fn P5::no_fill(Self) -> Unit
 pub fn P5::no_loop(Self) -> Unit
 pub fn P5::no_smooth(Self) -> Unit
 pub fn P5::no_stroke(Self) -> Unit
+pub fn P5::no_tint(Self) -> Unit
 pub fn P5::noise(Self, Double, y? : Double, z? : Double) -> Double
 pub fn P5::noise_detail(Self, Int32, falloff? : Double) -> Unit
 pub fn P5::noise_seed(Self, Double) -> Unit
@@ -258,6 +288,7 @@ pub fn P5::rect(Self, Double, Double, Double, Double, tl? : Double, tr? : Double
 pub fn P5::rect_mode(Self, @shape.ShapeMode) -> Unit
 pub fn[C : ColorArg] P5::red(Self, C) -> Double
 pub fn P5::redraw(Self, n? : Int32) -> Unit
+pub fn P5::remove(Self) -> Unit
 pub fn P5::reset_matrix(Self) -> Unit
 pub fn P5::resize_canvas(Self, Double, Double) -> Unit
 pub fn P5::rng(Self) -> @math.Random
@@ -266,6 +297,7 @@ pub fn[C : ColorArg] P5::saturation(Self, C) -> Double
 pub fn P5::save_canvas(Self, filename? : String, ext? : String) -> Unit
 pub fn P5::scale(Self, Double, y? : Double) -> Unit
 pub fn P5::screen_to_world(Self, Double, Double) -> (Double, Double)
+pub fn[C : ColorArg] P5::set(Self, Double, Double, C) -> Unit
 pub fn P5::set_draw(Self, (Self) -> Unit) -> Unit
 pub fn P5::shear_x(Self, Double) -> Unit
 pub fn P5::shear_y(Self, Double) -> Unit
@@ -295,11 +327,14 @@ pub fn P5::text_size(Self, Double) -> Unit
 pub fn P5::text_style(Self, TextStyle) -> Unit
 pub fn P5::text_width(Self, String) -> Double
 pub fn P5::text_wrap(Self, TextWrap) -> Unit
+pub fn[C : ColorArg] P5::tint(Self, C) -> Unit
 pub fn P5::translate(Self, Double, Double) -> Unit
 pub fn P5::triangle(Self, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::update_pixels(Self) -> Unit
 pub fn P5::vertex(Self, Double, Double) -> Unit
 pub fn P5::with_push(Self, () -> Unit) -> Unit
 pub fn P5::world_to_screen(Self, Double, Double) -> (Double, Double)
+pub impl ImageSource for P5
 
 pub struct Recorder {
   log : Array[String]
@@ -391,6 +426,10 @@ pub impl ColorArg for Array[Double]
 pub impl[A : Num, B : Num] ColorArg for (A, B)
 pub impl[A : Num, B : Num, C : Num] ColorArg for (A, B, C)
 pub impl[A : Num, B : Num, C : Num, D : Num] ColorArg for (A, B, C, D)
+
+pub(open) trait ImageSource {
+  fn image_source(Self) -> (@dom.ImageElement, Int32, Int32, Double, Double)?
+}
 
 pub(open) trait Num {
   fn to_num(Self) -> Double

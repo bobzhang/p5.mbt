@@ -104,3 +104,44 @@ pub extern "js" fn image_data_copy_to(
   d : ImageData,
   dst : FixedArray[Byte],
 ) -> Unit = "(d, s) => { s.set(d.data); }"
+
+///|
+/// Draws an image source into a canvas at `(0, 0)` with the given size
+/// (identity transform), replacing its contents.
+pub extern "js" fn blit(
+  dst : Canvas,
+  src : ImageElement,
+  w : Double,
+  h : Double,
+) -> Unit =
+  #|(dst, src, w, h) => {
+  #|  const c = dst.getContext('2d'); c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+  #|  c.clearRect(0, 0, dst.width, dst.height); c.drawImage(src, 0, 0, w, h); c.restore();
+  #|}
+
+///|
+/// Copies a region of `src` into `dst` (both in device pixels).
+pub extern "js" fn copy_region(
+  dst : Canvas,
+  src : ImageElement,
+  sx : Double,
+  sy : Double,
+  sw : Double,
+  sh : Double,
+  dx : Double,
+  dy : Double,
+  dw : Double,
+  dh : Double,
+) -> Unit =
+  #|(dst, src, sx, sy, sw, sh, dx, dy, dw, dh) => {
+  #|  const c = dst.getContext('2d'); c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+  #|  c.drawImage(src, sx, sy, sw, sh, dx, dy, dw, dh); c.restore();
+  #|}
+
+///|
+/// Masks `dst` with the alpha channel of `mask` (scaled to fit).
+pub extern "js" fn apply_mask(dst : Canvas, mask : ImageElement) -> Unit =
+  #|(dst, mask) => {
+  #|  const c = dst.getContext('2d'); c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
+  #|  c.globalCompositeOperation = 'destination-in'; c.drawImage(mask, 0, 0, dst.width, dst.height); c.restore();
+  #|}

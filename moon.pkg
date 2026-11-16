@@ -4,6 +4,7 @@ import {
   "bobzhang/p5/color",
   "bobzhang/p5/shape",
   "bobzhang/p5/dom",
+  "bobzhang/p5/filters",
   "moonbitlang/core/string",
 }
 
