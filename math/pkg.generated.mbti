@@ -1,0 +1,150 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/math"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const DEG_TO_RAD : Double = 0.017453292519943295
+
+pub const HALF_PI : Double = 1.5707963267948966
+
+pub const PI : Double = 3.141592653589793
+
+pub const QUARTER_PI : Double = 0.7853981633974483
+
+pub const RAD_TO_DEG : Double = 57.29577951308232
+
+pub const TAU : Double = 6.283185307179586
+
+pub const TWO_PI : Double = 6.283185307179586
+
+pub fn constrain(Double, Double, Double) -> Double
+
+pub fn degrees(Double) -> Double
+
+pub fn dist(Double, Double, Double, Double) -> Double
+
+pub fn dist3(Double, Double, Double, Double, Double, Double) -> Double
+
+pub fn fract(Double) -> Double
+
+pub let identity : Matrix2D
+
+pub fn js_rem(Double, Double) -> Double
+
+pub fn js_round(Double) -> Double
+
+pub fn lerp(Double, Double, Double) -> Double
+
+pub fn mag(Double, Double) -> Double
+
+pub fn map(Double, Double, Double, Double, Double, within_bounds? : Bool) -> Double
+
+pub fn max_of(ArrayView[Double]) -> Double
+
+pub fn min_of(ArrayView[Double]) -> Double
+
+pub fn norm(Double, Double, Double) -> Double
+
+pub fn radians(Double) -> Double
+
+pub fn round(Double, decimals? : Int32) -> Double
+
+pub fn sq(Double) -> Double
+
+pub fn to_uint32(Double) -> UInt32
+
+// Errors
+
+// Types and methods
+#derive(Eq, @debug.Debug)
+pub(all) struct Matrix2D {
+  a : Double
+  b : Double
+  c : Double
+  d : Double
+  e : Double
+  f : Double
+}
+pub fn Matrix2D::apply(Self, Double, Double) -> (Double, Double)
+pub fn Matrix2D::invert(Self) -> Self?
+pub fn Matrix2D::multiply(Self, Self) -> Self
+pub fn Matrix2D::rotate(Self, Double) -> Self
+pub fn Matrix2D::scale(Self, Double, Double) -> Self
+pub fn Matrix2D::shear_x(Self, Double) -> Self
+pub fn Matrix2D::shear_y(Self, Double) -> Self
+pub fn Matrix2D::translate(Self, Double, Double) -> Self
+
+pub struct Noise {
+  // private fields
+}
+pub fn Noise::amp_falloff(Self) -> Double
+pub fn Noise::detail(Self, Int32, falloff? : Double) -> Unit
+pub fn Noise::from_random(Random) -> Self
+pub fn Noise::new(Double) -> Self
+pub fn Noise::noise(Self, Double, y? : Double, z? : Double) -> Double
+pub fn Noise::octaves(Self) -> Int32
+pub fn Noise::set_seed(Self, Double) -> Unit
+
+pub struct Random {
+  // private fields
+}
+pub fn Random::below(Self, Double) -> Double
+pub fn[T] Random::choice(Self, ArrayView[T]) -> T
+pub fn Random::gaussian(Self, mean? : Double, sd? : Double) -> Double
+pub fn Random::new(Double) -> Self
+pub fn Random::next(Self) -> Double
+pub fn Random::range(Self, Double, Double) -> Double
+pub fn Random::set_seed(Self, Double) -> Unit
+
+#derive(Eq, @debug.Debug)
+pub struct Vector {
+  mut x : Double
+  mut y : Double
+  mut z : Double
+}
+pub fn Vector::Vector(Double, Double, z? : Double) -> Self
+pub fn Vector::add(Self, Self) -> Unit
+pub fn Vector::add_xy(Self, Double, Double, z? : Double) -> Unit
+pub fn Vector::angle_between(Self, Self) -> Double
+pub fn Vector::array(Self) -> Array[Double]
+pub fn Vector::clamp_to_zero(Self) -> Unit
+pub fn Vector::copy(Self) -> Self
+pub fn Vector::cross(Self, Self) -> Self
+pub fn Vector::dist(Self, Self) -> Double
+pub fn Vector::div(Self, Double) -> Unit
+pub fn Vector::dot(Self, Self) -> Double
+pub fn Vector::from_angle(Double, length? : Double) -> Self
+pub fn Vector::from_angles(Double, Double, length? : Double) -> Self
+pub fn Vector::heading(Self) -> Double
+pub fn Vector::lerp(Self, Self, Double) -> Unit
+pub fn Vector::limit(Self, Double) -> Unit
+pub fn Vector::mag(Self) -> Double
+pub fn Vector::mag_sq(Self) -> Double
+pub fn Vector::mult(Self, Double) -> Unit
+pub fn Vector::mult_vec(Self, Self) -> Unit
+pub fn Vector::normalize(Self) -> Unit
+pub fn Vector::normalized(Self) -> Self
+pub fn Vector::random2d(Random) -> Self
+pub fn Vector::random3d(Random) -> Self
+pub fn Vector::reflect(Self, Self) -> Unit
+pub fn Vector::rem(Self, Double) -> Unit
+pub fn Vector::rotate(Self, Double) -> Unit
+pub fn Vector::scaled(Self, Double) -> Self
+pub fn Vector::set(Self, Double, Double, z? : Double) -> Unit
+pub fn Vector::set_heading(Self, Double) -> Unit
+pub fn Vector::set_mag(Self, Double) -> Unit
+pub fn Vector::set_vec(Self, Self) -> Unit
+pub fn Vector::slerp(Self, Self, Double) -> Unit
+pub fn Vector::sub(Self, Self) -> Unit
+pub fn Vector::sub_xy(Self, Double, Double, z? : Double) -> Unit
+pub impl Add for Vector
+pub impl Neg for Vector
+pub impl Show for Vector
+pub impl Sub for Vector
+
+// Type aliases
+
+// Traits

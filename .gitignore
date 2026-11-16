@@ -1,0 +1,8 @@
+_build/
+target/
+.mooncakes/
+.repos/
+.moonagent/
+node_modules/
+*.log
+.DS_Store
