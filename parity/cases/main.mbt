@@ -114,9 +114,91 @@ fn cases() -> Map[String, Case] {
 fn gl_cases() -> Map[String, (Double, Double, (@p5.P5) -> Unit)] {
   {
     "gl_primitives": (260, 200, gl_primitives),
+    "gl_2d": (280, 200, gl_2d),
+    "gl_shapes": (280, 200, gl_shapes),
     "gl_lights": (260, 200, gl_lights),
     "gl_camera": (260, 200, gl_camera),
   }
+}
+
+///|
+fn gl_2d(p : @p5.P5) -> Unit {
+  p.background(250)
+  p.translate(-140, -100)
+  p.stroke(20)
+  p.stroke_weight(3)
+  p.fill((240, 120, 60))
+  p.rect(10, 10, 60, 40)
+  p.rect(80, 10, 60, 40, tl=12)
+  p.ellipse(190, 30, 60, h=40)
+  p.arc(250, 30, 40, 40, 0, @p5.PI * 1.3, mode=Pie)
+  p.arc(40, 90, 50, 40, 0.3, 4, mode=Chord)
+  p.no_fill()
+  p.arc(100, 90, 50, 40, 0.3, 4, mode=Open)
+  p.fill((60, 160, 220))
+  p.arc(160, 90, 50, 40, 1, 5)
+  p.triangle(200, 70, 270, 80, 220, 120)
+  p.quad(10, 130, 70, 125, 80, 190, 20, 180)
+  p.stroke_weight(6)
+  p.line(100, 130, 160, 190)
+  p.point(180, 140)
+  p.stroke_cap(Square)
+  p.point(200, 140)
+  p.stroke_weight(2)
+  p.no_fill()
+  p.bezier(180, 190, 200, 120, 260, 200, 270, 150)
+}
+
+///|
+fn gl_shapes(p : @p5.P5) -> Unit {
+  p.background(240)
+  p.translate(-140, -100)
+  p.stroke(0)
+  p.stroke_weight(2)
+  p.fill((250, 200, 0))
+  p.begin_shape()
+  p.vertex(20, 20)
+  p.vertex(120, 20)
+  p.vertex(120, 90)
+  p.vertex(20, 90)
+  p.begin_contour()
+  p.vertex(50, 40)
+  p.vertex(50, 70)
+  p.vertex(90, 70)
+  p.vertex(90, 40)
+  p.end_contour(mode=Close)
+  p.end_shape(mode=Close)
+  p.fill((200, 40, 120))
+  p.begin_shape()
+  for i in 0..<5 {
+    let a = -@p5.HALF_PI + i.to_double() * @p5.TWO_PI * 2 / 5
+    p.vertex(200 + 50 * js_cos(a), 60 + 50 * js_sin(a))
+  }
+  p.end_shape(mode=Close)
+  p.begin_shape(kind=Triangles)
+  p.fill((255, 0, 0))
+  p.vertex(20, 120)
+  p.fill((0, 255, 0))
+  p.vertex(80, 120)
+  p.fill((0, 0, 255))
+  p.vertex(50, 180)
+  p.end_shape()
+  p.fill((120, 200, 255))
+  p.begin_shape(kind=QuadStrip)
+  p.vertex(100, 120)
+  p.vertex(100, 180)
+  p.vertex(140, 130)
+  p.vertex(140, 170)
+  p.vertex(180, 120)
+  p.vertex(180, 190)
+  p.end_shape()
+  p.fill((100, 220, 100))
+  p.begin_shape()
+  p.vertex(200, 120)
+  p.bezier_vertex(280, 110)
+  p.bezier_vertex(260, 200)
+  p.bezier_vertex(210, 190)
+  p.end_shape(mode=Close)
 }
 
 ///|
@@ -965,3 +1047,9 @@ fn main {
     true
   })
 }
+
+///|
+extern "js" fn js_cos(x : Double) -> Double = "Math.cos"
+
+///|
+extern "js" fn js_sin(x : Double) -> Double = "Math.sin"

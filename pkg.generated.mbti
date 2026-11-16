@@ -434,7 +434,7 @@ pub fn P5::begin_contour(Self, kind? : @shape.ShapeKind) -> Unit
 pub fn P5::begin_shape(Self, kind? : @shape.ShapeKind) -> Unit
 pub fn P5::bezier(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::bezier_order(Self, Int32) -> Unit
-pub fn P5::bezier_vertex(Self, Double, Double) -> Unit
+pub fn P5::bezier_vertex(Self, Double, Double, z? : Double, u? : Double, v? : Double) -> Unit
 pub fn P5::bezier_vertex3(Self, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn[I : ImageSource] P5::blend(Self, I, Double, Double, Double, Double, Double, Double, Double, Double, BlendMode) -> Unit
 pub fn P5::blend_mode(Self, BlendMode) -> Unit
@@ -480,6 +480,7 @@ pub fn P5::create_video(Self, Array[String], on_load? : (MediaElement) -> Unit) 
 pub fn P5::create_writer(Self, String, ext? : String) -> PrintWriter
 pub fn P5::cursor(Self, kind? : String) -> Unit
 pub fn P5::curve(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::curve_detail(Self, Double) -> Unit
 pub fn P5::curve_tightness(Self, Double) -> Unit
 pub fn P5::curve_vertex(Self, Double, Double) -> Unit
 pub fn P5::cylinder(Self, r? : Double, h? : Double, detail_x? : Int32, detail_y? : Int32, bottom_cap? : Bool, top_cap? : Bool) -> Unit
@@ -538,7 +539,7 @@ pub fn P5::lerp_color(Self, @color.Color, @color.Color, Double) -> @color.Color
 pub fn P5::light_falloff(Self, Double, Double, Double) -> Unit
 pub fn[C : ColorArg] P5::lightness(Self, C) -> Double
 pub fn P5::lights(Self) -> Unit
-pub fn P5::line(Self, Double, Double, Double, Double) -> Unit
+pub fn P5::line(Self, Double, Double, Double, Double, z1? : Double, z2? : Double) -> Unit
 pub fn P5::line_perspective(Self, Bool) -> Unit
 pub fn P5::load_bytes(Self, String, (Bytes) -> Unit) -> Unit
 pub fn P5::load_font(Self, String, family? : String, on_load? : (Font) -> Unit) -> Font
@@ -565,12 +566,13 @@ pub fn P5::no_tint(Self) -> Unit
 pub fn P5::noise(Self, Double, y? : Double, z? : Double) -> Double
 pub fn P5::noise_detail(Self, Int32, falloff? : Double) -> Unit
 pub fn P5::noise_seed(Self, Double) -> Unit
+pub fn P5::normal(Self, Double, Double, Double) -> Unit
 pub fn P5::normal_material(Self) -> Unit
 pub fn P5::ortho(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
 pub fn P5::perspective(Self, fovy? : Double, aspect? : Double, near? : Double, far? : Double) -> Unit
 pub fn P5::pixel_density(Self, Double) -> Unit
 pub fn P5::plane(Self, w? : Double, h? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
-pub fn P5::point(Self, Double, Double) -> Unit
+pub fn P5::point(Self, Double, Double, z? : Double) -> Unit
 pub fn[C : ColorArg] P5::point_light(Self, C, Double, Double, Double) -> Unit
 pub fn P5::point_vec(Self, @math.Vector) -> Unit
 pub fn P5::pop(Self) -> Unit
@@ -629,7 +631,7 @@ pub fn P5::spline_ends(Self, @shape.SplineEnds) -> Unit
 pub fn P5::spline_point(Self, Double, Double, Double, Double, Double) -> Double
 pub fn P5::spline_tangent(Self, Double, Double, Double, Double, Double) -> Double
 pub fn P5::spline_tightness(Self, Double) -> Unit
-pub fn P5::spline_vertex(Self, Double, Double) -> Unit
+pub fn P5::spline_vertex(Self, Double, Double, z? : Double, u? : Double, v? : Double) -> Unit
 pub fn[C : ColorArg] P5::spot_light(Self, C, (Double, Double, Double), (Double, Double, Double), angle? : Double, concentration? : Double) -> Unit
 pub fn P5::square(Self, Double, Double, Double, tl? : Double, tr? : Double, br? : Double, bl? : Double) -> Unit
 pub fn[C : ColorArg] P5::stroke(Self, C) -> Unit
@@ -658,7 +660,7 @@ pub fn P5::torus(Self, r? : Double, tube? : Double, detail_x? : Int32, detail_y?
 pub fn P5::translate(Self, Double, Double, z? : Double) -> Unit
 pub fn P5::triangle(Self, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::update_pixels(Self) -> Unit
-pub fn P5::vertex(Self, Double, Double) -> Unit
+pub fn P5::vertex(Self, Double, Double, z? : Double, u? : Double, v? : Double) -> Unit
 pub fn P5::with_push(Self, () -> Unit) -> Unit
 pub fn P5::world_to_screen(Self, Double, Double) -> (Double, Double)
 pub impl ImageSource for P5

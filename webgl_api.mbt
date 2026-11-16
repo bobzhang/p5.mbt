@@ -575,3 +575,228 @@ pub fn P5::metalness(self : P5, metallic : Double) -> Unit {
     r.metalness(metallic)
   }
 }
+
+// ---- 2D primitives and custom shapes in WEBGL ----
+
+///|
+/// A WEBGL shape vertex carrying the current normal, fill and stroke.
+fn P5::gl_pt(
+  self : P5,
+  x : Double,
+  y : Double,
+  z : Double,
+  u : Double,
+  v : Double,
+) -> @shape.Pt {
+  let extra = FixedArray::make(@webgl.extra_size, 0.0)
+  extra[@webgl.extra_u] = u
+  extra[@webgl.extra_u + 1] = v
+  let (nx, ny, nz) = self.gl_normal
+  extra[@webgl.extra_normal] = nx
+  extra[@webgl.extra_normal + 1] = ny
+  extra[@webgl.extra_normal + 2] = nz
+  if self.state.fill is Some(c) {
+    let a = rgba01(c)
+    for k in 0..<4 {
+      extra[@webgl.extra_fill + k] = a[k]
+    }
+  }
+  if self.state.stroke is Some(c) {
+    let a = rgba01(c)
+    for k in 0..<4 {
+      extra[@webgl.extra_stroke + k] = a[k]
+    }
+  }
+  { x, y, z, extra, }
+}
+
+///|
+/// Sets the normal of vertices added afterwards (WEBGL).
+pub fn P5::normal(self : P5, x : Double, y : Double, z : Double) -> Unit {
+  self.gl_normal = (x, y, z)
+}
+
+///|
+/// Sets how finely curves are sampled in WEBGL (points per pixel of
+/// length, default 1/4).
+pub fn P5::curve_detail(self : P5, d : Double) -> Unit {
+  if self.gl is Some(r) {
+    r.set_curve_detail(d)
+  }
+}
+
+///|
+fn P5::gl_model_at(
+  self : P5,
+  g : @webgl.Geometry,
+  m : (@math.Matrix) -> @math.Matrix,
+) -> Unit {
+  guard self.gl is Some(r) else { return }
+  let saved = r.model_matrix()
+  r.set_model_matrix(m(saved.copy()))
+  r.draw_geometry(g, self.gl_style())
+  r.set_model_matrix(saved)
+}
+
+///|
+fn P5::gl_arc(
+  self : P5,
+  x : Double,
+  y : Double,
+  w : Double,
+  h : Double,
+  start : Double,
+  stop : Double,
+  mode : String,
+  detail : Int32,
+) -> Unit {
+  guard self.gl is Some(r) else { return }
+  let gid = if (stop - start).abs() >= @math.TWO_PI {
+    "ellipse|\{detail}|"
+  } else {
+    "arc|\{@webgl.js_string(start)}|\{@webgl.js_string(stop)}|\{mode}|\{detail}|"
+  }
+  let g = r.cached_geometry(gid, () => {
+    @webgl.arc_geometry(start, stop, mode, detail)
+  })
+  self.gl_model_at(g, m => m.translate(x, y, 0).scale(w, h, 1))
+}
+
+///|
+fn P5::gl_rect(
+  self : P5,
+  x : Double,
+  y : Double,
+  w : Double,
+  h : Double,
+  radii : (Double, Double, Double, Double)?,
+) -> Unit {
+  guard self.gl is Some(r) else { return }
+  match radii {
+    None => {
+      let g = r.cached_geometry("rect|1|1", () => @webgl.rect_geometry(1, 1))
+      self.gl_model_at(g, m => m.translate(x, y, 0).scale(w, h, 1))
+    }
+    Some((tl, tr, br, bl)) => {
+      let mut a = x
+      let mut b = y
+      let mut c = w + a
+      let mut d = h + b
+      if a > c {
+        let t = a
+        a = c
+        c = t
+      }
+      if b > d {
+        let t = b
+        b = d
+        d = t
+      }
+      let max_r = ((c - a) / 2).min((d - b) / 2)
+      let tl = tl.min(max_r)
+      let tr = tr.min(max_r)
+      let br = br.min(max_r)
+      let bl = bl.min(max_r)
+      let (x1, y1, x2, y2) = (a, b, c, d)
+      let rr = 0.5523
+      let order = self.state.bezier_order
+      self.state.bezier_order = 3
+      self.begin_shape()
+      let vx = (px : Double, py : Double) => {
+        self.vertex(px, py, u=(px - x1) / w, v=(py - y1) / h)
+      }
+      let bv = (px : Double, py : Double) => {
+        self.bezier_vertex(px, py, u=(px - x1) / w, v=(py - y1) / h)
+      }
+      if tr != 0 {
+        vx(x2 - tr, y1)
+        bv(x2 - tr + tr * rr, y1)
+        bv(x2, y1 + tr - tr * rr)
+        bv(x2, y1 + tr)
+      } else {
+        vx(x2, y1)
+      }
+      if br != 0 {
+        vx(x2, y2 - br)
+        bv(x2, y2 - br + br * rr)
+        bv(x2 - br + rr * br, y2)
+        bv(x2 - br, y2)
+      } else {
+        vx(x2, y2)
+      }
+      if bl != 0 {
+        vx(x1 + bl, y2)
+        bv(x1 + bl - bl * rr, y2)
+        bv(x1, y2 - bl + bl * rr)
+        bv(x1, y2 - bl)
+      } else {
+        vx(x1, y2)
+      }
+      if tl != 0 {
+        vx(x1, y1 + tl)
+        bv(x1, y1 + tl - tl * rr)
+        bv(x1 + tl - tl * rr, y1)
+        bv(x1 + tl, y1)
+      } else {
+        vx(x1, y1)
+      }
+      self.end_shape(mode=Close)
+      self.state.bezier_order = order
+    }
+  }
+}
+
+///|
+fn P5::gl_triangle(
+  self : P5,
+  x1 : Double,
+  y1 : Double,
+  x2 : Double,
+  y2 : Double,
+  x3 : Double,
+  y3 : Double,
+) -> Unit {
+  guard self.gl is Some(r) else { return }
+  let g = r.cached_geometry("tri", () => @webgl.triangle_geometry())
+  let o = x1 * y2 - x2 * y1 + x2 * y3 - x3 * y2 + x3 * y1 - x1 * y3
+  let orientation = if o > 0 { 1.0 } else if o < 0 { -1.0 } else { o }
+  self.gl_model_at(g, m => {
+    @math.Matrix::from_array([
+      x2 - x1,
+      y2 - y1,
+      0,
+      0,
+      x3 - x1,
+      y3 - y1,
+      0,
+      0,
+      0,
+      0,
+      orientation,
+      0,
+      x1,
+      y1,
+      0,
+      1,
+    ]).mult(m)
+  })
+}
+
+///|
+fn P5::gl_quad(
+  self : P5,
+  p1 : (Double, Double, Double),
+  p2 : (Double, Double, Double),
+  p3 : (Double, Double, Double),
+  p4 : (Double, Double, Double),
+  detail_x : Int32,
+  detail_y : Int32,
+) -> Unit {
+  guard self.gl is Some(r) else { return }
+  let n = (v : Double) => @webgl.js_string(v)
+  let gid = "quad|\{n(p1.0)}|\{n(p1.1)}|\{n(p1.2)}|\{n(p2.0)}|\{n(p2.1)}|\{n(p2.2)}|\{n(p3.0)}|\{n(p3.1)}|\{n(p3.2)}|\{n(p4.0)}|\{n(p4.1)}|\{n(p4.2)}|\{detail_x}|\{detail_y}"
+  let g = r.cached_geometry(gid, () => {
+    @webgl.quad_geometry(p1, p2, p3, p4, detail_x, detail_y)
+  })
+  r.draw_geometry(g, self.gl_style())
+}

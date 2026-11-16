@@ -139,6 +139,7 @@ pub struct P5 {
   priv mut gl_canvas : @dom.Canvas?
   priv mut gl_cap : Int32
   priv mut gl_join : Int32
+  priv mut gl_normal : (Double, Double, Double)
   priv mut density : Double
   priv mut state : State
   priv stack : Array[State]
@@ -230,6 +231,7 @@ fn P5::make(
     gl_canvas: None,
     gl_cap: 0,
     gl_join: 0,
+    gl_normal: (0, 0, 1),
     density,
     state: State::new(),
     stack: [],

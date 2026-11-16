@@ -4,11 +4,16 @@ package "bobzhang/p5/webgl"
 import {
   "bobzhang/p5/gl",
   "bobzhang/p5/math",
+  "bobzhang/p5/shape",
   "moonbitlang/core/debug",
 }
 
 // Values
+pub fn arc_geometry(Double, Double, String, Int32) -> Geometry
+
 pub fn box_geometry(Int32, Int32) -> Geometry
+
+pub fn build_immediate(Geometry, @shape.ShapeKind, Array[Array[@shape.Pt]], Bool, Bool, Bool) -> ShapeMode
 
 pub fn cone_geometry(Int32, Int32, Bool) -> Geometry
 
@@ -16,9 +21,29 @@ pub fn cylinder_geometry(Int32, Int32, Bool, Bool) -> Geometry
 
 pub fn ellipsoid_geometry(Int32, Int32) -> Geometry
 
+pub let extra_fill : Int32
+
+pub let extra_normal : Int32
+
+pub let extra_size : Int32
+
+pub let extra_stroke : Int32
+
+pub let extra_u : Int32
+
+pub fn js_string(Double) -> String
+
 pub fn plane_geometry(Int32, Int32) -> Geometry
 
+pub fn quad_geometry((Double, Double, Double), (Double, Double, Double), (Double, Double, Double), (Double, Double, Double), Int32, Int32) -> Geometry
+
+pub fn rect_geometry(Int32, Int32) -> Geometry
+
+pub fn tessellate(Array[Array[FixedArray[Double]]]) -> Array[FixedArray[Double]]
+
 pub fn torus_geometry(Double, Int32, Int32) -> Geometry
+
+pub fn triangle_geometry() -> Geometry
 
 // Errors
 
@@ -146,6 +171,7 @@ pub struct Renderer3D {
   mut density : Double
   mut state : GLState
   main_camera : Camera
+  mut curve_detail : Double
   simple_lines : Bool
   // private fields
 }
@@ -159,8 +185,9 @@ pub fn Renderer3D::clear_depth(Self, depth? : Double) -> Unit
 pub fn Renderer3D::create_camera(Self) -> Camera
 pub fn Renderer3D::current_camera(Self) -> Camera
 pub fn Renderer3D::directional_light(Self, Double, Double, Double, Double, Double, Double) -> Unit
-pub fn Renderer3D::draw_geometry(Self, Geometry, Style, mode? : DrawMode, count? : Int32) -> Unit
+pub fn Renderer3D::draw_geometry(Self, Geometry, Style, mode? : DrawMode, count? : Int32, skip_fill? : Bool) -> Unit
 pub fn Renderer3D::draw_scaled(Self, Geometry, Double, Double, Double, Style) -> Unit
+pub fn Renderer3D::draw_shape(Self, @shape.ShapeKind, Array[Array[@shape.Pt]], Style, count? : Int32) -> Unit
 pub fn Renderer3D::emissive_material(Self, FixedArray[Double]) -> Unit
 pub fn Renderer3D::free_geometry(Self, Geometry) -> Unit
 pub fn Renderer3D::frustum(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
@@ -185,7 +212,9 @@ pub fn Renderer3D::resize(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::rotate(Self, Double, Double, Double, Double) -> Unit
 pub fn Renderer3D::scale(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::set_camera(Self, Camera) -> Unit
+pub fn Renderer3D::set_curve_detail(Self, Double) -> Unit
 pub fn Renderer3D::set_fill_shader(Self, Shader?) -> Unit
+pub fn Renderer3D::set_model_matrix(Self, @math.Matrix) -> Unit
 pub fn Renderer3D::set_stroke_shader(Self, Shader?) -> Unit
 pub fn Renderer3D::set_tint(Self, FixedArray[Double]) -> Unit
 pub fn Renderer3D::shininess(Self, Double) -> Unit
@@ -209,6 +238,17 @@ pub fn Shader::frag_src(Self) -> String
 pub fn Shader::modify(Self, vertex? : Array[(String, String)], fragment? : Array[(String, String)]) -> Self
 pub fn Shader::new(String, String) -> Self
 pub fn Shader::vert_src(Self) -> String
+
+pub(all) enum ShapeMode {
+  PathMode
+  PointsMode
+  LinesMode
+  TrianglesMode
+  TriangleFanMode
+  TriangleStripMode
+  QuadsMode
+  QuadStripMode
+}
 
 pub(all) struct Style {
   fill : FixedArray[Double]?

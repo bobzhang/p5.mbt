@@ -242,6 +242,32 @@ export const cases = {
 };
 
 export const glCases = {
+  gl_2d: [280, 200, p => {
+    p.background(250); p.translate(-140, -100); p.stroke(20); p.strokeWeight(3); p.fill(240, 120, 60);
+    p.rect(10, 10, 60, 40); p.rect(80, 10, 60, 40, 12); p.ellipse(190, 30, 60, 40);
+    p.arc(250, 30, 40, 40, 0, p.PI * 1.3, p.PIE);
+    p.arc(40, 90, 50, 40, 0.3, 4, p.CHORD); p.noFill(); p.arc(100, 90, 50, 40, 0.3, 4, p.OPEN);
+    p.fill(60, 160, 220); p.arc(160, 90, 50, 40, 1, 5);
+    p.triangle(200, 70, 270, 80, 220, 120);
+    p.quad(10, 130, 70, 125, 80, 190, 20, 180);
+    p.strokeWeight(6); p.line(100, 130, 160, 190); p.point(180, 140); p.strokeCap(p.SQUARE); p.point(200, 140);
+    p.strokeWeight(2); p.noFill(); p.bezier(180, 190, 200, 120, 260, 200, 270, 150);
+  }],
+  gl_shapes: [280, 200, p => {
+    p.background(240); p.translate(-140, -100); p.stroke(0); p.strokeWeight(2);
+    p.fill(250, 200, 0);
+    p.beginShape(); p.vertex(20, 20); p.vertex(120, 20); p.vertex(120, 90); p.vertex(20, 90);
+    p.beginContour(); p.vertex(50, 40); p.vertex(50, 70); p.vertex(90, 70); p.vertex(90, 40); p.endContour(p.CLOSE);
+    p.endShape(p.CLOSE);
+    p.fill(200, 40, 120);
+    p.beginShape();
+    for (let i = 0; i < 5; i++) { const a = -p.HALF_PI + i * p.TWO_PI * 2 / 5; p.vertex(200 + 50 * Math.cos(a), 60 + 50 * Math.sin(a)); }
+    p.endShape(p.CLOSE);
+    p.beginShape(p.TRIANGLES); p.fill(255, 0, 0); p.vertex(20, 120); p.fill(0, 255, 0); p.vertex(80, 120); p.fill(0, 0, 255); p.vertex(50, 180); p.endShape();
+    p.fill(120, 200, 255);
+    p.beginShape(p.QUAD_STRIP); p.vertex(100, 120); p.vertex(100, 180); p.vertex(140, 130); p.vertex(140, 170); p.vertex(180, 120); p.vertex(180, 190); p.endShape();
+    p.fill(100, 220, 100); p.beginShape(); p.vertex(200, 120); p.bezierVertex(280, 110); p.bezierVertex(260, 200); p.bezierVertex(210, 190); p.endShape(p.CLOSE);
+  }],
   gl_primitives: [260, 200, p => {
     p.background(220); p.fill(200, 100, 50); p.stroke(0);
     p.push(); p.translate(-80, -45); p.rotateX(0.5); p.rotateY(0.6); p.box(50); p.pop();

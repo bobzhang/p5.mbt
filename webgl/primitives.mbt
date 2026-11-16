@@ -285,3 +285,159 @@ pub fn torus_geometry(
 
 ///|
 extern "js" fn js_num_precision4(x : Double) -> String = "(x) => x.toPrecision(4)"
+
+///|
+/// p5's `arc|start|stop|mode|detail|` / `ellipse|detail|` unit geometry in
+/// [0, 1]²; `mode` is "pie", "chord", "open" or "undefined".
+pub fn arc_geometry(
+  start : Double,
+  stop : Double,
+  mode : String,
+  detail : Int32,
+) -> Geometry {
+  let g = Geometry::new(detail_x=detail, detail_y=1)
+  if js_fixed10(start) != js_fixed10(stop) {
+    if mode == "pie" || mode == "undefined" {
+      g.vertices.push(Vec3::new(0.5, 0.5, 0))
+      g.uvs.append([0.5, 0.5])
+    }
+    for i in 0..<=detail {
+      let u = i.to_double() / detail.to_double()
+      let theta = (stop - start) * u + start
+      let x = 0.5 + js_cos(theta) / 2
+      let y = 0.5 + js_sin(theta) / 2
+      g.vertices.push(Vec3::new(x, y, 0))
+      g.uvs.append([x, y])
+      if i < detail - 1 {
+        g.faces.push((0, i + 1, i + 2))
+        g.edges.push((i + 1, i + 2))
+      }
+    }
+    let n = g.vertices.length()
+    match mode {
+      "pie" => {
+        g.faces.push((0, n - 2, n - 1))
+        g.edges.push((0, 1))
+        g.edges.push((n - 2, n - 1))
+        g.edges.push((0, n - 1))
+      }
+      "chord" => {
+        g.edges.push((0, 1))
+        g.edges.push((0, n - 1))
+      }
+      "open" => g.edges.push((0, 1))
+      _ => {
+        g.faces.push((0, n - 2, n - 1))
+        g.edges.push((n - 2, n - 1))
+      }
+    }
+  }
+  ignore(g.compute_normals())
+  if detail <= 50 {
+    ignore(g.edges_to_vertices())
+  }
+  g
+}
+
+///|
+/// p5's `rect|dx|dy` unit geometry.
+pub fn rect_geometry(detail_x : Int32, detail_y : Int32) -> Geometry {
+  let g = Geometry::new(detail_x~, detail_y~)
+  for i in 0..<=detail_y {
+    let v = i.to_double() / detail_y.to_double()
+    for j in 0..<=detail_x {
+      let u = j.to_double() / detail_x.to_double()
+      g.vertices.push(Vec3::new(u, v, 0))
+      g.uvs.push(u)
+      g.uvs.push(v)
+    }
+  }
+  if detail_x > 0 && detail_y > 0 {
+    let last = (detail_x + 1) * (detail_y + 1) - 1
+    g.edges.push((0, detail_x))
+    g.edges.push((detail_x, last))
+    g.edges.push((last, (detail_x + 1) * detail_y))
+    g.edges.push(((detail_x + 1) * detail_y, 0))
+  }
+  ignore(g.compute_faces().compute_normals().edges_to_vertices())
+  g
+}
+
+///|
+/// p5's `tri` unit triangle.
+pub fn triangle_geometry() -> Geometry {
+  let g = Geometry::new()
+  g.vertices.push(Vec3::new(0, 0, 0))
+  g.vertices.push(Vec3::new(1, 0, 0))
+  g.vertices.push(Vec3::new(0, 1, 0))
+  g.edges.append([(0, 1), (1, 2), (2, 0)])
+  g.faces.push((0, 1, 2))
+  g.uvs.append([0, 0, 1, 0, 1, 1])
+  ignore(g.edges_to_vertices())
+  ignore(g.compute_normals())
+  g
+}
+
+///|
+/// p5's quad geometry for four corners with a `detail_x × detail_y` grid.
+pub fn quad_geometry(
+  p1 : (Double, Double, Double),
+  p2 : (Double, Double, Double),
+  p3 : (Double, Double, Double),
+  p4 : (Double, Double, Double),
+  detail_x : Int32,
+  detail_y : Int32,
+) -> Geometry {
+  let g = Geometry::new(detail_x~, detail_y~)
+  let x_res = 1.0 / (detail_x - 1).to_double()
+  let y_res = 1.0 / (detail_y - 1).to_double()
+  let (x1, y1, z1) = p1
+  let (x2, y2, z2) = p2
+  let (x3, y3, z3) = p3
+  let (x4, y4, z4) = p4
+  for y in 0..<detail_y {
+    for x in 0..<detail_x {
+      let pctx = x.to_double() * x_res
+      let pcty = y.to_double() * y_res
+      let l0x = (1.0 - pcty) * x1 + pcty * x4
+      let l0y = (1.0 - pcty) * y1 + pcty * y4
+      let l0z = (1.0 - pcty) * z1 + pcty * z4
+      let l1x = (1.0 - pcty) * x2 + pcty * x3
+      let l1y = (1.0 - pcty) * y2 + pcty * y3
+      let l1z = (1.0 - pcty) * z2 + pcty * z3
+      g.vertices.push(
+        Vec3::new(
+          (1.0 - pctx) * l0x + pctx * l1x,
+          (1.0 - pctx) * l0y + pctx * l1y,
+          (1.0 - pctx) * l0z + pctx * l1z,
+        ),
+      )
+      g.uvs.push(pctx)
+      g.uvs.push(pcty)
+    }
+  }
+  for y in 0..<(detail_y - 1) {
+    for x in 0..<(detail_x - 1) {
+      let pt0 = x + y * detail_x
+      let pt1 = x + 1 + y * detail_x
+      let pt2 = x + 1 + (y + 1) * detail_x
+      let pt3 = x + (y + 1) * detail_x
+      g.faces.push((pt0, pt1, pt2))
+      g.faces.push((pt0, pt2, pt3))
+    }
+  }
+  ignore(g.compute_normals())
+  let order = [0, 2, 3, 1]
+  for i in 0..<4 {
+    g.edges.push((order[i], order[(i + 1) % 4]))
+  }
+  ignore(g.edges_to_vertices())
+  g
+}
+
+///|
+extern "js" fn js_fixed10(x : Double) -> String = "(x) => x.toFixed(10)"
+
+///|
+/// JavaScript's `String(x)`, used in p5's geometry cache keys.
+pub extern "js" fn js_string(x : Double) -> String = "String"

@@ -30,6 +30,16 @@ fn P5::stroke_css(self : P5) -> String? {
 ///|
 /// Paints (or adds to the clip path) a finished shape.
 fn P5::draw_shape(self : P5, shape : Shape, fill~ : Bool = true) -> Unit {
+  if self.gl is Some(r) && !self.clipping {
+    let style = self.gl_style()
+    let style = if fill { style } else { { ..style, fill: None, } }
+    r.draw_shape(
+      shape.first_contour_kind(),
+      shape.to_vertices(curve_detail=r.curve_detail),
+      style,
+    )
+    return
+  }
   if self.clipping {
     let paths = shape.to_paths(has_fill=false, has_stroke=false)
     let relative = match self.clip_base.invert() {
@@ -91,8 +101,14 @@ fn P5::from_radians(self : P5, a : Double) -> Double {
 
 ///|
 /// Draws a point. Its size is the stroke weight; it uses the stroke color.
-pub fn P5::point(self : P5, x : Double, y : Double) -> Unit {
+pub fn P5::point(self : P5, x : Double, y : Double, z~ : Double = 0) -> Unit {
   if self.state.stroke is None && !self.clipping {
+    return
+  }
+  if self.gl is Some(_) {
+    self.begin_shape(kind=Points)
+    self.vertex(x, y, z~)
+    self.end_shape()
     return
   }
   let s = self.fresh_shape()
@@ -115,8 +131,17 @@ pub fn P5::line(
   y1 : Double,
   x2 : Double,
   y2 : Double,
+  z1~ : Double = 0,
+  z2~ : Double = 0,
 ) -> Unit {
   if self.state.stroke is None && !self.clipping {
+    return
+  }
+  if self.gl is Some(_) {
+    self.begin_shape(kind=Lines)
+    self.vertex(x1, y1, z=z1)
+    self.vertex(x2, y2, z=z2)
+    self.end_shape()
     return
   }
   let s = self.fresh_shape()
@@ -151,6 +176,12 @@ pub fn P5::rect(
       Some((tl, tr, br, bl))
     }
   }
+  if self.gl is Some(_) {
+    if self.state.fill is Some(_) || self.state.stroke is Some(_) {
+      self.gl_rect(rx, ry, rw, rh, radii)
+    }
+    return
+  }
   let s = self.fresh_shape()
   s.rect(rx, ry, rw, rh, radii?)
   s.end_shape()
@@ -184,6 +215,12 @@ pub fn P5::ellipse(
 ) -> Unit {
   let h = h.unwrap_or(w)
   let (ex, ey, ew, eh) = @shape.mode_adjust(x, y, w, h, self.state.ellipse_mode)
+  if self.gl is Some(_) {
+    if self.state.fill is Some(_) || self.state.stroke is Some(_) {
+      self.gl_arc(ex, ey, ew, eh, 0, @math.TWO_PI, "open", 25)
+    }
+    return
+  }
   let s = self.fresh_shape()
   s.ellipse(ex, ey, ew, eh)
   s.end_shape()
@@ -216,6 +253,23 @@ pub fn P5::arc(
   let stop = self.to_radians(stop)
   let (ax, ay, aw, ah) = @shape.mode_adjust(x, y, w, h, self.state.ellipse_mode)
   let angles = @shape.normalize_arc_angles(start, stop, aw, ah)
+  if self.gl is Some(_) {
+    if self.state.fill is None && self.state.stroke is None {
+      return
+    }
+    if angles.same_point {
+      self.gl_arc(ax, ay, aw, ah, 0, @math.TWO_PI, "open", 25)
+    } else {
+      let m = match mode {
+        Some(Pie) => "pie"
+        Some(Chord) => "chord"
+        Some(Open) => "open"
+        None => "undefined"
+      }
+      self.gl_arc(ax, ay, aw, ah, angles.start, angles.stop, m, 25)
+    }
+    return
+  }
   let s = self.fresh_shape()
   if angles.same_point {
     s.ellipse(ax, ay, aw, ah)
@@ -237,6 +291,12 @@ pub fn P5::triangle(
   x3 : Double,
   y3 : Double,
 ) -> Unit {
+  if self.gl is Some(_) {
+    if self.state.fill is Some(_) || self.state.stroke is Some(_) {
+      self.gl_triangle(x1, y1, x2, y2, x3, y3)
+    }
+    return
+  }
   let s = self.fresh_shape()
   s.triangle(x1, y1, x2, y2, x3, y3)
   s.end_shape()
@@ -256,6 +316,12 @@ pub fn P5::quad(
   x4 : Double,
   y4 : Double,
 ) -> Unit {
+  if self.gl is Some(_) {
+    if self.state.fill is Some(_) || self.state.stroke is Some(_) {
+      self.gl_quad((x1, y1, 0), (x2, y2, 0), (x3, y3, 0), (x4, y4, 0), 2, 2)
+    }
+    return
+  }
   let s = self.fresh_shape()
   s.quad(x1, y1, x2, y2, x3, y3, x4, y4)
   s.end_shape()
@@ -341,15 +407,37 @@ pub fn P5::begin_shape(self : P5, kind~ : ShapeKind = Path) -> Unit {
 
 ///|
 /// Adds a vertex to the current shape.
-pub fn P5::vertex(self : P5, x : Double, y : Double) -> Unit {
-  self.shape.vertex(x, y)
+pub fn P5::vertex(
+  self : P5,
+  x : Double,
+  y : Double,
+  z~ : Double = 0,
+  u~ : Double = 0,
+  v~ : Double = 0,
+) -> Unit {
+  if self.gl is Some(_) {
+    self.shape.vertex_pt(self.gl_pt(x, y, z, u, v))
+  } else {
+    self.shape.vertex(x, y)
+  }
 }
 
 ///|
 /// Adds a Bézier vertex. The first one in a path is the anchor; then every
 /// `bezier_order()` vertices (3 by default) form one curve.
-pub fn P5::bezier_vertex(self : P5, x : Double, y : Double) -> Unit {
-  self.shape.bezier_vertex(x, y)
+pub fn P5::bezier_vertex(
+  self : P5,
+  x : Double,
+  y : Double,
+  z~ : Double = 0,
+  u~ : Double = 0,
+  v~ : Double = 0,
+) -> Unit {
+  if self.gl is Some(_) {
+    self.shape.bezier_vertex_pt(self.gl_pt(x, y, z, u, v))
+  } else {
+    self.shape.bezier_vertex(x, y)
+  }
 }
 
 ///|
@@ -363,9 +451,9 @@ pub fn P5::bezier_vertex3(
   x : Double,
   y : Double,
 ) -> Unit {
-  self.shape.bezier_vertex(cx1, cy1)
-  self.shape.bezier_vertex(cx2, cy2)
-  self.shape.bezier_vertex(x, y)
+  self.bezier_vertex(cx1, cy1)
+  self.bezier_vertex(cx2, cy2)
+  self.bezier_vertex(x, y)
 }
 
 ///|
@@ -378,15 +466,26 @@ pub fn P5::quadratic_vertex(
   y : Double,
 ) -> Unit {
   self.shape.set_bezier_order(2)
-  self.shape.bezier_vertex(cx, cy)
-  self.shape.bezier_vertex(x, y)
+  self.bezier_vertex(cx, cy)
+  self.bezier_vertex(x, y)
   self.shape.set_bezier_order(self.state.bezier_order)
 }
 
 ///|
 /// Adds a spline vertex to the current shape.
-pub fn P5::spline_vertex(self : P5, x : Double, y : Double) -> Unit {
-  self.shape.spline_vertex(x, y)
+pub fn P5::spline_vertex(
+  self : P5,
+  x : Double,
+  y : Double,
+  z~ : Double = 0,
+  u~ : Double = 0,
+  v~ : Double = 0,
+) -> Unit {
+  if self.gl is Some(_) {
+    self.shape.spline_vertex_pt(self.gl_pt(x, y, z, u, v))
+  } else {
+    self.shape.spline_vertex(x, y)
+  }
 }
 
 ///|

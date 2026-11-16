@@ -1,13 +1,23 @@
-// Port of the p5.js 2.x shape model (src/shape/custom_shapes.js), restricted
-// to 2D positions.  A `Shape` is a list of contours; each contour is a list
+// Port of the p5.js 2.x shape model (src/shape/custom_shapes.js). Vertices
+// carry a 3D position plus, in WEBGL mode, extra per-vertex data.  A `Shape` is a list of contours; each contour is a list
 // of primitives (anchors, segments, isolated primitives, tessellations).
 
 ///|
-/// A 2D vertex position.
+/// A vertex: position plus extra per-vertex data (WEBGL mode flattens
+/// texture coordinates, normal, fill and stroke into `extra`; interpolated
+/// along curves like p5's vertexToArray/arrayToVertex).
 #derive(Eq, Debug)
 pub(all) struct Pt {
   x : Double
   y : Double
+  z : Double
+  extra : FixedArray[Double]
+}
+
+///|
+/// A 2D vertex without extra data.
+pub fn Pt::xy(x : Double, y : Double) -> Pt {
+  { x, y, z: 0, extra: [], }
 }
 
 ///|
@@ -269,20 +279,38 @@ fn Shape::vertex_closing(self : Shape, p : Pt, is_closing : Bool) -> Unit {
 ///|
 /// Adds a vertex (`vertex(x, y)`).
 pub fn Shape::vertex(self : Shape, x : Double, y : Double) -> Unit {
-  self.vertex_closing({ x, y, }, false)
+  self.vertex_closing(Pt::xy(x, y), false)
+}
+
+///|
+/// Adds a vertex with a z coordinate and extra data (WEBGL).
+pub fn Shape::vertex_pt(self : Shape, p : Pt) -> Unit {
+  self.vertex_closing(p, false)
+}
+
+///|
+/// Adds a Bézier control/anchor vertex with full data (WEBGL).
+pub fn Shape::bezier_vertex_pt(self : Shape, p : Pt) -> Unit {
+  self.general_vertex(1, p)
+}
+
+///|
+/// Adds a spline vertex with full data (WEBGL).
+pub fn Shape::spline_vertex_pt(self : Shape, p : Pt) -> Unit {
+  self.general_vertex(2, p)
 }
 
 ///|
 /// Adds a Bézier vertex (`bezierVertex(x, y)`). In a path, the first vertex
 /// is an anchor and every `bezier_order` following vertices form a curve.
 pub fn Shape::bezier_vertex(self : Shape, x : Double, y : Double) -> Unit {
-  self.general_vertex(1, { x, y, })
+  self.general_vertex(1, Pt::xy(x, y))
 }
 
 ///|
 /// Adds a spline vertex (`splineVertex(x, y)`).
 pub fn Shape::spline_vertex(self : Shape, x : Double, y : Double) -> Unit {
-  self.general_vertex(2, { x, y, })
+  self.general_vertex(2, Pt::xy(x, y))
 }
 
 ///|
@@ -349,14 +377,8 @@ pub fn Shape::arc(
   self.begin_shape()
   let cx = x + w / 2
   let cy = y + h / 2
-  let s : Pt = {
-    x: cx + w / 2 * @cmath.cos(start),
-    y: cy + h / 2 * @cmath.sin(start),
-  }
-  let e : Pt = {
-    x: cx + w / 2 * @cmath.cos(stop),
-    y: cy + h / 2 * @cmath.sin(stop),
-  }
+  let s = Pt::xy(cx + w / 2 * @cmath.cos(start), cy + h / 2 * @cmath.sin(start))
+  let e = Pt::xy(cx + w / 2 * @cmath.cos(stop), cy + h / 2 * @cmath.sin(stop))
   self.add_primitive(
     Primitive::new(ArcP(x, y, w, h, start, stop, mode), [s, e]),
   )
@@ -373,7 +395,7 @@ pub fn Shape::ellipse(
   h : Double,
 ) -> Unit {
   self.add_primitive(
-    Primitive::new(EllipseP(x, y, w, h), [{ x: x + w / 2, y: y + h / 2, }]),
+    Primitive::new(EllipseP(x, y, w, h), [Pt::xy(x + w / 2, y + h / 2)]),
   )
 }
 
@@ -388,13 +410,13 @@ pub fn Shape::rect(
   h : Double,
   radii? : (Double, Double, Double, Double),
 ) -> Unit {
-  self.add_primitive(Primitive::new(RectP(x, y, w, h, radii), [{ x, y, }]))
+  self.add_primitive(Primitive::new(RectP(x, y, w, h, radii), [Pt::xy(x, y)]))
 }
 
 ///|
 /// Adds a point primitive.
 pub fn Shape::point(self : Shape, x : Double, y : Double) -> Unit {
-  self.add_primitive(Primitive::new(PointP, [{ x, y, }]))
+  self.add_primitive(Primitive::new(PointP, [Pt::xy(x, y)]))
 }
 
 ///|
@@ -406,9 +428,7 @@ pub fn Shape::line(
   x2 : Double,
   y2 : Double,
 ) -> Unit {
-  self.add_primitive(
-    Primitive::new(LineP, [{ x: x1, y: y1, }, { x: x2, y: y2, }]),
-  )
+  self.add_primitive(Primitive::new(LineP, [Pt::xy(x1, y1), Pt::xy(x2, y2)]))
 }
 
 ///|
@@ -423,11 +443,7 @@ pub fn Shape::triangle(
   y3 : Double,
 ) -> Unit {
   self.add_primitive(
-    Primitive::new(TriangleP, [
-      { x: x1, y: y1, },
-      { x: x2, y: y2, },
-      { x: x3, y: y3, },
-    ]),
+    Primitive::new(TriangleP, [Pt::xy(x1, y1), Pt::xy(x2, y2), Pt::xy(x3, y3)]),
   )
 }
 
@@ -446,10 +462,10 @@ pub fn Shape::quad(
 ) -> Unit {
   self.add_primitive(
     Primitive::new(QuadP, [
-      { x: x1, y: y1, },
-      { x: x2, y: y2, },
-      { x: x3, y: y3, },
-      { x: x4, y: y4, },
+      Pt::xy(x1, y1),
+      Pt::xy(x2, y2),
+      Pt::xy(x3, y3),
+      Pt::xy(x4, y4),
     ]),
   )
 }

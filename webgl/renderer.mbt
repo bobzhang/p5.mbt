@@ -86,6 +86,9 @@ pub struct Renderer3D {
   priv mut blending : Bool
   priv mut cached_blend : String
   main_camera : Camera
+  priv immediate : Geometry
+  /// Points per unit length when sampling curves (`curveDetail`, 1/4).
+  mut curve_detail : Double
   simple_lines : Bool
 }
 
@@ -151,6 +154,8 @@ pub fn Renderer3D::new(
     blending: false,
     cached_blend: "",
     main_camera: cam,
+    immediate: { ..Geometry::new(), gid: "__IMMEDIATE_MODE_GEOMETRY__", },
+    curve_detail: 0.25,
     simple_lines: false,
   }
 }
@@ -746,11 +751,12 @@ pub fn Renderer3D::draw_geometry(
   style : Style,
   mode~ : DrawMode = Triangles,
   count~ : Int32 = 1,
+  skip_fill~ : Bool = false,
 ) -> Unit {
   let b = self.cached(g)
   let dirty = g.dirty
   g.dirty = false
-  if style.fill is Some(fill) && g.vertices.length() >= 3 {
+  if style.fill is Some(fill) && g.vertices.length() >= 3 && !skip_fill {
     self.draw_fills(b, fill, style, mode, count, dirty)
   }
   if style.stroke is Some(stroke) && g.line_vertices.length() >= 1 {
@@ -966,4 +972,50 @@ pub fn Renderer3D::read_pixels(
   h : Int32,
 ) -> FixedArray[Byte] {
   @gl.read_pixels(self.gl, x, y, w, h)
+}
+
+///|
+/// Draws a shape given as vertex lists (`drawShape` with the
+/// ShapeBuilder): PATH shapes are tessellated; strokes follow the edges.
+pub fn Renderer3D::draw_shape(
+  self : Renderer3D,
+  kind : @shape.ShapeKind,
+  contours : Array[Array[@shape.Pt]],
+  style : Style,
+  count~ : Int32 = 1,
+) -> Unit {
+  if contours.is_empty() {
+    return
+  }
+  let g = self.immediate
+  let mode = build_immediate(
+    g,
+    kind,
+    contours,
+    style.fill is Some(_),
+    style.stroke is Some(_),
+    self.simple_lines,
+  )
+  let (draw_mode, skip_fill) = match mode {
+    TriangleFanMode => (TriangleFan, false)
+    TriangleStripMode | PathMode => (TriangleStrip, false)
+    LinesMode | PointsMode => (Triangles, true)
+    _ => (Triangles, false)
+  }
+  self.draw_geometry(g, style, mode=draw_mode, count~, skip_fill~)
+}
+
+///|
+/// Sets how many points per unit length curves are sampled with.
+pub fn Renderer3D::set_curve_detail(self : Renderer3D, d : Double) -> Unit {
+  self.curve_detail = d
+}
+
+///|
+/// Replaces the model matrix.
+pub fn Renderer3D::set_model_matrix(
+  self : Renderer3D,
+  m : @math.Matrix,
+) -> Unit {
+  self.state.model = m
 }

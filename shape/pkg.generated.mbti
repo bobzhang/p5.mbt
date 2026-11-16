@@ -56,7 +56,10 @@ pub(all) enum PathCmd {
 pub(all) struct Pt {
   x : Double
   y : Double
+  z : Double
+  extra : FixedArray[Double]
 }
+pub fn Pt::xy(Double, Double) -> Self
 
 pub struct Shape {
   // private fields
@@ -65,9 +68,11 @@ pub fn Shape::arc(Self, Double, Double, Double, Double, Double, Double, ArcMode?
 pub fn Shape::begin_contour(Self, kind? : ShapeKind) -> Unit
 pub fn Shape::begin_shape(Self, kind? : ShapeKind) -> Unit
 pub fn Shape::bezier_vertex(Self, Double, Double) -> Unit
+pub fn Shape::bezier_vertex_pt(Self, Pt) -> Unit
 pub fn Shape::ellipse(Self, Double, Double, Double, Double) -> Unit
 pub fn Shape::end_contour(Self, mode? : CloseMode) -> Unit
 pub fn Shape::end_shape(Self, mode? : CloseMode) -> Unit
+pub fn Shape::first_contour_kind(Self) -> ShapeKind
 pub fn Shape::kind(Self) -> ShapeKind
 pub fn Shape::line(Self, Double, Double, Double, Double) -> Unit
 pub fn Shape::new() -> Self
@@ -79,9 +84,12 @@ pub fn Shape::set_bezier_order(Self, Int32) -> Unit
 pub fn Shape::set_spline_ends(Self, SplineEnds) -> Unit
 pub fn Shape::set_spline_tightness(Self, Double) -> Unit
 pub fn Shape::spline_vertex(Self, Double, Double) -> Unit
+pub fn Shape::spline_vertex_pt(Self, Pt) -> Unit
 pub fn Shape::to_paths(Self, has_fill? : Bool, has_stroke? : Bool) -> ShapePaths
+pub fn Shape::to_vertices(Self, curve_detail? : Double, points_to_lines? : Bool) -> Array[Array[Pt]]
 pub fn Shape::triangle(Self, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn Shape::vertex(Self, Double, Double) -> Unit
+pub fn Shape::vertex_pt(Self, Pt) -> Unit
 
 #derive(Eq, @debug.Debug)
 pub(all) enum ShapeKind {
