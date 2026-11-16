@@ -1,0 +1,64 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/color"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn default_maxes(ColorMode) -> FixedArray[(Double, Double)]
+
+pub fn maxes(Double, Double, Double, Double) -> FixedArray[(Double, Double)]
+
+pub fn palette_lerp(ArrayView[(Color, Double)], Double) -> Color
+
+// Errors
+
+// Types and methods
+pub struct Color {
+  // private fields
+}
+pub fn Color::alpha(Self, max? : Double) -> Double
+pub fn Color::blue(Self, max? : Double) -> Double
+pub fn Color::brightness(Self, max? : Double) -> Double
+pub fn Color::contrast_ratio(Self, Self) -> Double
+pub fn Color::coords(Self) -> (Double, Double, Double)
+pub fn Color::from_native(ColorMode, Double, Double, Double, alpha? : Double) -> Self
+pub fn Color::green(Self, max? : Double) -> Double
+pub fn Color::hue(Self, max? : Double) -> Double
+pub fn Color::lerp(Self, Self, Double, lerp_mode? : ColorMode, output_mode? : ColorMode) -> Self
+pub fn Color::lightness(Self, max? : Double) -> Double
+pub fn Color::mode(Self) -> ColorMode
+pub fn Color::new(ArrayView[Double], ColorMode, FixedArray[(Double, Double)], clamp? : Bool) -> Self
+pub fn Color::parse(StringView) -> Self?
+pub fn Color::red(Self, max? : Double) -> Double
+pub fn Color::rgb(Double, Double, Double, alpha? : Double) -> Self
+pub fn Color::rgba(Self, maxes? : FixedArray[(Double, Double)]) -> (Double, Double, Double, Double)
+pub fn Color::same_as(Self, Self) -> Bool
+pub fn Color::saturation(Self, max? : Double) -> Double
+pub fn Color::set_alpha(Self, Double, max? : Double) -> Unit
+pub fn Color::set_blue(Self, Double, max? : Double) -> Unit
+pub fn Color::set_green(Self, Double, max? : Double) -> Unit
+pub fn Color::set_red(Self, Double, max? : Double) -> Unit
+pub fn Color::to_css(Self) -> String
+pub fn Color::to_mode(Self, ColorMode) -> Self
+pub fn Color::to_srgb(Self) -> (Double, Double, Double, Double)
+pub impl Show for Color
+
+#derive(Eq, Hash, @debug.Debug)
+pub(all) enum ColorMode {
+  RGB
+  HSB
+  HSL
+  HWB
+  LAB
+  LCH
+  OKLAB
+  OKLCH
+}
+pub impl Show for ColorMode
+
+// Type aliases
+pub type ColorMaxes = FixedArray[(Double, Double)]
+
+// Traits
