@@ -193,12 +193,23 @@ fn P5::redraw_once(self : P5) -> Unit {
   self.reset_matrix()
   self.frame_count += 1
   self.in_draw = true
+  // Clipping applied during a frame ends with the frame.
+  self.surface.save()
   draw(self)
   self.in_draw = false
-  // Undo unbalanced push() calls so that clips don't leak between frames.
+  // Undo unbalanced push() calls.
   while !self.stack.is_empty() {
     self.pop()
   }
+  self.surface.restore()
+  self.surface.set_blend_mode(
+    if self.state.erasing {
+      Remove
+    } else {
+      self.state.blend_mode
+    },
+  )
+  self.surface.set_smoothing(self.state.smooth)
 }
 
 ///|

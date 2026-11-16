@@ -179,10 +179,18 @@ test "draw loop resets the matrix and counts frames" {
   inspect(
     rec.take().join("\n"),
     content=(
+      #|save
       #|transform 1 0 0 1 5 0
       #|stroke #000000 w=1 round/miter M1,0 L1,0
+      #|restore
+      #|blend source-over
+      #|smoothing true
+      #|save
       #|transform 1 0 0 1 5 0
       #|stroke #000000 w=1 round/miter M2,0 L2,0
+      #|restore
+      #|blend source-over
+      #|smoothing true
     ),
   )
 }

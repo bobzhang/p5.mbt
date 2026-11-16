@@ -95,11 +95,7 @@ fn P5::handle_key(
   match kind {
     "down" => {
       if self.keys_down.contains(code) {
-        // auto-repeat: only key_typed fires again
-        if key.length() == 1 {
-          self.key = key
-          (self.callbacks.key_typed)(self)
-        }
+        // Auto-repeat doesn't fire key_pressed or key_typed again.
         return
       }
       self.key_is_pressed = true
@@ -122,6 +118,8 @@ fn P5::handle_key(
       self.keys_down.remove(key)
       if self.keys_down.is_empty() {
         self.key_is_pressed = false
+        self.key = ""
+        self.code = ""
       }
     }
     _ => {
