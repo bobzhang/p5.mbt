@@ -129,6 +129,7 @@ pub struct P5 {
   priv mut on_loads_done : () -> Unit
   priv mut is_main : Bool
   priv mut erase_strength : (Double, Double)
+  priv mut font_counter : Int32
   priv mut container : String
 }
 
@@ -211,6 +212,7 @@ fn P5::make(
     on_loads_done: () => (),
     is_main: false,
     erase_strength: (255, 255),
+    font_counter: 0,
     container: "",
   }
 }
