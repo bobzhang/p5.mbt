@@ -2,11 +2,17 @@
 package "bobzhang/p5/dom"
 
 // Values
+pub fn add_class(Element, String) -> Unit
+
+pub fn add_option(Element, String, String) -> Unit
+
 pub fn apply_mask(Canvas, ImageElement) -> Unit
 
 pub fn blit(Canvas, ImageElement, Double, Double) -> Unit
 
 pub fn canvas_as_image(Canvas) -> ImageElement
+
+pub fn canvas_element(Canvas) -> Element
 
 pub fn canvas_height(Canvas) -> Int32
 
@@ -24,6 +30,8 @@ pub fn copy_region(Canvas, ImageElement, Double, Double, Double, Double, Double,
 
 pub fn create_canvas(Double, Double, Double, String, Bool) -> Canvas
 
+pub fn create_element(String, String, String) -> Element
+
 pub fn date_part(Int32) -> Int32
 
 pub fn device_pixel_ratio() -> Double
@@ -40,15 +48,31 @@ pub fn draw_image(Context2D, ImageElement, Double, Double, Double, Double, Doubl
 
 pub fn draw_tinted_image(Context2D, ImageElement, Int32, Int32, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 
+pub fn element_exists(Element) -> Bool
+
+pub fn element_height(Element) -> Double
+
+pub fn element_width(Element) -> Double
+
 pub fn fill_path(Context2D, Path2D, String) -> Unit
 
 pub fn fill_rect(Context2D, Double, Double, Double, Double, String) -> Unit
 
 pub fn fill_text(Context2D, String, Double, Double, String) -> Unit
 
+pub fn get_attribute(Element, String) -> String
+
+pub fn get_checked(Element) -> Bool
+
 pub fn get_context(Canvas) -> Context2D
 
+pub fn get_html(Element) -> String
+
 pub fn get_image_data(Context2D, Int32, Int32, Int32, Int32) -> ImageData
+
+pub fn get_style(Element, String) -> String
+
+pub fn get_value(Element) -> String
 
 pub fn image_data_copy_from(ImageData, FixedArray[Byte]) -> Unit
 
@@ -88,6 +112,8 @@ pub fn number_to_fixed(Double, Int32) -> String
 
 pub fn number_to_string(Double) -> String
 
+pub fn on_event(Element, String, () -> Unit) -> Unit
+
 pub fn on_focus_change((Bool) -> Unit) -> Unit
 
 pub fn on_ready(() -> Unit) -> Unit
@@ -114,7 +140,15 @@ pub fn path_round_rect(Path2D, Double, Double, Double, Double, Double, Double, D
 
 pub fn put_image_data(Context2D, ImageData, Int32, Int32) -> Unit
 
+pub fn query_selector(String) -> Element
+
+pub fn remove_attribute(Element, String) -> Unit
+
 pub fn remove_canvas(Canvas) -> Unit
+
+pub fn remove_class(Element, String) -> Unit
+
+pub fn remove_element(Element) -> Unit
 
 pub fn request_animation_frame((Double) -> Unit) -> Unit
 
@@ -124,7 +158,11 @@ pub fn restore(Context2D) -> Unit
 
 pub fn save(Context2D) -> Unit
 
+pub fn set_attribute(Element, String, String) -> Unit
+
 pub fn set_canvas_id(Canvas, String) -> Unit
+
+pub fn set_checked(Element, Bool) -> Unit
 
 pub fn set_composite(Context2D, String) -> Unit
 
@@ -136,11 +174,19 @@ pub fn set_fullscreen(Canvas, Bool) -> Unit
 
 pub fn set_global_alpha(Context2D, Double) -> Unit
 
+pub fn set_html(Element, String) -> Unit
+
 pub fn set_image_smoothing(Context2D, Bool) -> Unit
 
 pub fn set_line_dash(Context2D, FixedArray[Double]) -> Unit
 
+pub fn set_parent(Element, String) -> Unit
+
+pub fn set_position(Element, Double, Double) -> Unit
+
 pub fn set_shadow(Context2D, Double, Double, Double, String) -> Unit
+
+pub fn set_style(Element, String, String) -> Unit
 
 pub fn set_text_style(Context2D, String, String, String) -> Unit
 
@@ -149,6 +195,8 @@ pub fn set_timeout(() -> Unit, Double) -> Unit
 pub fn set_title(String) -> Unit
 
 pub fn set_transform(Context2D, Double, Double, Double, Double, Double, Double) -> Unit
+
+pub fn set_value(Element, String) -> Unit
 
 pub fn storage_clear() -> Unit
 

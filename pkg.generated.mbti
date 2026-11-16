@@ -88,6 +88,8 @@ pub fn run(preload? : (P5) -> Unit, setup? : (P5) -> Unit, draw? : (P5) -> Unit,
 
 pub fn second() -> Int32
 
+pub fn select(String) -> Element?
+
 pub fn set_title(String) -> Unit
 
 pub fn spline_point(Double, Double, Double, Double, Double, tightness? : Double) -> Double
@@ -140,6 +142,37 @@ pub struct CanvasSurface {
 }
 pub fn CanvasSurface::new(@dom.Canvas) -> Self
 pub impl Surface for CanvasSurface
+
+pub struct Element {
+  elt : @dom.Element
+}
+pub fn Element::add_class(Self, String) -> Unit
+pub fn Element::attribute(Self, String, String) -> Unit
+pub fn Element::changed(Self, () -> Unit) -> Unit
+pub fn Element::checked(Self) -> Bool
+pub fn Element::color(Self) -> @color.Color
+pub fn Element::disable(Self) -> Unit
+pub fn Element::elt(Self) -> @dom.Element
+pub fn Element::enable(Self) -> Unit
+pub fn Element::hide(Self) -> Unit
+pub fn Element::html(Self, String) -> Unit
+pub fn Element::id(Self, String) -> Unit
+pub fn Element::input(Self, () -> Unit) -> Unit
+pub fn Element::mouse_pressed(Self, () -> Unit) -> Unit
+pub fn Element::on(Self, String, () -> Unit) -> Unit
+pub fn Element::option(Self, String, value? : String) -> Unit
+pub fn Element::parent(Self, String) -> Unit
+pub fn Element::position(Self, Double, Double) -> Unit
+pub fn Element::remove(Self) -> Unit
+pub fn Element::remove_class(Self, String) -> Unit
+pub fn Element::selected(Self, String) -> Unit
+pub fn Element::set_checked(Self, Bool) -> Unit
+pub fn Element::set_value(Self, String) -> Unit
+pub fn Element::show(Self) -> Unit
+pub fn Element::size(Self, Double, Double) -> Unit
+pub fn Element::style(Self, String, String) -> Unit
+pub fn Element::value(Self) -> String
+pub fn Element::value_number(Self) -> Double
 
 #derive(Eq, @debug.Debug)
 pub(all) enum Filter {
@@ -247,9 +280,20 @@ pub fn P5::color_mode(Self, @color.ColorMode) -> Unit
 pub fn P5::color_mode_max(Self, @color.ColorMode, Double) -> Unit
 pub fn P5::color_mode_maxes(Self, @color.ColorMode, Double, Double, Double, max_alpha? : Double) -> Unit
 pub fn P5::cos(Self, Double) -> Double
+pub fn P5::create_a(Self, String, String, target? : String) -> Element
+pub fn P5::create_button(Self, String) -> Element
 pub fn P5::create_canvas(Self, Double, Double) -> Unit
+pub fn P5::create_checkbox(Self, label? : String, checked? : Bool) -> Element
+pub fn P5::create_color_picker(Self, value? : String) -> Element
+pub fn P5::create_div(Self, html? : String) -> Element
 pub fn P5::create_graphics(Self, Double, Double) -> Self
 pub fn P5::create_image(Self, Double, Double) -> Image
+pub fn P5::create_img(Self, String, alt? : String) -> Element
+pub fn P5::create_input(Self, value? : String, kind? : String) -> Element
+pub fn P5::create_p(Self, html? : String) -> Element
+pub fn P5::create_select(Self) -> Element
+pub fn P5::create_slider(Self, Double, Double, value? : Double, step? : Double) -> Element
+pub fn P5::create_span(Self, html? : String) -> Element
 pub fn P5::create_vector(Self, Double, Double, z? : Double) -> @math.Vector
 pub fn P5::cursor(Self, kind? : String) -> Unit
 pub fn P5::curve(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit

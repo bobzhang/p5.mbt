@@ -1,0 +1,13 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/examples/flowfield"
+
+// Values
+
+// Errors
+
+// Types and methods
+type Particle
+
+// Type aliases
+
+// Traits
