@@ -1,7 +1,7 @@
 ///|
 /// Images: loading, filters, tint, pixels and off-screen graphics.
 fn main {
-  let img : Ref[@p5.Image?] = Ref::new(None)
+  let img : Ref[@p5.Image?] = Ref(None)
   @p5.run(
     preload=p => img.val = Some(p.load_image("../assets/landscape.svg")),
     setup=p => {

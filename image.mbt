@@ -13,7 +13,7 @@ pub struct Image {
   /// RGBA pixel data filled by `load_pixels()`.
   mut pixels : FixedArray[Byte]
   priv canvas : @dom.Canvas
-  priv surface : CanvasSurface
+  priv surface : &Surface
 }
 
 ///|

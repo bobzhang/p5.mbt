@@ -84,6 +84,10 @@ pub fn measure_width(Context2D, String) -> Double
 
 pub fn now() -> Double
 
+pub fn number_to_fixed(Double, Int32) -> String
+
+pub fn number_to_string(Double) -> String
+
 pub fn on_focus_change((Bool) -> Unit) -> Unit
 
 pub fn on_ready(() -> Unit) -> Unit

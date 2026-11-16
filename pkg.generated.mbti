@@ -28,7 +28,13 @@ pub fn bezier_point(Double, Double, Double, Double, Double) -> Double
 
 pub fn bezier_tangent(Double, Double, Double, Double, Double) -> Double
 
+pub fn binary(Int32, digits? : Int32) -> String
+
+pub fn clear_storage() -> Unit
+
 pub fn constrain(Double, Double, Double) -> Double
+
+pub fn day() -> Int32
 
 pub fn degrees(Double) -> Double
 
@@ -37,6 +43,12 @@ pub fn dist(Double, Double, Double, Double) -> Double
 pub fn dist3(Double, Double, Double, Double, Double, Double) -> Double
 
 pub fn fract(Double) -> Double
+
+pub fn get_item(String) -> String?
+
+pub fn hex(Int32, digits? : Int32) -> String
+
+pub fn hour() -> Int32
 
 pub fn lerp(Double, Double, Double) -> Double
 
@@ -48,6 +60,18 @@ pub fn max_of(ArrayView[Double]) -> Double
 
 pub fn min_of(ArrayView[Double]) -> Double
 
+pub fn minute() -> Int32
+
+pub fn month() -> Int32
+
+pub fn nf(Double, left? : Int32, right? : Int32) -> String
+
+pub fn nfc(Double, right? : Int32) -> String
+
+pub fn nfp(Double, left? : Int32, right? : Int32) -> String
+
+pub fn nfs(Double, left? : Int32, right? : Int32) -> String
+
 pub fn norm(Double, Double, Double) -> Double
 
 pub fn palette_lerp(ArrayView[(@color.Color, Double)], Double) -> @color.Color
@@ -56,9 +80,13 @@ pub fn print(String) -> Unit
 
 pub fn radians(Double) -> Double
 
+pub fn remove_item(String) -> Unit
+
 pub fn round(Double, decimals? : Int32) -> Double
 
 pub fn run(preload? : (P5) -> Unit, setup? : (P5) -> Unit, draw? : (P5) -> Unit, mouse_pressed? : (P5) -> Unit, mouse_released? : (P5) -> Unit, mouse_clicked? : (P5) -> Unit, double_clicked? : (P5) -> Unit, mouse_moved? : (P5) -> Unit, mouse_dragged? : (P5) -> Unit, mouse_wheel? : (P5, Double) -> Unit, key_pressed? : (P5) -> Unit, key_released? : (P5) -> Unit, key_typed? : (P5) -> Unit, touch_started? : (P5) -> Unit, touch_moved? : (P5) -> Unit, touch_ended? : (P5) -> Unit, window_resized? : (P5) -> Unit, container? : String, seed? : Double) -> Unit
+
+pub fn second() -> Int32
 
 pub fn set_title(String) -> Unit
 
@@ -66,7 +94,17 @@ pub fn spline_point(Double, Double, Double, Double, Double, tightness? : Double)
 
 pub fn spline_tangent(Double, Double, Double, Double, Double, tightness? : Double) -> Double
 
+pub fn split_tokens(String, delims? : String) -> Array[String]
+
 pub fn sq(Double) -> Double
+
+pub fn store_item(String, String) -> Unit
+
+pub fn unbinary(String) -> Int32
+
+pub fn unhex(String) -> Int32
+
+pub fn year() -> Int32
 
 // Errors
 
@@ -301,6 +339,7 @@ pub fn[C : ColorArg] P5::set(Self, Double, Double, C) -> Unit
 pub fn P5::set_draw(Self, (Self) -> Unit) -> Unit
 pub fn P5::shear_x(Self, Double) -> Unit
 pub fn P5::shear_y(Self, Double) -> Unit
+pub fn[T] P5::shuffle(Self, ArrayView[T]) -> Array[T]
 pub fn P5::sin(Self, Double) -> Double
 pub fn P5::smooth(Self) -> Unit
 pub fn P5::spline(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit

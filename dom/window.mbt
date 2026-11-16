@@ -90,3 +90,11 @@ pub extern "js" fn set_fullscreen(c : Canvas, on : Bool) -> Unit =
 
 ///|
 pub extern "js" fn is_fullscreen() -> Bool = "() => !!document.fullscreenElement"
+
+///|
+/// JavaScript `String(n)`.
+pub extern "js" fn number_to_string(n : Double) -> String = "(n) => String(n)"
+
+///|
+/// JavaScript `n.toFixed(digits)`.
+pub extern "js" fn number_to_fixed(n : Double, digits : Int32) -> String = "(n, d) => n.toFixed(Math.max(0, Math.min(100, d)))"
