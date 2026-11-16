@@ -168,6 +168,7 @@ pub struct P5 {
   priv motion : Motion
   priv elements : Array[Element]
   priv mut radio_counter : Int32
+  priv mut pending_svg : String?
   priv mut container : String
 }
 
@@ -274,6 +275,7 @@ fn P5::make(
     motion: Motion::new(),
     elements: [],
     radio_counter: 0,
+    pending_svg: None,
     container: "",
   }
 }

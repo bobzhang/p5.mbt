@@ -145,3 +145,17 @@ pub extern "js" fn apply_mask(dst : Canvas, mask : ImageElement) -> Unit =
   #|  const c = dst.getContext('2d'); c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
   #|  c.globalCompositeOperation = 'destination-in'; c.drawImage(mask, 0, 0, dst.width, dst.height); c.restore();
   #|}
+
+///|
+/// An image source as a PNG data URL (drawn through a scratch canvas).
+pub extern "js" fn image_to_data_url(
+  img : ImageElement,
+  w : Int32,
+  h : Int32,
+) -> String =
+  #|(img, w, h) => {
+  #|  if (img instanceof HTMLImageElement && img.src && img.src.startsWith('data:')) return img.src;
+  #|  const c = document.createElement('canvas'); c.width = Math.max(1, w); c.height = Math.max(1, h);
+  #|  try { c.getContext('2d').drawImage(img, 0, 0, w, h); } catch {}
+  #|  return c.toDataURL('image/png');
+  #|}

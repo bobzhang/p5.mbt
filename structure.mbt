@@ -205,6 +205,17 @@ fn P5::frame(self : P5, now : Double) -> Unit {
 ///|
 fn P5::redraw_once(self : P5) -> Unit {
   guard self.callbacks.draw is Some(draw) else { return }
+  if self.pending_svg is Some(filename) {
+    self.pending_svg = None
+    let coll = self.build_shape(() => self.redraw_frame(draw), draw=true)
+    self.save_svg(coll, filename~)
+    return
+  }
+  self.redraw_frame(draw)
+}
+
+///|
+fn P5::redraw_frame(self : P5, draw : (P5) -> Unit) -> Unit {
   self.reset_matrix()
   self.frame_count += 1
   self.in_draw = true

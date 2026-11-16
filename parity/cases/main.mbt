@@ -56,8 +56,91 @@ fn cases() -> Map[String, Case] {
     }),
     draw: p => if img.val is Some(img) { gif_frames(p, img) },
   }
+  let svg : Ref[@p5.ShapeCollection?] = Ref(None)
+  all["svg_import"] = {
+    w: 240,
+    h: 160,
+    preload: Some(p => {
+      p.load_svg("../examples/assets/shapes.svg", c => svg.val = Some(c))
+    }),
+    draw: p => {
+      p.background(255)
+      if svg.val is Some(c) {
+        p.shape(c)
+      }
+    },
+  }
+  all["svg_replay"] = { w: 220, h: 160, preload: None, draw: svg_replay, }
   all
 }
+
+///|
+fn svg_replay(p : @p5.P5) -> Unit {
+  p.background(250)
+  let rec = p.build_shape(() => {
+    p.fill((255, 0, 100))
+    p.stroke(0)
+    p.stroke_weight(2)
+    p.circle(50, 50, 60)
+    p.no_stroke()
+    p.fill((0, 120, 255))
+    p.rect(80, 30, 60, 40)
+  })
+  p.shape(rec)
+  p.shape(rec, x=60, y=80, scale=0.6)
+}
+
+///|
+fn svg_cases() -> Map[String, (Double, Double, (@p5.P5) -> Unit)] {
+  {
+    "svg_export_shapes": (220, 160, svg_export_shapes),
+    "svg_export_arcs": (200, 120, svg_export_arcs),
+  }
+}
+
+///|
+fn svg_export_shapes(p : @p5.P5) -> Unit {
+  p.background(240)
+  p.stroke(20)
+  p.stroke_weight(3)
+  p.fill((255, 120, 80))
+  p.rect(10, 10, 60, 40, tl=8)
+  p.ellipse(120, 30, 70, h=40)
+  p.no_fill()
+  p.stroke((30, 90, 200))
+  p.bezier(10, 150, 40, 70, 120, 150, 150, 80)
+  p.fill((80, 200, 120, 180))
+  p.no_stroke()
+  p.triangle(160, 150, 190, 90, 215, 150)
+  p.push()
+  p.translate(60, 110)
+  p.rotate(0.4)
+  p.fill((120, 60, 200))
+  p.rect(-15, -10, 30, 20)
+  p.pop()
+}
+
+///|
+fn svg_export_arcs(p : @p5.P5) -> Unit {
+  p.background(255)
+  p.stroke(0)
+  p.stroke_weight(2)
+  p.fill((250, 200, 0))
+  p.arc(40, 40, 60, 60, 0, @p5.HALF_PI, mode=Pie)
+  p.arc(110, 40, 60, 40, 0.5, 4, mode=Chord)
+  p.no_fill()
+  p.arc(170, 40, 50, 50, @p5.PI, @p5.TWO_PI)
+  p.begin_shape()
+  p.vertex(10, 110)
+  p.vertex(60, 80)
+  p.vertex(110, 110)
+  p.end_shape(mode=Close)
+}
+
+///|
+extern "js" fn expose_svg(
+  render : (String, String, (String) -> Unit) -> Bool,
+) -> Unit = "(f) => { globalThis.p5mbt_svg = f; }"
 
 ///|
 fn gif_frames(p : @p5.P5, img : @p5.Image) -> Unit {
@@ -605,6 +688,17 @@ extern "js" fn expose(render : (String, String, () -> Unit) -> Bool) -> Unit = "
 
 ///|
 fn main {
+  let svgs = svg_cases()
+  expose_svg((name, container, done) => {
+    guard svgs.get(name) is Some((w, h, scene)) else { return false }
+    @p5.run(container~, seed=1, setup=p => {
+      p.create_canvas(w, h)
+      p.pixel_density(1)
+      p.no_loop()
+      done(p.get_svg(p.build_shape(() => scene(p))))
+    })
+    true
+  })
   let all = cases()
   expose((name, container, done) => {
     guard all.get(name) is Some(c) else { return false }

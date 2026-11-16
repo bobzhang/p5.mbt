@@ -36,6 +36,8 @@ pub fn clear_storage() -> Unit
 
 pub fn constrain(Double, Double, Double) -> Double
 
+pub fn create_svg(String) -> ShapeCollection raise @io.XmlError
+
 pub fn day() -> Int32
 
 pub fn degrees(Double) -> Double
@@ -91,6 +93,8 @@ pub fn norm(Double, Double, Double) -> Double
 pub fn palette_lerp(ArrayView[(@color.Color, Double)], Double) -> @color.Color
 
 pub fn parse_float(String) -> Double
+
+pub fn parse_svg_path(String) -> Array[@shape.PathCmd]
 
 pub fn print(String) -> Unit
 
@@ -178,6 +182,26 @@ pub struct CanvasSurface {
 }
 pub fn CanvasSurface::new(@dom.Canvas) -> Self
 pub impl Surface for CanvasSurface
+
+pub struct DisplayList {
+  ops : Array[DrawOp]
+  // private fields
+}
+pub fn DisplayList::new(Double, &Surface, forward? : &Surface) -> Self
+pub impl Surface for DisplayList
+
+pub(all) enum DrawOp {
+  FillPath(Array[@shape.PathCmd], String, @math.Matrix2D)
+  StrokePath(Array[@shape.PathCmd], String, Double, StrokeCap, StrokeJoin, @math.Matrix2D)
+  FillRect(Double, Double, Double, Double, String, @math.Matrix2D)
+  FillText(String, Double, Double, String, String, HAlign, VAlign, @math.Matrix2D)
+  StrokeText(String, Double, Double, String, Double, String, HAlign, VAlign, @math.Matrix2D)
+  DrawImage(@dom.ImageElement, Int32, Int32, (Double, Double, Double, Double)?, (Double, Double, Double, Double), (Double, Double, Double, Double), @math.Matrix2D)
+  Clip(@math.Matrix2D, Array[(Array[@shape.PathCmd], @math.Matrix2D)])
+  Save
+  Restore
+  SetBlend(BlendMode)
+}
 
 pub struct Element {
   elt : @dom.Element
@@ -406,6 +430,7 @@ pub fn[I : ImageSource] P5::blend(Self, I, Double, Double, Double, Double, Doubl
 pub fn P5::blend_mode(Self, BlendMode) -> Unit
 pub fn[C : ColorArg] P5::blue(Self, C) -> Double
 pub fn[C : ColorArg] P5::brightness(Self, C) -> Double
+pub fn P5::build_shape(Self, () -> Unit, draw? : Bool) -> ShapeCollection
 pub fn P5::canvas(Self) -> @dom.Canvas?
 pub fn P5::canvas_element(Self) -> Element?
 pub fn P5::circle(Self, Double, Double, Double) -> Unit
@@ -470,6 +495,7 @@ pub fn P5::get_matrix(Self) -> @math.Matrix2D
 pub fn P5::get_pixel_density(Self) -> Double
 pub fn P5::get_region(Self, Double, Double, Double, Double) -> Image
 pub fn P5::get_stroke(Self) -> @color.Color?
+pub fn P5::get_svg(Self, ShapeCollection, width? : Double, height? : Double) -> String
 pub fn P5::get_target_frame_rate(Self) -> Double
 pub fn P5::get_text_leading(Self) -> Double
 pub fn P5::get_text_size(Self) -> Double
@@ -496,6 +522,7 @@ pub fn P5::load_image(Self, String, on_load? : (Image) -> Unit) -> Image
 pub fn P5::load_json(Self, String, (@json.Json) -> Unit) -> Unit
 pub fn P5::load_pixels(Self) -> Unit
 pub fn P5::load_strings(Self, String, on_load? : (Array[String]) -> Unit) -> Array[String]
+pub fn P5::load_svg(Self, String, (ShapeCollection) -> Unit) -> Unit
 pub fn P5::load_table(Self, String, (@io.Table) -> Unit, header? : Bool, separator? : Char) -> Unit
 pub fn P5::load_text(Self, String, on_load? : (String) -> Unit) -> Unit
 pub fn P5::load_xml(Self, String, (@io.Xml) -> Unit) -> Unit
@@ -542,12 +569,15 @@ pub fn[C : ColorArg] P5::saturation(Self, C) -> Double
 pub fn P5::save_canvas(Self, filename? : String, ext? : String) -> Unit
 pub fn P5::save_frames(Self, String, String, duration? : Double, fps? : Double, on_done? : (Array[SavedFrame]) -> Unit) -> Unit
 pub fn P5::save_gif(Self, String, Double, delay? : Double, units? : String, silent? : Bool, reset? : Bool, on_done? : () -> Unit) -> Unit
+pub fn P5::save_svg(Self, ShapeCollection, filename? : String) -> Unit
+pub fn P5::save_svg_frame(Self, filename? : String) -> Unit
 pub fn P5::scale(Self, Double, y? : Double) -> Unit
 pub fn P5::screen_to_world(Self, Double, Double) -> (Double, Double)
 pub fn[C : ColorArg] P5::set(Self, Double, Double, C) -> Unit
 pub fn P5::set_draw(Self, (Self) -> Unit) -> Unit
 pub fn P5::set_move_threshold(Self, Double) -> Unit
 pub fn P5::set_shake_threshold(Self, Double) -> Unit
+pub fn P5::shape(Self, ShapeCollection, x? : Double, y? : Double, scale? : Double, scale_x? : Double, scale_y? : Double, align? : ShapeAlign) -> Unit
 pub fn P5::shear_x(Self, Double) -> Unit
 pub fn P5::shear_y(Self, Double) -> Unit
 pub fn[T] P5::shuffle(Self, ArrayView[T]) -> Array[T]
@@ -610,6 +640,18 @@ pub(all) struct SavedFrame {
   image_data : String
   filename : String
   ext : String
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ShapeAlign {
+  AlignCorner
+  AlignCenter
+  AlignViewBox
+}
+
+pub struct ShapeCollection {
+  ops : Array[DrawOp]
+  bounds : (Double, Double, Double, Double)
 }
 
 #derive(Eq, @debug.Debug)

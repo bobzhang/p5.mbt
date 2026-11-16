@@ -220,6 +220,33 @@ export const cases = {
   filter_erode: [120, 90, p => { gradientScene(p); p.filter(p.ERODE, false); }],
   filter_dilate: [120, 90, p => { gradientScene(p); p.filter(p.DILATE, false); }],
   filter_blur: [120, 90, p => { gradientScene(p); p.filter(p.BLUR, 3, false); }],
+  svg_import: [240, 160, (p, rec) => { p.background(255); p.shape(rec, 0, 0); },
+    async p => await p.loadSVG('../examples/assets/shapes.svg')],
+  svg_replay: [220, 160, p => {
+    p.background(250);
+    const rec = p.buildShape(() => {
+      p.fill(255, 0, 100); p.stroke(0); p.strokeWeight(2); p.circle(50, 50, 60);
+      p.noStroke(); p.fill(0, 120, 255); p.rect(80, 30, 60, 40);
+    });
+    p.shape(rec, 0, 0);
+    p.shape(rec, 60, 80, { scale: 0.6 });
+  }],
+};
+
+export const svgCases = {
+  svg_export_shapes: [220, 160, p => {
+    p.background(240); p.stroke(20); p.strokeWeight(3); p.fill(255, 120, 80);
+    p.rect(10, 10, 60, 40, 8); p.ellipse(120, 30, 70, 40);
+    p.noFill(); p.stroke(30, 90, 200); p.bezier(10, 150, 40, 70, 120, 150, 150, 80);
+    p.fill(80, 200, 120, 180); p.noStroke(); p.triangle(160, 150, 190, 90, 215, 150);
+    p.push(); p.translate(60, 110); p.rotate(0.4); p.fill(120, 60, 200); p.rect(-15, -10, 30, 20); p.pop();
+  }],
+  svg_export_arcs: [200, 120, p => {
+    p.background(255); p.stroke(0); p.strokeWeight(2); p.fill(250, 200, 0);
+    p.arc(40, 40, 60, 60, 0, p.HALF_PI, p.PIE); p.arc(110, 40, 60, 40, 0.5, 4, p.CHORD);
+    p.noFill(); p.arc(170, 40, 50, 50, p.PI, p.TWO_PI);
+    p.beginShape(); p.vertex(10, 110); p.vertex(60, 80); p.vertex(110, 110); p.endShape(p.CLOSE);
+  }],
 };
 
 function gradientScene(p) {

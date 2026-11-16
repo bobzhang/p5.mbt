@@ -116,6 +116,8 @@ pub fn image_data_length(ImageData) -> Int32
 
 pub fn image_data_set(ImageData, Int32, Int32) -> Unit
 
+pub fn image_to_data_url(ImageElement, Int32, Int32) -> String
+
 pub fn is_fullscreen() -> Bool
 
 pub fn listen_device((Double, Double, Double) -> Unit, (Double, Double, Double) -> Unit) -> Unit
