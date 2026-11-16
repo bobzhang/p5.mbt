@@ -112,8 +112,9 @@ pub impl Surface for Recorder with fn set_text_style(
   font,
   align,
   baseline,
+  _direction,
 ) {
-  // font strings look like "normal normal 12px sans-serif"
+  // font strings look like "bold 12px sans-serif"
   for part in font.split(" ") {
     if part is [.. size, 'p', 'x'] {
       self.font_size = @string.parse_double(size) catch { _ => 12 }
@@ -140,18 +141,20 @@ fn repr(s : String) -> String {
 }
 
 ///|
-pub impl Surface for Recorder with fn text_width(self, s) {
-  s.length().to_double() * self.font_size * 0.5
-}
-
-///|
-pub impl Surface for Recorder with fn text_ascent(self) {
-  self.font_size * 0.8
-}
-
-///|
-pub impl Surface for Recorder with fn text_descent(self) {
-  self.font_size * 0.2
+/// Text is measured as `0.5 × size` per character; the ink ascends
+/// `0.7 × size` and descends `0.1 × size`, the font `0.8` and `0.2 × size`.
+pub impl Surface for Recorder with fn measure_text(self, s) {
+  let w = s.length().to_double() * self.font_size * 0.5
+  {
+    width: w,
+    actual_left: 0,
+    actual_right: w,
+    actual_ascent: self.font_size * 0.7,
+    actual_descent: self.font_size * 0.1,
+    font_ascent: self.font_size * 0.8,
+    font_descent: self.font_size * 0.2,
+    alphabetic_baseline: 0,
+  }
 }
 
 ///|

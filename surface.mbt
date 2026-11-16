@@ -14,12 +14,10 @@ pub(open) trait Surface {
   fn fill_rect(Self, Double, Double, Double, Double, String) -> Unit
   fn clear_rect(Self, Double, Double, Double, Double) -> Unit
   fn set_blend_mode(Self, BlendMode) -> Unit
-  fn set_text_style(Self, String, HAlign, VAlign) -> Unit
+  fn set_text_style(Self, String, HAlign, VAlign, String) -> Unit
   fn fill_text(Self, String, Double, Double, String) -> Unit
   fn stroke_text(Self, String, Double, Double, String, Double, StrokeJoin) -> Unit
-  fn text_width(Self, String) -> Double
-  fn text_ascent(Self) -> Double
-  fn text_descent(Self) -> Double
+  fn measure_text(Self, String) -> TextMetrics
   fn draw_image(
     Self,
     @dom.ImageElement,
@@ -48,7 +46,24 @@ fn css_align(a : HAlign) -> String {
     Left => "left"
     HCenter => "center"
     Right => "right"
+    Start => "start"
+    End => "end"
   }
+}
+
+///|
+/// Text measurements, as returned by the canvas `measureText()`.
+#derive(Debug)
+pub(all) struct TextMetrics {
+  width : Double
+  actual_left : Double
+  actual_right : Double
+  actual_ascent : Double
+  actual_descent : Double
+  font_ascent : Double
+  font_descent : Double
+  /// Distance from the current baseline to the alphabetic baseline
+  alphabetic_baseline : Double
 }
 
 ///|
@@ -58,6 +73,8 @@ fn css_baseline(a : VAlign) -> String {
     VCenter => "middle"
     Bottom => "bottom"
     Baseline => "alphabetic"
+    Hanging => "hanging"
+    Ideographic => "ideographic"
   }
 }
 
@@ -154,8 +171,15 @@ pub impl Surface for CanvasSurface with fn set_text_style(
   font,
   align,
   baseline,
+  direction,
 ) {
-  @dom.set_text_style(self.ctx, font, css_align(align), css_baseline(baseline))
+  @dom.set_text_style(
+    self.ctx,
+    font,
+    css_align(align),
+    css_baseline(baseline),
+    direction,
+  )
 }
 
 ///|
@@ -177,18 +201,18 @@ pub impl Surface for CanvasSurface with fn stroke_text(
 }
 
 ///|
-pub impl Surface for CanvasSurface with fn text_width(self, s) {
-  @dom.measure_width(self.ctx, s)
-}
-
-///|
-pub impl Surface for CanvasSurface with fn text_ascent(self) {
-  @dom.measure_ascent(self.ctx)
-}
-
-///|
-pub impl Surface for CanvasSurface with fn text_descent(self) {
-  @dom.measure_descent(self.ctx)
+pub impl Surface for CanvasSurface with fn measure_text(self, s) {
+  let m = @dom.measure_text(self.ctx, s)
+  {
+    width: m[0],
+    actual_left: m[1],
+    actual_right: m[2],
+    actual_ascent: m[3],
+    actual_descent: m[4],
+    font_ascent: m[5],
+    font_descent: m[6],
+    alphabetic_baseline: m[7],
+  }
 }
 
 ///|

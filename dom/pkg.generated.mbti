@@ -104,13 +104,7 @@ pub fn load_image(String, (ImageElement, Int32, Int32) -> Unit, (String) -> Unit
 
 pub fn math_random() -> Double
 
-pub fn measure_ascent(Context2D) -> Double
-
-pub fn measure_descent(Context2D) -> Double
-
-pub fn measure_tight_width(Context2D, String) -> Double
-
-pub fn measure_width(Context2D, String) -> Double
+pub fn measure_text(Context2D, String) -> FixedArray[Double]
 
 pub fn now() -> Double
 
@@ -198,7 +192,7 @@ pub fn set_shadow(Context2D, Double, Double, Double, String) -> Unit
 
 pub fn set_style(Element, String, String) -> Unit
 
-pub fn set_text_style(Context2D, String, String, String) -> Unit
+pub fn set_text_style(Context2D, String, String, String, String) -> Unit
 
 pub fn set_timeout(() -> Unit, Double) -> Unit
 

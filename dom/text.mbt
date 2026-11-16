@@ -5,7 +5,8 @@ pub extern "js" fn set_text_style(
   font : String,
   align : String,
   baseline : String,
-) -> Unit = "(c, f, a, b) => { c.font = f; c.textAlign = a; c.textBaseline = b; }"
+  direction : String,
+) -> Unit = "(c, f, a, b, d) => { c.font = f; c.textAlign = a; c.textBaseline = b; c.direction = d; }"
 
 ///|
 pub extern "js" fn fill_text(
@@ -28,28 +29,17 @@ pub extern "js" fn stroke_text(
 ) -> Unit = "(c, t, x, y, s, w, j) => { c.strokeStyle = s; c.lineWidth = w; c.lineJoin = j; c.strokeText(t, x, y); }"
 
 ///|
-/// Advance width of `text` with the current font.
-pub extern "js" fn measure_width(ctx : Context2D, text : String) -> Double = "(c, t) => c.measureText(t).width"
-
-///|
-/// Tight width (`actualBoundingBoxLeft + actualBoundingBoxRight`).
-pub extern "js" fn measure_tight_width(
+/// `measureText(text)` as `[width, actualBoundingBoxLeft,
+/// actualBoundingBoxRight, actualBoundingBoxAscent, actualBoundingBoxDescent,
+/// fontBoundingBoxAscent, fontBoundingBoxDescent, alphabeticBaseline]`.
+pub extern "js" fn measure_text(
   ctx : Context2D,
   text : String,
-) -> Double =
-  #|(c, t) => { const m = c.measureText(t); return m.actualBoundingBoxLeft + m.actualBoundingBoxRight; }
-
-///|
-/// Font ascent (`fontBoundingBoxAscent`) for the current font.
-pub extern "js" fn measure_ascent(ctx : Context2D) -> Double =
-  #|(c) => { const b = c.textBaseline; c.textBaseline = 'alphabetic';
-  #|  const m = c.measureText('X'); c.textBaseline = b; return m.fontBoundingBoxAscent ?? m.actualBoundingBoxAscent; }
-
-///|
-/// Font descent (`fontBoundingBoxDescent`) for the current font.
-pub extern "js" fn measure_descent(ctx : Context2D) -> Double =
-  #|(c) => { const b = c.textBaseline; c.textBaseline = 'alphabetic';
-  #|  const m = c.measureText('X'); c.textBaseline = b; return m.fontBoundingBoxDescent ?? m.actualBoundingBoxDescent; }
+) -> FixedArray[Double] =
+  #|(c, t) => { const m = c.measureText(t);
+  #|  return [m.width, m.actualBoundingBoxLeft, m.actualBoundingBoxRight, m.actualBoundingBoxAscent,
+  #|    m.actualBoundingBoxDescent, m.fontBoundingBoxAscent ?? m.actualBoundingBoxAscent,
+  #|    m.fontBoundingBoxDescent ?? m.actualBoundingBoxDescent, m.alphabeticBaseline ?? 0]; }
 
 ///|
 /// Loads a font file with the `FontFace` API and calls `done(family)` once it

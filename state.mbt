@@ -25,6 +25,9 @@ priv struct State {
   mut text_align : HAlign
   mut text_baseline : VAlign
   mut text_wrap : TextWrap
+  mut font_weight : String
+  mut font_variant : String
+  mut text_direction : String
   mut bezier_order : Int32
   mut spline_ends : SplineEnds
   mut spline_tightness : Double
@@ -68,6 +71,9 @@ fn State::new() -> State {
     text_align: Left,
     text_baseline: Baseline,
     text_wrap: Word,
+    font_weight: "normal",
+    font_variant: "normal",
+    text_direction: "inherit",
     bezier_order: 3,
     spline_ends: Include,
     spline_tightness: 0,

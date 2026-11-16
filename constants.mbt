@@ -126,6 +126,10 @@ pub(all) enum HAlign {
   Left
   HCenter
   Right
+  /// Start of the line in the current text direction
+  Start
+  /// End of the line in the current text direction
+  End
 }
 
 ///|
@@ -136,6 +140,8 @@ pub(all) enum VAlign {
   VCenter
   Bottom
   Baseline
+  Hanging
+  Ideographic
 }
 
 ///|
