@@ -4,7 +4,7 @@ version = "0.1.0"
 
 readme = "README.md"
 
-repository = ""
+repository = "https://github.com/bobzhang/p5.mbt"
 
 license = "LGPL-2.1"
 
