@@ -1,0 +1,69 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/gif"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn apply_palette(FixedArray[Byte], ArrayView[Array[Int32]], format? : ColorFormat) -> FixedArray[Byte]
+
+pub fn nearest_color_index(ArrayView[Array[Int32]], ArrayView[Int32]) -> Int32
+
+pub fn quantize(FixedArray[Byte], Int32, format? : ColorFormat, one_bit_alpha? : Int32, clear_alpha? : Bool, clear_alpha_color? : Int32, clear_alpha_threshold? : Int32, use_sqrt? : Bool) -> Array[Array[Int32]]
+
+pub fn rgb888_to_rgb444(Int32, Int32, Int32) -> Int32
+
+pub fn rgb888_to_rgb565(Int32, Int32, Int32) -> Int32
+
+pub fn rgba8888_to_rgba4444(Int32, Int32, Int32, Int32) -> Int32
+
+// Errors
+#derive(@debug.Debug)
+pub suberror GifError {
+  GifError(String)
+}
+
+// Types and methods
+#derive(Eq, @debug.Debug)
+pub(all) enum ColorFormat {
+  Rgb565
+  Rgb444
+  Rgba4444
+}
+
+pub struct Encoder {
+  // private fields
+}
+pub fn Encoder::finish(Self) -> Bytes
+pub fn Encoder::new() -> Self
+pub fn Encoder::write_frame(Self, FixedArray[Byte], Int32, Int32, palette? : Array[Array[Int32]], delay? : Double, transparent? : Bool, transparent_index? : Int32, repeat? : Int32, color_depth? : Int32, dispose? : Int32) -> Unit
+
+#derive(@debug.Debug)
+pub(all) struct FrameInfo {
+  x : Int32
+  y : Int32
+  width : Int32
+  height : Int32
+  palette_offset : Int32
+  palette_size : Int32
+  data_offset : Int32
+  transparent_index : Int32?
+  interlaced : Bool
+  delay : Int32
+  disposal : Int32
+}
+
+pub struct Reader {
+  buf : Bytes
+  width : Int32
+  height : Int32
+  frames : Array[FrameInfo]
+  loop_count : Int32?
+}
+pub fn Reader::blit_frame_rgba(Self, Int32, FixedArray[Byte]) -> Unit
+pub fn Reader::new(Bytes) -> Self raise GifError
+
+// Type aliases
+
+// Traits
