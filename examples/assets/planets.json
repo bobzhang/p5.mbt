@@ -1,0 +1,13 @@
+{
+  "title": "Planets (radius in km)",
+  "planets": [
+    { "name": "Mercury", "radius": 2440, "color": "#9e9e9e" },
+    { "name": "Venus", "radius": 6052, "color": "#e6c07b" },
+    { "name": "Earth", "radius": 6371, "color": "#4a90d9" },
+    { "name": "Mars", "radius": 3390, "color": "#d9663a" },
+    { "name": "Jupiter", "radius": 69911, "color": "#d8b48a" },
+    { "name": "Saturn", "radius": 58232, "color": "#e8d29b" },
+    { "name": "Uranus", "radius": 25362, "color": "#9fd9e6" },
+    { "name": "Neptune", "radius": 24622, "color": "#4b6fd9" }
+  ]
+}

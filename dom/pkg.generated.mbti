@@ -42,6 +42,8 @@ pub fn display_width() -> Double
 
 pub fn document_has_focus() -> Bool
 
+pub fn download_text(String, String, String) -> Unit
+
 pub fn download_url(String, String) -> Unit
 
 pub fn draw_image(Context2D, ImageElement, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
@@ -53,6 +55,8 @@ pub fn element_exists(Element) -> Bool
 pub fn element_height(Element) -> Double
 
 pub fn element_width(Element) -> Double
+
+pub fn fetch_text(String, (String) -> Unit, (String) -> Unit) -> Unit
 
 pub fn fill_path(Context2D, Path2D, String) -> Unit
 

@@ -6,6 +6,7 @@ import {
   "bobzhang/p5/dom",
   "bobzhang/p5/filters",
   "moonbitlang/core/string",
+  "moonbitlang/core/json",
 }
 
 supported_targets = "js"

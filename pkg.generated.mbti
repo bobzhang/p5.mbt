@@ -7,6 +7,7 @@ import {
   "bobzhang/p5/math",
   "bobzhang/p5/shape",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -85,6 +86,10 @@ pub fn remove_item(String) -> Unit
 pub fn round(Double, decimals? : Int32) -> Double
 
 pub fn run(preload? : (P5) -> Unit, setup? : (P5) -> Unit, draw? : (P5) -> Unit, mouse_pressed? : (P5) -> Unit, mouse_released? : (P5) -> Unit, mouse_clicked? : (P5) -> Unit, double_clicked? : (P5) -> Unit, mouse_moved? : (P5) -> Unit, mouse_dragged? : (P5) -> Unit, mouse_wheel? : (P5, Double) -> Unit, key_pressed? : (P5) -> Unit, key_released? : (P5) -> Unit, key_typed? : (P5) -> Unit, touch_started? : (P5) -> Unit, touch_moved? : (P5) -> Unit, touch_ended? : (P5) -> Unit, window_resized? : (P5) -> Unit, container? : String, seed? : Double) -> Unit
+
+pub fn save_json(@json.Json, String, pretty? : Bool) -> Unit
+
+pub fn save_strings(ArrayView[String], String, ext? : String) -> Unit
 
 pub fn second() -> Int32
 
@@ -338,7 +343,10 @@ pub fn[C : ColorArg] P5::lightness(Self, C) -> Double
 pub fn P5::line(Self, Double, Double, Double, Double) -> Unit
 pub fn P5::load_font(Self, String, family? : String, on_load? : (Font) -> Unit) -> Font
 pub fn P5::load_image(Self, String, on_load? : (Image) -> Unit) -> Image
+pub fn P5::load_json(Self, String, (@json.Json) -> Unit) -> Unit
 pub fn P5::load_pixels(Self) -> Unit
+pub fn P5::load_strings(Self, String, on_load? : (Array[String]) -> Unit) -> Array[String]
+pub fn P5::load_text(Self, String, on_load? : (String) -> Unit) -> Unit
 pub fn P5::loop_(Self) -> Unit
 pub fn P5::millis(Self) -> Double
 pub fn P5::no_cursor(Self) -> Unit
