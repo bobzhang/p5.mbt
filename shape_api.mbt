@@ -32,8 +32,11 @@ fn P5::stroke_css(self : P5) -> String? {
 fn P5::draw_shape(self : P5, shape : Shape, fill~ : Bool = true) -> Unit {
   if self.clipping {
     let paths = shape.to_paths(has_fill=false, has_stroke=false)
-    let m = self.device_matrix()
-    self.clip_path.append(transform_path(paths.path, m))
+    let relative = match self.clip_base.invert() {
+      Some(inv) => inv.multiply(self.device_matrix())
+      None => self.device_matrix()
+    }
+    self.clip_parts.push((paths.path, relative))
     return
   }
   let fill_css = if fill { self.fill_css() } else { None }
@@ -70,17 +73,19 @@ fn P5::fresh_shape(self : P5) -> Shape {
 
 ///|
 fn P5::to_radians(self : P5, a : Double) -> Double {
-  match self.state.angle_mode {
-    Radians => a
-    Degrees => a * DEG_TO_RAD
+  if self.degrees.val {
+    a * DEG_TO_RAD
+  } else {
+    a
   }
 }
 
 ///|
 fn P5::from_radians(self : P5, a : Double) -> Double {
-  match self.state.angle_mode {
-    Radians => a
-    Degrees => a * RAD_TO_DEG
+  if self.degrees.val {
+    a * RAD_TO_DEG
+  } else {
+    a
   }
 }
 
@@ -202,7 +207,7 @@ pub fn P5::arc(
   h : Double,
   start : Double,
   stop : Double,
-  mode~ : ArcMode = Open,
+  mode? : ArcMode,
 ) -> Unit {
   if start == stop {
     return

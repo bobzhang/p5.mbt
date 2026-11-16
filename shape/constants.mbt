@@ -25,10 +25,11 @@ pub(all) enum SplineEnds {
 }
 
 ///|
-/// How `arc()` is closed.
+/// How `arc()` is closed. Without a mode, an arc is filled like a pie slice
+/// but its outline is left open.
 #derive(Eq, Debug)
 pub(all) enum ArcMode {
-  /// Unclosed arc; filled as a chord (default).
+  /// Unclosed outline; filled as a chord.
   Open
   /// Closed with a straight line between the end points.
   Chord

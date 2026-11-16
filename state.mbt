@@ -13,7 +13,6 @@ priv struct State {
   mut image_mode : ShapeMode
   mut color_mode : ColorMode
   color_maxes : Map[ColorMode, @color.ColorMaxes]
-  mut angle_mode : AngleMode
   mut matrix : Matrix2D
   mut tint : Color?
   mut blend_mode : BlendMode
@@ -59,7 +58,6 @@ fn State::new() -> State {
     image_mode: Corner,
     color_mode: RGB,
     color_maxes: default_maxes_map(),
-    angle_mode: Radians,
     matrix: @math.identity,
     tint: None,
     blend_mode: Blend,

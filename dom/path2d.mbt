@@ -68,3 +68,16 @@ pub extern "js" fn path_round_rect(
 
 ///|
 pub extern "js" fn path_close(p : Path2D) -> Unit = "(p) => p.closePath()"
+
+///|
+/// `target.addPath(src, new DOMMatrix([a, b, c, d, e, f]))`.
+pub extern "js" fn path_add_path(
+  target : Path2D,
+  src : Path2D,
+  a : Double,
+  b : Double,
+  c : Double,
+  d : Double,
+  e : Double,
+  f : Double,
+) -> Unit = "(t, s, a, b, c, d, e, f) => t.addPath(s, new DOMMatrix([a, b, c, d, e, f]))"

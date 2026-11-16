@@ -212,7 +212,7 @@ test "shape kinds" {
 ///|
 test "arc paths" {
   let s = @shape.Shape::new()
-  s.arc(0, 0, 20, 20, 0, @math.HALF_PI, Pie)
+  s.arc(0, 0, 20, 20, 0, @math.HALF_PI, Some(Pie))
   let paths = s.to_paths()
   debug_inspect(
     paths.fill_path(),
@@ -237,7 +237,7 @@ test "arc paths" {
     ),
   )
   s.reset()
-  s.arc(0, 0, 20, 20, 0, @math.HALF_PI, Open)
+  s.arc(0, 0, 20, 20, 0, @math.HALF_PI, Some(Open))
   let paths = s.to_paths()
   debug_inspect(
     paths.stroke_path(),

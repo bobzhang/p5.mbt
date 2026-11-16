@@ -91,8 +91,7 @@ test "clip without push ends with the frame" {
     content=(
       #|[
       #|  "save",
-      #|  "transform 1 0 0 1 0 0",
-      #|  "clip M0,0 L5,0 L5,5 L0,5 Z",
+      #|  "clip base=1 0 0 1 0 0 [1 0 0 1 0 0] R0,0,5,5",
       #|  "restore",
       #|  "blend source-over",
       #|  "smoothing true",

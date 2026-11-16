@@ -6,11 +6,60 @@
 
 ///|
 /// A 2D or 3D Euclidean vector.
-#derive(Eq, Debug)
+///
+/// Vectors created by a sketch (`create_vector`) follow the sketch's angle
+/// mode in `heading`, `rotate` and `angle_between`, like p5.js; other
+/// vectors always use radians.
 pub struct Vector {
   mut x : Double
   mut y : Double
   mut z : Double
+  priv degrees : Ref[Bool]?
+}
+
+///|
+pub impl Eq for Vector with fn equal(a, b) {
+  a.x == b.x && a.y == b.y && a.z == b.z
+}
+
+///|
+#derive(Debug)
+priv struct VectorRepr {
+  x : Double
+  y : Double
+  z : Double
+}
+
+///|
+pub impl Debug for Vector with fn to_repr(self) {
+  Debug::to_repr(({ x: self.x, y: self.y, z: self.z, } : VectorRepr))
+}
+
+///|
+/// A vector whose angles follow `degrees` (true: degrees, false: radians).
+pub fn Vector::with_angle_mode(
+  x : Double,
+  y : Double,
+  z~ : Double = 0,
+  degrees~ : Ref[Bool],
+) -> Vector {
+  { x, y, z, degrees: Some(degrees), }
+}
+
+///|
+fn Vector::from_radians(self : Vector, a : Double) -> Double {
+  match self.degrees {
+    Some(d) if d.val => a * RAD_TO_DEG
+    _ => a
+  }
+}
+
+///|
+fn Vector::to_radians(self : Vector, a : Double) -> Double {
+  match self.degrees {
+    Some(d) if d.val => a * DEG_TO_RAD
+    _ => a
+  }
 }
 
 ///|
@@ -24,7 +73,7 @@ pub struct Vector {
 /// }
 /// ```
 pub fn Vector::Vector(x : Double, y : Double, z~ : Double = 0) -> Vector {
-  { x, y, z, }
+  { x, y, z, degrees: None, }
 }
 
 ///|
@@ -56,7 +105,7 @@ pub fn Vector::set_vec(self : Vector, other : Vector) -> Unit {
 ///|
 /// Returns a copy of the vector.
 pub fn Vector::copy(self : Vector) -> Vector {
-  { x: self.x, y: self.y, z: self.z, }
+  { x: self.x, y: self.y, z: self.z, degrees: self.degrees, }
 }
 
 ///|
@@ -170,6 +219,7 @@ pub fn Vector::cross(self : Vector, v : Vector) -> Vector {
     x: self.y * v.z - self.z * v.y,
     y: self.z * v.x - self.x * v.z,
     z: self.x * v.y - self.y * v.x,
+    degrees: self.degrees,
   }
 }
 
@@ -209,9 +259,9 @@ pub fn Vector::set_mag(self : Vector, n : Double) -> Unit {
 }
 
 ///|
-/// Angle of rotation of a 2D vector, in radians.
+/// Angle of rotation of a 2D vector (radians, or the sketch's angle mode).
 pub fn Vector::heading(self : Vector) -> Double {
-  @cmath.atan2(self.y, self.x)
+  self.from_radians(@cmath.atan2(self.y, self.x))
 }
 
 ///|
@@ -223,16 +273,17 @@ pub fn Vector::set_heading(self : Vector, a : Double) -> Unit {
 }
 
 ///|
-/// Rotates a 2D vector by `a` radians (in place).
+/// Rotates a 2D vector by `a` (radians, or the sketch's angle mode).
 pub fn Vector::rotate(self : Vector, a : Double) -> Unit {
-  let new_heading = self.heading() + a
+  let new_heading = self.to_radians(self.heading() + a)
   let m = self.mag()
   self.x = @cmath.cos(new_heading) * m
   self.y = @cmath.sin(new_heading) * m
 }
 
 ///|
-/// Signed angle between two vectors, in radians (NaN if one is zero).
+/// Signed angle between two vectors (radians, or the sketch's angle mode;
+/// NaN if one is zero).
 pub fn Vector::angle_between(self : Vector, v : Vector) -> Double {
   let mag_sq_mult = self.mag_sq() * v.mag_sq()
   if mag_sq_mult == 0 {
@@ -240,7 +291,7 @@ pub fn Vector::angle_between(self : Vector, v : Vector) -> Double {
   }
   let u = self.cross(v)
   let sign = if u.z == 0 { 1.0 } else { u.z.signum() }
-  @cmath.atan2(u.mag(), self.dot(v)) * sign
+  self.from_radians(@cmath.atan2(u.mag(), self.dot(v)) * sign)
 }
 
 ///|
@@ -329,7 +380,7 @@ pub fn Vector::clamp_to_zero(self : Vector) -> Unit {
 ///|
 /// Returns a new vector multiplied by `n`.
 pub fn Vector::scaled(self : Vector, n : Double) -> Vector {
-  { x: self.x * n, y: self.y * n, z: self.z * n, }
+  { x: self.x * n, y: self.y * n, z: self.z * n, degrees: self.degrees, }
 }
 
 ///|
@@ -342,23 +393,28 @@ pub fn Vector::normalized(self : Vector) -> Vector {
 
 ///|
 pub impl Add for Vector with fn add(a, b) {
-  { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z, }
+  { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z, degrees: a.degrees, }
 }
 
 ///|
 pub impl Sub for Vector with fn sub(a, b) {
-  { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z, }
+  { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z, degrees: a.degrees, }
 }
 
 ///|
 pub impl Neg for Vector with fn neg(a) {
-  { x: -a.x, y: -a.y, z: -a.z, }
+  { x: -a.x, y: -a.y, z: -a.z, degrees: a.degrees, }
 }
 
 ///|
 /// Creates a 2D unit vector (times `length`) pointing at `angle` radians.
 pub fn Vector::from_angle(angle : Double, length~ : Double = 1) -> Vector {
-  { x: length * @cmath.cos(angle), y: length * @cmath.sin(angle), z: 0, }
+  {
+    x: length * @cmath.cos(angle),
+    y: length * @cmath.sin(angle),
+    z: 0,
+    degrees: None,
+  }
 }
 
 ///|
@@ -376,6 +432,7 @@ pub fn Vector::from_angles(
     x: length * sin_theta * sin_phi,
     y: -length * cos_theta,
     z: length * sin_theta * cos_phi,
+    degrees: None,
   }
 }
 
@@ -391,5 +448,10 @@ pub fn Vector::random3d(rng : Random) -> Vector {
   let angle = rng.next() * TWO_PI
   let vz = rng.next() * 2 - 1
   let vz_base = (1.0 - vz * vz).sqrt()
-  { x: vz_base * @cmath.cos(angle), y: vz_base * @cmath.sin(angle), z: vz, }
+  {
+    x: vz_base * @cmath.cos(angle),
+    y: vz_base * @cmath.sin(angle),
+    z: vz,
+    degrees: None,
+  }
 }

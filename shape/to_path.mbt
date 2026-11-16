@@ -192,7 +192,7 @@ fn Converter::visit_arc(
   h : Double,
   start : Double,
   stop : Double,
-  mode : ArcMode,
+  mode : ArcMode?,
 ) -> Unit {
   let cx = x + w / 2
   let cy = y + h / 2
@@ -203,7 +203,7 @@ fn Converter::visit_arc(
   let delta = stop - start
   let full = @math.js_rem(delta, 2 * @math.PI).abs() < 0.00001 &&
     delta.abs() > 0.00001
-  let pie_slice = !(mode is (Chord | Open) || full)
+  let pie_slice = !(mode is Some(Chord | Open) || full)
   if self.has_fill {
     let fp = self.fill_path.unwrap_or(self.path.copy())
     fp.push(MoveTo(sx, sy))
@@ -218,10 +218,10 @@ fn Converter::visit_arc(
     let sp = self.stroke_path.unwrap_or(self.path.copy())
     sp.push(MoveTo(sx, sy))
     sp.push(Ellipse(cx, cy, rx, ry, 0, start, stop))
-    if mode is Pie && pie_slice {
+    if mode is Some(Pie) && pie_slice {
       sp.push(LineTo(cx, cy))
     }
-    if mode is (Pie | Chord) {
+    if mode is Some(Pie | Chord) {
       sp.push(ClosePath)
     }
     self.stroke_path = Some(sp)

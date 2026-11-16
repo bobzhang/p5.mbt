@@ -1,0 +1,186 @@
+// p5.js side of the parity cases. Each case draws one frame on a canvas of
+// the given size; parity/cases/main.mbt draws the same thing with p5.mbt.
+export const cases = {
+  basics: [200, 150, p => {
+    p.background(220);
+    p.fill(255, 0, 0); p.rect(20, 20, 60, 40);
+    p.stroke(0, 0, 255); p.strokeWeight(4); p.fill(0, 255, 0, 128); p.ellipse(120, 60, 70, 50);
+    p.noStroke(); p.fill('#ff8800'); p.circle(60, 110, 40);
+    p.stroke(30); p.strokeWeight(1); p.noFill(); p.square(120, 95, 40);
+  }],
+  modes: [220, 160, p => {
+    p.background(250); p.fill(100, 150, 250, 180); p.stroke(20);
+    p.rectMode(p.CENTER); p.rect(50, 40, 60, 40);
+    p.rectMode(p.CORNERS); p.rect(100, 20, 150, 70);
+    p.rectMode(p.RADIUS); p.rect(190, 45, 20, 25);
+    p.ellipseMode(p.CORNER); p.ellipse(10, 90, 60, 50);
+    p.ellipseMode(p.RADIUS); p.ellipse(120, 115, 30, 20);
+    p.ellipseMode(p.CORNERS); p.ellipse(160, 90, 210, 150);
+  }],
+  rounded: [200, 120, p => {
+    p.background(240); p.fill(250, 200, 60); p.stroke(0); p.strokeWeight(2);
+    p.rect(10, 10, 80, 50, 12);
+    p.rect(110, 10, 80, 50, 5, 20, 0, 30);
+    p.rect(10, 70, 40, 40, 100);
+    p.square(110, 70, 40, 8, 2);
+  }],
+  arcs: [240, 170, p => {
+    p.background(230); p.fill(80, 160, 220); p.stroke(10); p.strokeWeight(3);
+    p.arc(40, 40, 60, 60, 0, p.HALF_PI);
+    p.arc(120, 40, 60, 60, 0, p.PI + p.QUARTER_PI, p.OPEN);
+    p.arc(200, 40, 60, 40, p.PI, p.TWO_PI, p.CHORD);
+    p.arc(40, 120, 60, 60, -p.HALF_PI, p.PI, p.PIE);
+    p.arc(120, 120, 70, 40, 1, 5, p.PIE);
+    p.angleMode(p.DEGREES); p.arc(200, 120, 60, 60, 30, 330, p.PIE);
+  }],
+  strokes: [240, 160, p => {
+    p.background(255); p.stroke(30, 30, 120);
+    p.strokeWeight(12);
+    p.strokeCap(p.ROUND); p.line(20, 20, 100, 20);
+    p.strokeCap(p.SQUARE); p.line(20, 50, 100, 50);
+    p.strokeCap(p.PROJECT); p.line(20, 80, 100, 80);
+    p.noFill(); p.strokeWeight(10);
+    p.strokeJoin(p.MITER); p.triangle(130, 40, 160, 10, 190, 40);
+    p.strokeJoin(p.BEVEL); p.triangle(130, 90, 160, 60, 190, 90);
+    p.strokeJoin(p.ROUND); p.triangle(130, 140, 160, 110, 190, 140);
+    p.strokeWeight(8); p.point(30, 130); p.strokeWeight(20); p.point(70, 130);
+    p.strokeWeight(0.5); p.line(210, 10, 230, 150);
+  }],
+  polygons: [220, 120, p => {
+    p.background(245); p.stroke(0); p.fill(200, 100, 160);
+    p.triangle(10, 100, 50, 10, 90, 100);
+    p.quad(110, 20, 200, 10, 210, 100, 120, 90);
+  }],
+  curves: [240, 160, p => {
+    p.background(250); p.noFill(); p.strokeWeight(3);
+    p.stroke(200, 0, 0); p.bezier(10, 140, 40, 10, 120, 10, 150, 140);
+    p.stroke(0, 120, 0); p.spline(20, 20, 60, 120, 140, 30, 230, 150);
+    p.splineProperty('tightness', 0.5);
+    p.stroke(0, 0, 200); p.spline(20, 60, 80, 150, 160, 60, 230, 100);
+    p.splineProperty('tightness', 0);
+    p.splineProperty('ends', p.EXCLUDE);
+    p.stroke(120, 0, 120);
+    p.beginShape(); for (const [x, y] of [[0, 80], [40, 40], [100, 90], [160, 30], [220, 90], [240, 40]]) p.splineVertex(x, y); p.endShape();
+  }],
+  shape_kinds: [300, 200, p => {
+    p.background(240); p.stroke(0); p.fill(120, 180, 240, 200);
+    const pts = [[10, 10], [40, 40], [70, 10], [100, 40], [130, 10], [160, 40]];
+    p.beginShape(p.POINTS); p.strokeWeight(6); for (const [x, y] of pts) p.vertex(x, y); p.endShape();
+    p.strokeWeight(1);
+    p.beginShape(p.LINES); for (const [x, y] of pts) p.vertex(x, y + 50); p.endShape();
+    p.beginShape(p.TRIANGLES); for (const [x, y] of pts) p.vertex(x, y + 100); p.endShape();
+    p.beginShape(p.TRIANGLE_STRIP); for (const [x, y] of pts) p.vertex(x + 140, y + 100); p.endShape();
+    p.beginShape(p.TRIANGLE_FAN); p.vertex(230, 40); for (let i = 0; i < 6; i++) p.vertex(230 + 40 * Math.cos(i), 40 + 40 * Math.sin(i)); p.endShape();
+    p.beginShape(p.QUADS); p.vertex(180, 150); p.vertex(210, 150); p.vertex(210, 190); p.vertex(180, 190); p.endShape();
+    p.beginShape(p.QUAD_STRIP); for (let i = 0; i < 4; i++) { p.vertex(220 + i * 25, 150); p.vertex(220 + i * 25, 190); } p.endShape();
+  }],
+  contours: [220, 160, p => {
+    p.background(255); p.fill(250, 180, 40); p.stroke(0); p.strokeWeight(2);
+    p.beginShape();
+    p.vertex(20, 20); p.vertex(200, 20); p.vertex(200, 140); p.vertex(20, 140);
+    p.beginContour(); p.vertex(60, 60); p.vertex(60, 100); p.vertex(160, 100); p.vertex(160, 60); p.endContour(p.CLOSE);
+    p.endShape(p.CLOSE);
+    p.bezierOrder(2);
+    p.beginShape(); p.vertex(20, 150); p.bezierVertex(110, 100); p.bezierVertex(200, 150); p.endShape();
+  }],
+  transforms: [220, 220, p => {
+    p.background(230); p.fill(255, 100, 100); p.stroke(0);
+    p.push(); p.translate(60, 60); p.rotate(p.QUARTER_PI); p.rect(-20, -20, 40, 40); p.pop();
+    p.push(); p.translate(160, 60); p.scale(1.5, 0.7); p.ellipse(0, 0, 50, 50); p.pop();
+    p.push(); p.translate(60, 160); p.shearX(0.4); p.rect(-20, -20, 40, 40); p.pop();
+    p.push(); p.translate(160, 160); p.applyMatrix(1, 0.3, -0.2, 1, 0, 0); p.shearY(0.2); p.triangle(-30, 30, 0, -30, 30, 30); p.pop();
+    p.rect(5, 5, 10, 10);
+  }],
+  color_modes: [260, 120, p => {
+    p.background(255); p.noStroke();
+    p.colorMode(p.HSB); for (let i = 0; i < 12; i++) { p.fill(i * 30, 80, 90); p.rect(i * 20 + 10, 10, 20, 25); }
+    p.colorMode(p.HSL); for (let i = 0; i < 12; i++) { p.fill(i * 30, 70, 50); p.rect(i * 20 + 10, 40, 20, 25); }
+    p.colorMode(p.RGB, 1); p.fill(0.2, 0.6, 0.4, 0.5); p.rect(10, 75, 60, 35);
+    p.colorMode(p.HSB, 100); p.fill(70, 100, 100); p.rect(80, 75, 60, 35);
+    p.colorMode(p.RGB); p.fill(p.lerpColor(p.color(255, 0, 0), p.color(0, 0, 255), 0.3)); p.rect(150, 75, 50, 35);
+    p.fill('hsl(160, 80%, 40%)'); p.rect(205, 75, 45, 35);
+  }],
+  blend_erase: [200, 120, p => {
+    p.background(40, 80, 160); p.noStroke();
+    p.fill(255, 0, 0); p.circle(60, 60, 80);
+    p.blendMode(p.ADD); p.fill(0, 200, 0); p.circle(100, 60, 80);
+    p.blendMode(p.MULTIPLY); p.fill(250, 250, 0); p.circle(140, 60, 80);
+    p.blendMode(p.BLEND);
+    p.erase(); p.rect(80, 90, 60, 20); p.noErase();
+  }],
+  clipping: [200, 140, p => {
+    p.background(255); p.noStroke();
+    p.push(); p.clip(() => { p.circle(60, 70, 100); });
+    for (let i = 0; i < 12; i++) { p.fill(i % 2 ? 200 : 60, 100, 160); p.rect(i * 10, 0, 10, 140); }
+    p.pop();
+    p.push(); p.clip(() => { p.rect(130, 30, 50, 80); }, { invert: true });
+    p.fill(250, 120, 0); p.circle(155, 70, 70);
+    p.pop();
+  }],
+  text_basic: [260, 160, p => {
+    p.background(250); p.fill(20);
+    p.textSize(20); p.text('Hello p5', 10, 30);
+    p.textStyle(p.BOLD); p.textFont('Georgia'); p.text('Bold Georgia', 10, 60);
+    p.textStyle(p.ITALIC); p.textSize(16); p.text('italic 16px', 10, 85);
+    p.textStyle(p.NORMAL); p.textFont('monospace'); p.textSize(14);
+    p.text('multi\nline text', 10, 110);
+    p.fill(200, 0, 0); p.stroke(0, 0, 255); p.strokeWeight(1); p.textSize(28); p.text('Stroke', 150, 40);
+  }],
+  text_align: [260, 200, p => {
+    p.background(255); p.stroke(200); p.line(130, 0, 130, 200); p.line(0, 50, 260, 50); p.line(0, 120, 260, 120);
+    p.noStroke(); p.fill(0); p.textSize(18);
+    p.textAlign(p.LEFT, p.TOP); p.text('left top', 130, 50);
+    p.textAlign(p.RIGHT, p.BOTTOM); p.text('right bottom', 130, 50);
+    p.textAlign(p.CENTER, p.CENTER); p.text('center\ncenter', 130, 120);
+    p.textAlign(p.LEFT, p.BASELINE); p.text('baseline', 10, 180);
+    p.textAlign(p.RIGHT, p.CENTER); p.text('right', 250, 180);
+  }],
+  text_box: [260, 200, p => {
+    p.background(255); p.noFill(); p.stroke(180); p.rect(20, 20, 140, 90); p.rect(170, 20, 80, 160);
+    p.noStroke(); p.fill(0); p.textSize(15); p.textLeading(19);
+    p.text('The quick brown fox jumps over the lazy dog again and again', 20, 20, 140, 90);
+    p.textAlign(p.CENTER, p.CENTER); p.textWrap(p.CHAR);
+    p.text('characterwrappingdemo text', 170, 20, 80, 160);
+    p.textAlign(p.RIGHT, p.BOTTOM); p.textWrap(p.WORD); p.rectMode(p.CENTER);
+    p.text('right bottom box', 90, 160, 140, 60);
+  }],
+  text_metrics: [300, 120, p => {
+    p.background(255); p.textSize(22); p.fill(0); p.noStroke();
+    const s = 'Measure gyp';
+    p.text(s, 20, 50);
+    const b = p.textBounds(s, 20, 50); p.noFill(); p.stroke(255, 0, 0); p.rect(b.x, b.y, b.w, b.h);
+    const f = p.fontBounds(s, 20, 90); p.stroke(0, 0, 255); p.rect(f.x, f.y, f.w, f.h);
+    p.stroke(0, 150, 0); p.line(20, 100, 20 + p.textWidth(s), 100); p.line(20, 106, 20 + p.fontWidth(s), 106);
+    p.line(250, 50 - p.textAscent(), 250, 50 + p.textDescent());
+    p.line(260, 50 - p.textAscent('gyp'), 260, 50 + p.textDescent('gyp'));
+  }],
+  random_noise: [200, 200, p => {
+    p.background(20); p.randomSeed(42); p.noiseSeed(7); p.noStroke();
+    for (let i = 0; i < 300; i++) { p.fill(p.random(255), p.random(100, 255), 200); p.circle(p.random(200), p.random(200), p.random(2, 8)); }
+    p.stroke(255, 200, 0); p.noFill(); p.beginShape();
+    for (let x = 0; x <= 200; x += 4) p.vertex(x, 100 + 80 * (p.noise(x * 0.02) - 0.5));
+    p.endShape();
+    p.stroke(0, 220, 255); for (let i = 0; i < 40; i++) p.point(100 + p.randomGaussian(0, 30), 160 + p.randomGaussian(0, 10));
+  }],
+  vectors_trig: [200, 200, p => {
+    p.background(250); p.angleMode(p.DEGREES); p.stroke(0); p.noFill();
+    for (let a = 0; a < 360; a += 15) {
+      const v = p5.Vector.fromAngle(p.radians(a), 60 + 20 * p.sin(a * 3));
+      p.line(100, 100, 100 + v.x, 100 + v.y);
+    }
+    const w = p.createVector(30, 40); w.setMag(70); w.rotate(20);
+    p.stroke(255, 0, 0); p.strokeWeight(3); p.line(100, 100, 100 + w.x, 100 + w.y);
+    p.text(p.nf(p.atan2(1, 1), 2, 2), 10, 190);
+  }],
+  pixels: [100, 80, p => {
+    p.background(255, 0, 0); p.loadPixels();
+    const d = p.pixelDensity();
+    for (let y = 0; y < p.height * d; y++) for (let x = 0; x < p.width * d; x++) {
+      const i = 4 * (y * p.width * d + x);
+      p.pixels[i] = x * 2; p.pixels[i + 1] = y * 3; p.pixels[i + 2] = 128; p.pixels[i + 3] = 255;
+    }
+    p.updatePixels();
+    p.set(10, 10, p.color(255)); p.set(11, 10, p.color(255)); p.updatePixels();
+    const c = p.get(50, 40); p.fill(c); p.noStroke(); p.rect(60, 50, 30, 20);
+  }],
+};

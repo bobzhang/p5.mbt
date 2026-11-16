@@ -3,6 +3,7 @@ package "bobzhang/p5/math"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/ref",
 }
 
 // Values
@@ -99,11 +100,11 @@ pub fn Random::next(Self) -> Double
 pub fn Random::range(Self, Double, Double) -> Double
 pub fn Random::set_seed(Self, Double) -> Unit
 
-#derive(Eq, @debug.Debug)
 pub struct Vector {
   mut x : Double
   mut y : Double
   mut z : Double
+  // private fields
 }
 pub fn Vector::Vector(Double, Double, z? : Double) -> Self
 pub fn Vector::add(Self, Self) -> Unit
@@ -140,10 +141,13 @@ pub fn Vector::set_vec(Self, Self) -> Unit
 pub fn Vector::slerp(Self, Self, Double) -> Unit
 pub fn Vector::sub(Self, Self) -> Unit
 pub fn Vector::sub_xy(Self, Double, Double, z? : Double) -> Unit
+pub fn Vector::with_angle_mode(Double, Double, z? : Double, degrees~ : @ref.Ref[Bool]) -> Self
 pub impl Add for Vector
+pub impl Eq for Vector
 pub impl Neg for Vector
 pub impl Show for Vector
 pub impl Sub for Vector
+pub impl @debug.Debug for Vector
 
 // Type aliases
 

@@ -120,6 +120,8 @@ pub fn on_ready(() -> Unit) -> Unit
 
 pub fn on_window_resize(() -> Unit) -> Unit
 
+pub fn path_add_path(Path2D, Path2D, Double, Double, Double, Double, Double, Double) -> Unit
+
 pub fn path_bezier_curve_to(Path2D, Double, Double, Double, Double, Double, Double) -> Unit
 
 pub fn path_close(Path2D) -> Unit

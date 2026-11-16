@@ -121,17 +121,24 @@ pub fn P5::begin_clip(self : P5, invert~ : Bool = false) -> Unit {
   }
   self.clipping = true
   self.clip_invert = invert
-  self.clip_path.clear()
+  self.clip_parts.clear()
+  self.clip_base = self.device_matrix()
   if invert {
-    let w = self.width * self.density
-    let h = self.height * self.density
-    self.clip_path.append([
-      MoveTo(-2 * w, -2 * h),
-      LineTo(-2 * w, 2 * h),
-      LineTo(2 * w, 2 * h),
-      LineTo(2 * w, -2 * h),
-      ClosePath,
-    ])
+    // Slight hack, as in p5: a big rectangle with reverse winding.
+    let w = self.width
+    let h = self.height
+    self.clip_parts.push(
+      (
+        [
+          MoveTo(-2 * w, -2 * h),
+          LineTo(-2 * w, 2 * h),
+          LineTo(2 * w, 2 * h),
+          LineTo(2 * w, -2 * h),
+          ClosePath,
+        ],
+        @math.identity,
+      ),
+    )
   }
 }
 
@@ -144,9 +151,8 @@ pub fn P5::end_clip(self : P5) -> Unit {
     )
   }
   self.clipping = false
-  self.surface.set_transform(@math.identity)
-  self.surface.clip(self.clip_path.copy())
-  self.clip_path.clear()
+  self.surface.clip(self.clip_base, self.clip_parts.copy())
+  self.clip_parts.clear()
 }
 
 ///|

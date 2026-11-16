@@ -61,7 +61,7 @@ pub(all) struct Pt {
 pub struct Shape {
   // private fields
 }
-pub fn Shape::arc(Self, Double, Double, Double, Double, Double, Double, ArcMode) -> Unit
+pub fn Shape::arc(Self, Double, Double, Double, Double, Double, Double, ArcMode?) -> Unit
 pub fn Shape::begin_contour(Self, kind? : ShapeKind) -> Unit
 pub fn Shape::begin_shape(Self, kind? : ShapeKind) -> Unit
 pub fn Shape::bezier_vertex(Self, Double, Double) -> Unit

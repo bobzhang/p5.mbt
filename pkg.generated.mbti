@@ -573,7 +573,7 @@ pub(open) trait Surface {
   fn restore(Self) -> Unit
   fn fill_path(Self, Array[@shape.PathCmd], String) -> Unit
   fn stroke_path(Self, Array[@shape.PathCmd], String, Double, StrokeCap, StrokeJoin) -> Unit
-  fn clip(Self, Array[@shape.PathCmd]) -> Unit
+  fn clip(Self, @math.Matrix2D, Array[(Array[@shape.PathCmd], @math.Matrix2D)]) -> Unit
   fn fill_rect(Self, Double, Double, Double, Double, String) -> Unit
   fn clear_rect(Self, Double, Double, Double, Double) -> Unit
   fn set_blend_mode(Self, BlendMode) -> Unit

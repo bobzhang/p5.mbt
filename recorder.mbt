@@ -87,8 +87,14 @@ pub impl Surface for Recorder with fn stroke_path(
 }
 
 ///|
-pub impl Surface for Recorder with fn clip(self, path) {
-  self.log.push("clip \{path_str(path)}")
+pub impl Surface for Recorder with fn clip(self, base, parts) {
+  let ps = parts.map(part => {
+    let (path, m) = part
+    "[\{num(m.a)} \{num(m.b)} \{num(m.c)} \{num(m.d)} \{num(m.e)} \{num(m.f)}] \{path_str(path)}"
+  })
+  self.log.push(
+    "clip base=\{num(base.a)} \{num(base.b)} \{num(base.c)} \{num(base.d)} \{num(base.e)} \{num(base.f)} \{ps.join(" | ")}",
+  )
 }
 
 ///|

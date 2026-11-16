@@ -23,7 +23,7 @@ priv enum PrimKind {
   TriangleFanP
   TriangleStripP
   QuadStripP
-  ArcP(Double, Double, Double, Double, Double, Double, ArcMode)
+  ArcP(Double, Double, Double, Double, Double, Double, ArcMode?)
   EllipseP(Double, Double, Double, Double)
   RectP(Double, Double, Double, Double, (Double, Double, Double, Double)?)
 }
@@ -344,7 +344,7 @@ pub fn Shape::arc(
   h : Double,
   start : Double,
   stop : Double,
-  mode : ArcMode,
+  mode : ArcMode?,
 ) -> Unit {
   self.begin_shape()
   let cx = x + w / 2

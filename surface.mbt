@@ -10,7 +10,7 @@ pub(open) trait Surface {
   fn restore(Self) -> Unit
   fn fill_path(Self, @shape.Path, String) -> Unit
   fn stroke_path(Self, @shape.Path, String, Double, StrokeCap, StrokeJoin) -> Unit
-  fn clip(Self, @shape.Path) -> Unit
+  fn clip(Self, Matrix2D, Array[(@shape.Path, Matrix2D)]) -> Unit
   fn fill_rect(Self, Double, Double, Double, Double, String) -> Unit
   fn clear_rect(Self, Double, Double, Double, Double) -> Unit
   fn set_blend_mode(Self, BlendMode) -> Unit
@@ -146,8 +146,17 @@ pub impl Surface for CanvasSurface with fn stroke_path(
 }
 
 ///|
-pub impl Surface for CanvasSurface with fn clip(self, path) {
-  @dom.clip_path(self.ctx, to_path2d(path))
+/// Clips to the union of `parts`, each drawn with its transform relative to
+/// `base` (like p5's clip path built with `Path2D.addPath`).
+pub impl Surface for CanvasSurface with fn clip(self, base, parts) {
+  let clip = @dom.path_new()
+  for part in parts {
+    let (path, m) = part
+    @dom.path_add_path(clip, to_path2d(path), m.a, m.b, m.c, m.d, m.e, m.f)
+    @dom.path_close(clip)
+  }
+  @dom.set_transform(self.ctx, base.a, base.b, base.c, base.d, base.e, base.f)
+  @dom.clip_path(self.ctx, clip)
 }
 
 ///|

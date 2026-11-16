@@ -148,12 +148,12 @@ pub fn P5::atan2(self : P5, y : Double, x : Double) -> Double {
 ///|
 /// Creates a vector, like p5's `createVector(x, y, z)`.
 pub fn P5::create_vector(
-  _self : P5,
+  self : P5,
   x : Double,
   y : Double,
   z~ : Double = 0,
 ) -> Vector {
-  Vector(x, y, z~)
+  Vector::with_angle_mode(x, y, z~, degrees=self.degrees)
 }
 
 ///|

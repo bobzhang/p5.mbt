@@ -124,13 +124,15 @@ pub struct P5 {
   priv mut clip_depth : Int32
   priv mut clipping : Bool
   priv mut clip_invert : Bool
-  priv clip_path : @shape.Path
+  priv clip_parts : Array[(@shape.Path, Matrix2D)]
+  priv mut clip_base : Matrix2D
   priv mut pending_loads : Int32
   priv mut on_loads_done : () -> Unit
   priv mut is_main : Bool
   priv mut erase_strength : (Double, Double)
   priv mut font_counter : Int32
   priv mut recording : Recording?
+  priv degrees : Ref[Bool]
   priv mut container : String
 }
 
@@ -208,13 +210,15 @@ fn P5::make(
     clip_depth: 0,
     clipping: false,
     clip_invert: false,
-    clip_path: [],
+    clip_parts: [],
+    clip_base: @math.identity,
     pending_loads: 0,
     on_loads_done: () => (),
     is_main: false,
     erase_strength: (255, 255),
     font_counter: 0,
     recording: None,
+    degrees: Ref(false),
     container: "",
   }
 }

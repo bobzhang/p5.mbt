@@ -153,8 +153,7 @@ test "clipping" {
     rec.take().join("\n"),
     content=(
       #|save
-      #|transform 1 0 0 1 0 0
-      #|clip M10,0 L30,0 L30,20 L10,20 Z
+      #|clip base=1 0 0 1 0 0 [1 0 0 1 10 0] R0,0,20,20
       #|transform 1 0 0 1 10 0
       #|fill #ffffff M5,0 E0,0,5,5,0,6.283
       #|restore
@@ -217,4 +216,24 @@ test "random and noise are seedable" {
   p.angle_mode(Degrees)
   inspect(@p5.round(p.sin(90)), content="1")
   inspect(p.atan2(1, 0), content="90")
+}
+
+///|
+test "vectors from create_vector follow the angle mode, like p5.js" {
+  let (p, _) = sketch()
+  let v = p.create_vector(1, 0)
+  p.angle_mode(Degrees)
+  v.rotate(90)
+  inspect(@p5.round(v.heading()), content="90")
+  p.angle_mode(Radians)
+  inspect(@p5.round(v.heading(), decimals=4), content="1.5708")
+  // plain vectors always use radians
+  let w = @p5.Vector(0, 1)
+  p.angle_mode(Degrees)
+  inspect(@p5.round(w.heading(), decimals=4), content="1.5708")
+  // push/pop do not save the angle mode
+  p.push()
+  p.angle_mode(Radians)
+  p.pop()
+  debug_inspect(p.get_angle_mode(), content="Radians")
 }
