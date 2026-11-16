@@ -6,6 +6,7 @@ package "bobzhang/p5/parity/cases"
 // Errors
 
 // Types and methods
+type Case
 
 // Type aliases
 

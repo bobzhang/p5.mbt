@@ -7,18 +7,32 @@ const only = new URLSearchParams(location.search).get('case');
 
 function cell(row) { const td = document.createElement('td'); row.appendChild(td); return td; }
 
-function renderP5(draw, w, h, host) {
-  return new Promise(resolve => {
+function renderP5(draw, w, h, host, load) {
+  return new Promise((resolve, reject) => {
     new p5(p => {
-      p.setup = () => {
-        p.createCanvas(w, h);
-        p.pixelDensity(1);
-        p.randomSeed(1);
-        p.noLoop();
-        draw(p);
-        resolve(p.canvas);
+      p.setup = async () => {
+        try {
+          p.createCanvas(w, h);
+          p.pixelDensity(1);
+          p.randomSeed(1);
+          p.noLoop();
+          const data = load ? await load(p) : undefined;
+          draw(p, data);
+          resolve(p.canvas);
+        } catch (e) { reject(e); }
       };
     }, host);
+  });
+}
+
+function renderMbt(name, host) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timed out')), 10000);
+    const ok = globalThis.p5mbt_render(name, host.id, () => {
+      clearTimeout(timer);
+      resolve(host.querySelector('canvas'));
+    });
+    if (!ok) { clearTimeout(timer); reject(new Error('unknown case')); }
   });
 }
 
@@ -28,7 +42,7 @@ function pixelsOf(canvas) {
 
 async function run() {
   const results = [];
-  for (const [name, [w, h, draw]] of Object.entries(cases)) {
+  for (const [name, [w, h, draw, load]] of Object.entries(cases)) {
     if (only && only !== name) continue;
     const row = document.createElement('tr');
     document.getElementById('rows').appendChild(row);
@@ -39,11 +53,10 @@ async function run() {
     const r = cell(row);
     let jsCanvas, mbtCanvas;
     try {
-      jsCanvas = await renderP5(draw, w, h, a);
+      jsCanvas = await renderP5(draw, w, h, a, load);
     } catch (e) { r.innerHTML = `<span class=bad>p5.js error: ${e}</span>`; results.push({ name, error: String(e) }); continue; }
     try {
-      if (!globalThis.p5mbt_render(name, b.id)) throw new Error('unknown case');
-      mbtCanvas = b.querySelector('canvas');
+      mbtCanvas = await renderMbt(name, b);
     } catch (e) { r.innerHTML = `<span class=bad>p5.mbt error: ${e}</span>`; results.push({ name, error: String(e) }); continue; }
     const pa = pixelsOf(jsCanvas), pb = pixelsOf(mbtCanvas);
     const diff = document.createElement('canvas'); diff.width = w; diff.height = h; d.appendChild(diff);

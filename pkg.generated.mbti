@@ -223,16 +223,25 @@ pub struct Image {
   mut pixels : FixedArray[Byte]
   // private fields
 }
+pub fn[I : ImageSource] Image::blend_from(Self, I, Double, Double, Double, Double, Double, Double, Double, Double, BlendMode) -> Unit
 pub fn Image::copy(Self) -> Self
 pub fn[I : ImageSource] Image::copy_from(Self, I, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn Image::delay(Self, Double, index? : Int32) -> Unit
 pub fn Image::filter(Self, Filter) -> Unit
 pub fn Image::get(Self, Double, Double) -> @color.Color
+pub fn Image::get_current_frame(Self) -> Int32
 pub fn Image::get_region(Self, Double, Double, Double, Double) -> Self
 pub fn Image::load_pixels(Self) -> Unit
 pub fn[I : ImageSource] Image::mask(Self, I) -> Unit
+pub fn Image::num_frames(Self) -> Int32
+pub fn Image::pause(Self) -> Unit
+pub fn Image::play(Self) -> Unit
+pub fn Image::reset(Self) -> Unit
 pub fn Image::resize(Self, Double, Double) -> Unit
 pub fn Image::save(Self, filename? : String) -> Unit
+pub fn Image::save_as(Self, String, ext? : String) -> Unit
 pub fn Image::set(Self, Double, Double, @color.Color) -> Unit
+pub fn Image::set_frame(Self, Int32) -> Unit
 pub fn Image::update_pixels(Self) -> Unit
 pub impl ImageSource for Image
 
@@ -287,6 +296,7 @@ pub fn P5::bezier(Self, Double, Double, Double, Double, Double, Double, Double, 
 pub fn P5::bezier_order(Self, Int32) -> Unit
 pub fn P5::bezier_vertex(Self, Double, Double) -> Unit
 pub fn P5::bezier_vertex3(Self, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn[I : ImageSource] P5::blend(Self, I, Double, Double, Double, Double, Double, Double, Double, Double, BlendMode) -> Unit
 pub fn P5::blend_mode(Self, BlendMode) -> Unit
 pub fn[C : ColorArg] P5::blue(Self, C) -> Double
 pub fn[C : ColorArg] P5::brightness(Self, C) -> Double
@@ -298,6 +308,7 @@ pub fn[C : ColorArg] P5::color(Self, C) -> @color.Color
 pub fn P5::color_mode(Self, @color.ColorMode) -> Unit
 pub fn P5::color_mode_max(Self, @color.ColorMode, Double) -> Unit
 pub fn P5::color_mode_maxes(Self, @color.ColorMode, Double, Double, Double, max_alpha? : Double) -> Unit
+pub fn[I : ImageSource] P5::copy(Self, I, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::cos(Self, Double) -> Double
 pub fn P5::create_a(Self, String, String, target? : String) -> Element
 pub fn P5::create_button(Self, String) -> Element
@@ -406,6 +417,8 @@ pub fn P5::rng(Self) -> @math.Random
 pub fn P5::rotate(Self, Double) -> Unit
 pub fn[C : ColorArg] P5::saturation(Self, C) -> Double
 pub fn P5::save_canvas(Self, filename? : String, ext? : String) -> Unit
+pub fn P5::save_frames(Self, String, String, duration? : Double, fps? : Double, on_done? : (Array[SavedFrame]) -> Unit) -> Unit
+pub fn P5::save_gif(Self, String, Double, delay? : Double, units? : String, silent? : Bool, reset? : Bool, on_done? : () -> Unit) -> Unit
 pub fn P5::scale(Self, Double, y? : Double) -> Unit
 pub fn P5::screen_to_world(Self, Double, Double) -> (Double, Double)
 pub fn[C : ColorArg] P5::set(Self, Double, Double, C) -> Unit
@@ -459,6 +472,12 @@ pub struct Recorder {
 pub fn Recorder::new() -> Self
 pub fn Recorder::take(Self) -> Array[String]
 pub impl Surface for Recorder
+
+pub(all) struct SavedFrame {
+  image_data : String
+  filename : String
+  ext : String
+}
 
 #derive(Eq, @debug.Debug)
 pub(all) enum StrokeCap {
@@ -559,6 +578,7 @@ pub impl[A : Num, B : Num, C : Num, D : Num] ColorArg for (A, B, C, D)
 
 pub(open) trait ImageSource {
   fn image_source(Self) -> (@dom.ImageElement, Int32, Int32, Double, Double)?
+  fn advance(Self, Double) -> Unit = _
 }
 
 pub(open) trait Num {

@@ -42,6 +42,8 @@ pub fn display_width() -> Double
 
 pub fn document_has_focus() -> Bool
 
+pub fn download_bytes(FixedArray[Byte], String, String) -> Unit
+
 pub fn download_text(String, String, String) -> Unit
 
 pub fn download_url(String, String) -> Unit
@@ -55,6 +57,8 @@ pub fn element_exists(Element) -> Bool
 pub fn element_height(Element) -> Double
 
 pub fn element_width(Element) -> Double
+
+pub fn fetch_bytes(String, (FixedArray[Byte]) -> Unit, (String) -> Unit) -> Unit
 
 pub fn fetch_text(String, (String) -> Unit, (String) -> Unit) -> Unit
 

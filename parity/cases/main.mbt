@@ -2,8 +2,16 @@
 // The page calls `p5mbt_render(name, container)` for each case.
 
 ///|
-fn cases() -> Map[String, (Double, Double, (@p5.P5) -> Unit)] {
-  {
+struct Case {
+  w : Double
+  h : Double
+  draw : (@p5.P5) -> Unit
+  preload : ((@p5.P5) -> Unit)?
+}
+
+///|
+fn cases() -> Map[String, Case] {
+  let sync : Map[String, (Double, Double, (@p5.P5) -> Unit)] = {
     "basics": (200, 150, basics),
     "modes": (220, 160, modes),
     "rounded": (200, 120, rounded),
@@ -24,7 +32,108 @@ fn cases() -> Map[String, (Double, Double, (@p5.P5) -> Unit)] {
     "random_noise": (200, 200, random_noise),
     "vectors_trig": (200, 200, vectors_trig),
     "pixels": (100, 80, pixels),
+    "copy_blend": (240, 160, copy_blend),
+    "image_modes": (240, 160, image_modes),
+    "filter_gray": (120, 90, p => filtered(p, Gray)),
+    "filter_invert": (120, 90, p => filtered(p, Invert)),
+    "filter_threshold": (120, 90, p => filtered(p, Threshold(0.4))),
+    "filter_posterize": (120, 90, p => filtered(p, Posterize(3))),
+    "filter_erode": (120, 90, p => filtered(p, Erode)),
+    "filter_dilate": (120, 90, p => filtered(p, Dilate)),
+    "filter_blur": (120, 90, p => filtered(p, Blur(3))),
   }
+  let all : Map[String, Case] = Map([])
+  for name, c in sync {
+    all[name] = { w: c.0, h: c.1, draw: c.2, preload: None, }
+  }
+  // gif_frames needs the image loaded first
+  let img : Ref[@p5.Image?] = Ref(None)
+  all["gif_frames"] = {
+    w: 300,
+    h: 160,
+    preload: Some(p => {
+      img.val = Some(p.load_image("../examples/assets/testcard.gif"))
+    }),
+    draw: p => if img.val is Some(img) { gif_frames(p, img) },
+  }
+  all
+}
+
+///|
+fn gif_frames(p : @p5.P5, img : @p5.Image) -> Unit {
+  p.background(255)
+  img.pause()
+  p.image(img, 0, 0)
+  img.set_frame(5)
+  p.image(img, 100, 0)
+  img.set_frame(11)
+  p.image(img, 200, 0, w=48, h=36)
+  p.fill(0)
+  p.no_stroke()
+  p.text_size(14)
+  p.text("\{img.num_frames()} frames, now \{img.get_current_frame()}", 10, 110)
+}
+
+///|
+fn copy_blend(p : @p5.P5) -> Unit {
+  p.background(240)
+  p.no_stroke()
+  for i in 0..<6 {
+    p.fill((i * 40, 120, 255 - i * 40))
+    p.circle(15 + i.to_double() * 8, 25, 30)
+  }
+  p.copy(p, 0, 0, 80, 50, 100, 0, 140, 90)
+  p.fill((250, 200, 0))
+  p.rect(0, 100, 240, 60)
+  p.blend(p, 0, 0, 80, 50, 20, 105, 80, 50, Multiply)
+  p.blend(p, 0, 0, 80, 50, 130, 105, 80, 50, Difference)
+}
+
+///|
+fn image_modes(p : @p5.P5) -> Unit {
+  p.background(255)
+  let img = p.create_image(40, 30)
+  img.load_pixels()
+  for y in 0..<30 {
+    for x in 0..<40 {
+      let i = 4 * (y * 40 + x)
+      img.pixels[i] = (x * 6).to_byte()
+      img.pixels[i + 1] = (y * 8).to_byte()
+      img.pixels[i + 2] = 200
+      img.pixels[i + 3] = 255
+    }
+  }
+  img.update_pixels()
+  p.image(img, 5, 5)
+  p.image_mode(Center)
+  p.image(img, 120, 40, w=80, h=60)
+  p.image_mode(Corners)
+  p.image(img, 170, 10, w=230, h=70)
+  p.image_mode(Corner)
+  p.tint((255, 120, 120))
+  p.image(img, 5, 90, w=60, h=45)
+  p.tint((255, 128))
+  p.image(img, 80, 90, w=60, h=45)
+  p.no_tint()
+  p.image_region(img, 150, 90, 80, 60, 10, 5, 20, 15)
+}
+
+///|
+fn gradient_scene(p : @p5.P5) -> Unit {
+  p.background((30, 60, 90))
+  p.no_stroke()
+  for i in 0..<10 {
+    p.fill((25 * i, 255 - 20 * i, 120))
+    p.circle(10 + i.to_double() * 11, 45 + 25 * @cmath.sin(i.to_double()), 26)
+  }
+  p.fill(255)
+  p.rect(80, 10, 30, 12)
+}
+
+///|
+fn filtered(p : @p5.P5, f : @p5.Filter) -> Unit {
+  gradient_scene(p)
+  p.filter(f)
 }
 
 ///|
@@ -492,22 +601,26 @@ fn pixels(p : @p5.P5) -> Unit {
 }
 
 ///|
-extern "js" fn expose(render : (String, String) -> Bool) -> Unit = "(f) => { globalThis.p5mbt_render = f; }"
+extern "js" fn expose(render : (String, String, () -> Unit) -> Bool) -> Unit = "(f) => { globalThis.p5mbt_render = f; }"
 
 ///|
 fn main {
   let all = cases()
-  expose((name, container) => {
-    guard all.get(name) is Some((w, h, draw)) else { return false }
+  expose((name, container, done) => {
+    guard all.get(name) is Some(c) else { return false }
     @p5.run(
       container~,
       seed=1,
+      preload?=c.preload,
       setup=p => {
-        p.create_canvas(w, h)
+        p.create_canvas(c.w, c.h)
         p.pixel_density(1)
         p.no_loop()
       },
-      draw~,
+      draw=p => {
+        (c.draw)(p)
+        done()
+      },
     )
     true
   })

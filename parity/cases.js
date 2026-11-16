@@ -183,4 +183,47 @@ export const cases = {
     p.set(10, 10, p.color(255)); p.set(11, 10, p.color(255)); p.updatePixels();
     const c = p.get(50, 40); p.fill(c); p.noStroke(); p.rect(60, 50, 30, 20);
   }],
+  gif_frames: [300, 160, (p, img) => {
+    p.background(255); img.pause();
+    p.image(img, 0, 0);
+    img.setFrame(5); p.image(img, 100, 0);
+    img.setFrame(11); p.image(img, 200, 0, 48, 36);
+    p.fill(0); p.noStroke(); p.textSize(14);
+    p.text(img.numFrames() + ' frames, now ' + img.getCurrentFrame(), 10, 110);
+  }, async p => await p.loadImage('../examples/assets/testcard.gif')],
+  copy_blend: [240, 160, p => {
+    p.background(240); p.noStroke();
+    for (let i = 0; i < 6; i++) { p.fill(i * 40, 120, 255 - i * 40); p.circle(15 + i * 8, 25, 30); }
+    p.copy(0, 0, 80, 50, 100, 0, 140, 90);
+    p.fill(250, 200, 0); p.rect(0, 100, 240, 60);
+    p.blend(0, 0, 80, 50, 20, 105, 80, 50, p.MULTIPLY);
+    p.blend(0, 0, 80, 50, 130, 105, 80, 50, p.DIFFERENCE);
+  }],
+  image_modes: [240, 160, p => {
+    p.background(255);
+    const img = p.createImage(40, 30); img.loadPixels();
+    for (let y = 0; y < 30; y++) for (let x = 0; x < 40; x++) {
+      const i = 4 * (y * 40 + x); img.pixels[i] = x * 6; img.pixels[i + 1] = y * 8; img.pixels[i + 2] = 200; img.pixels[i + 3] = 255;
+    }
+    img.updatePixels();
+    p.image(img, 5, 5);
+    p.imageMode(p.CENTER); p.image(img, 120, 40, 80, 60);
+    p.imageMode(p.CORNERS); p.image(img, 170, 10, 230, 70);
+    p.imageMode(p.CORNER); p.tint(255, 120, 120); p.image(img, 5, 90, 60, 45);
+    p.tint(255, 128); p.image(img, 80, 90, 60, 45);
+    p.noTint(); p.image(img, 150, 90, 80, 60, 10, 5, 20, 15);
+  }],
+  filter_gray: [120, 90, p => { gradientScene(p); p.filter(p.GRAY, false); }],
+  filter_invert: [120, 90, p => { gradientScene(p); p.filter(p.INVERT, false); }],
+  filter_threshold: [120, 90, p => { gradientScene(p); p.filter(p.THRESHOLD, 0.4, false); }],
+  filter_posterize: [120, 90, p => { gradientScene(p); p.filter(p.POSTERIZE, 3, false); }],
+  filter_erode: [120, 90, p => { gradientScene(p); p.filter(p.ERODE, false); }],
+  filter_dilate: [120, 90, p => { gradientScene(p); p.filter(p.DILATE, false); }],
+  filter_blur: [120, 90, p => { gradientScene(p); p.filter(p.BLUR, 3, false); }],
 };
+
+function gradientScene(p) {
+  p.background(30, 60, 90); p.noStroke();
+  for (let i = 0; i < 10; i++) { p.fill(25 * i, 255 - 20 * i, 120); p.circle(10 + i * 11, 45 + 25 * Math.sin(i), 26); }
+  p.fill(255); p.rect(80, 10, 30, 12);
+}

@@ -156,74 +156,122 @@ pub fn erode(pixels : FixedArray[Byte], width : Int32) -> Unit {
 }
 
 ///|
-/// Box blur with the given radius (in pixels), three passes to approximate
-/// a Gaussian. Alpha-weighted so transparent pixels don't darken edges.
+/// Blurs with p5's `blurARGB`: a triangular kernel of radius
+/// `trunc(radius × 3.5)` (clamped to 1–248), applied horizontally then
+/// vertically on the packed ARGB values.
 pub fn blur(pixels : FixedArray[Byte], width : Int32, radius : Double) -> Unit {
-  let r = radius.round().to_int()
-  if r < 1 || width <= 0 {
+  if width <= 0 {
     return
   }
   let height = pixels.length() / 4 / width
-  let buf = FixedArray::make(pixels.length(), 0.0)
-  for i in 0..<(pixels.length() / 4) {
-    let a = pixels[i * 4 + 3].to_double() / 255
-    buf[i * 4] = pixels[i * 4].to_double() * a
-    buf[i * 4 + 1] = pixels[i * 4 + 1].to_double() * a
-    buf[i * 4 + 2] = pixels[i * 4 + 2].to_double() * a
-    buf[i * 4 + 3] = a
+  let n = width * height
+  let mut r = (radius * 3.5).trunc().to_int()
+  r = if r < 1 { 1 } else if r < 248 { r } else { 248 }
+  let size = (1 + r) << 1
+  // kernel and multiplication tables
+  let kernel = FixedArray::make(size, 0L)
+  let mut radiusi = r - 1
+  for i in 1..<r {
+    let bki = (radiusi * radiusi).to_int64()
+    kernel[r + i] = bki
+    kernel[radiusi] = bki
+    radiusi -= 1
   }
-  let tmp = FixedArray::make(pixels.length(), 0.0)
-  let pass = (
-    src : FixedArray[Double],
-    dst : FixedArray[Double],
-    horizontal : Bool,
-  ) => {
-    let (outer, inner) = if horizontal {
-      (height, width)
-    } else {
-      (width, height)
+  kernel[r] = (r * r).to_int64()
+  let mult = (k : Int32, v : Int32) => kernel[k] * v.to_int64()
+  let a = FixedArray::make(n, 0)
+  let rr = FixedArray::make(n, 0)
+  let g = FixedArray::make(n, 0)
+  let b = FixedArray::make(n, 0)
+  for j in 0..<n {
+    a[j] = pixels[j * 4 + 3].to_int()
+    rr[j] = pixels[j * 4].to_int()
+    g[j] = pixels[j * 4 + 1].to_int()
+    b[j] = pixels[j * 4 + 2].to_int()
+  }
+  let a2 = FixedArray::make(n, 0)
+  let r2 = FixedArray::make(n, 0)
+  let g2 = FixedArray::make(n, 0)
+  let b2 = FixedArray::make(n, 0)
+  // horizontal pass
+  let mut yi = 0
+  for _y in 0..<height {
+    for x in 0..<width {
+      let mut ca = 0L
+      let mut cr = 0L
+      let mut cg = 0L
+      let mut cb = 0L
+      let mut sum = 0L
+      let mut read = x - r
+      let bk0 = if read < 0 {
+        let k = -read
+        read = 0
+        k
+      } else {
+        0
+      }
+      for i in bk0..<size {
+        if read >= width {
+          break
+        }
+        let c = read + yi
+        ca += mult(i, a[c])
+        cr += mult(i, rr[c])
+        cg += mult(i, g[c])
+        cb += mult(i, b[c])
+        sum += kernel[i]
+        read += 1
+      }
+      let ri = yi + x
+      a2[ri] = (ca / sum).to_int()
+      r2[ri] = (cr / sum).to_int()
+      g2[ri] = (cg / sum).to_int()
+      b2[ri] = (cb / sum).to_int()
     }
-    for o in 0..<outer {
-      let idx = (k : Int32) => {
-        if horizontal {
-          (o * width + k) * 4
-        } else {
-          (k * width + o) * 4
+    yi += width
+  }
+  // vertical pass
+  yi = 0
+  let mut ym = -r
+  let mut ymi = ym * width
+  for _y in 0..<height {
+    for x in 0..<width {
+      let mut ca = 0L
+      let mut cr = 0L
+      let mut cg = 0L
+      let mut cb = 0L
+      let mut sum = 0L
+      let (bk0, ri0, read0) = if ym < 0 {
+        (-ym, -ym, x)
+      } else {
+        (0, ym, x + ymi)
+      }
+      let mut ri = ri0
+      let mut read = read0
+      if ym < height {
+        for i in bk0..<size {
+          if ri >= height {
+            break
+          }
+          ca += mult(i, a2[read])
+          cr += mult(i, r2[read])
+          cg += mult(i, g2[read])
+          cb += mult(i, b2[read])
+          sum += kernel[i]
+          ri += 1
+          read += width
         }
       }
-      for c in 0..<4 {
-        let mut sum = 0.0
-        let mut n = 0
-        for k in 0..<=r.min(inner - 1) {
-          sum += src[idx(k) + c]
-          n += 1
-        }
-        for k in 0..<inner {
-          dst[idx(k) + c] = sum / n.to_double()
-          let add = k + r + 1
-          let sub = k - r
-          if add < inner {
-            sum += src[idx(add) + c]
-            n += 1
-          }
-          if sub >= 0 {
-            sum -= src[idx(sub) + c]
-            n -= 1
-          }
-        }
+      let o = (x + yi) * 4
+      if sum > 0L {
+        pixels[o] = (cr / sum).to_int().to_byte()
+        pixels[o + 1] = (cg / sum).to_int().to_byte()
+        pixels[o + 2] = (cb / sum).to_int().to_byte()
+        pixels[o + 3] = (ca / sum).to_int().to_byte()
       }
     }
-  }
-  for _ in 0..<3 {
-    pass(buf, tmp, true)
-    pass(tmp, buf, false)
-  }
-  for i in 0..<(pixels.length() / 4) {
-    let a = buf[i * 4 + 3]
-    let inv = if a > 0 { 1.0 / a } else { 0 }
-    pixels[i * 4] = clamp_byte(buf[i * 4] * inv)
-    pixels[i * 4 + 1] = clamp_byte(buf[i * 4 + 1] * inv)
-    pixels[i * 4 + 2] = clamp_byte(buf[i * 4 + 2] * inv)
-    pixels[i * 4 + 3] = clamp_byte(a * 255)
+    yi += width
+    ymi += width
+    ym += 1
   }
 }

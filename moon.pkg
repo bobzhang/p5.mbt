@@ -5,6 +5,7 @@ import {
   "bobzhang/p5/shape",
   "bobzhang/p5/dom",
   "bobzhang/p5/filters",
+  "bobzhang/p5/gif",
   "moonbitlang/core/string",
   "moonbitlang/core/json",
   "moonbitlang/core/double",

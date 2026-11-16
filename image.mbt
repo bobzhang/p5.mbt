@@ -14,6 +14,19 @@ pub struct Image {
   mut pixels : FixedArray[Byte]
   priv canvas : @dom.Canvas
   priv surface : &Surface
+  priv mut gif : GifState?
+}
+
+///|
+/// Playback state of an animated GIF (p5's `gifProperties`).
+priv struct GifState {
+  frames : Array[(FixedArray[Byte], Double)]
+  mut display_index : Int32
+  loop_limit : Int32?
+  mut loop_count : Int32
+  mut playing : Bool
+  mut time_displayed : Double
+  mut last_change_time : Double
 }
 
 ///|
@@ -27,6 +40,7 @@ fn Image::with_size(w : Double, h : Double) -> Image {
     pixels: [],
     canvas,
     surface: CanvasSurface::new(canvas),
+    gif: None,
   }
 }
 
@@ -47,6 +61,14 @@ pub(open) trait ImageSource {
   /// The source element, its size in device pixels and its size in logical
   /// pixels.
   fn image_source(Self) -> (@dom.ImageElement, Int32, Int32, Double, Double)?
+  /// Called before the source is drawn at time `now` (ms), so animated
+  /// sources can advance.
+  fn advance(Self, now : Double) -> Unit = _
+}
+
+///|
+impl ImageSource with fn advance(_self, _now) {
+
 }
 
 ///|
@@ -276,8 +298,16 @@ pub fn P5::create_image(_self : P5, w : Double, h : Double) -> Image {
 }
 
 ///|
+fn repr_error(e : @gif.GifError) -> String {
+  match e {
+    GifError(msg) => msg
+  }
+}
+
+///|
 /// Loads an image from a URL. The returned image is 1×1 until it has
-/// loaded; when called in `preload`, `setup` waits for it.
+/// loaded; when called in `preload`, `setup` waits for it. Animated GIFs are
+/// decoded frame by frame and play when drawn with `image()`.
 pub fn P5::load_image(
   self : P5,
   url : String,
@@ -285,23 +315,49 @@ pub fn P5::load_image(
 ) -> Image {
   let img = Image::with_size(1, 1)
   self.begin_load()
-  @dom.load_image(
-    url,
-    (elt, w, h) => {
-      img.width = w.to_double()
-      img.height = h.to_double()
-      @dom.resize_canvas(img.canvas, img.width, img.height, 1)
-      @dom.blit(img.canvas, elt, img.width, img.height)
-      if on_load is Some(f) {
-        f(img)
-      }
-      self.end_load()
-    },
-    msg => {
-      warn(msg)
-      self.end_load()
-    },
-  )
+  let loaded = () => {
+    if on_load is Some(f) {
+      f(img)
+    }
+    self.end_load()
+  }
+  let failed = (msg : String) => {
+    warn(msg)
+    self.end_load()
+  }
+  let path = match url.find("?") {
+    Some(i) =>
+      url.to_array()[:i].iter().fold(init="", (s, c) => s + c.to_string())
+    None => url
+  }
+  if path.to_lower().has_suffix(".gif") {
+    // Animated GIFs are decoded in MoonBit, like p5 does with omggif.
+    @dom.fetch_bytes(
+      url,
+      bytes => {
+        img.load_gif_bytes(Bytes::from_iter(bytes.iter())) catch {
+          e => {
+            failed("Could not decode GIF \{url}: \{repr_error(e)}")
+            return
+          }
+        }
+        loaded()
+      },
+      failed,
+    )
+  } else {
+    @dom.load_image(
+      url,
+      (elt, w, h) => {
+        img.width = w.to_double()
+        img.height = h.to_double()
+        @dom.resize_canvas(img.canvas, img.width, img.height, 1)
+        @dom.blit(img.canvas, elt, img.width, img.height)
+        loaded()
+      },
+      failed,
+    )
+  }
   img
 }
 
@@ -356,6 +412,13 @@ pub fn[I : ImageSource] P5::image_region(
   sw : Double,
   sh : Double,
 ) -> Unit {
+  img.advance(
+    if self.recording is Some(_) || !self.is_main {
+      self.last_real_frame_time
+    } else {
+      @dom.now()
+    },
+  )
   guard img.image_source() is Some((elt, pw, ph, lw, _)) else { return }
   let (x, y, w, h) = @shape.mode_adjust(dx, dy, dw, dh, self.state.image_mode)
   let (w, h) = if self.state.image_mode is Corner { (dw, dh) } else { (w, h) }
@@ -477,14 +540,11 @@ pub fn[C : ColorArg] P5::set(self : P5, x : Double, y : Double, c : C) -> Unit {
 }
 
 ///|
-/// Applies a filter to the whole canvas.
+/// Applies a filter to the whole canvas, on the CPU (like p5's
+/// `filter(type, param, false)`).
 pub fn P5::filter(self : P5, f : Filter) -> Unit {
   let (w, _) = self.device_size()
   self.load_pixels()
-  let f = match f {
-    Blur(r) => Blur(r * self.density)
-    other => other
-  }
   apply_filter(self.pixels, w, f)
   self.update_pixels()
 }
