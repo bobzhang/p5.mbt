@@ -6,6 +6,8 @@ pub fn add_class(Element, String) -> Unit
 
 pub fn add_option(Element, String, String) -> Unit
 
+pub fn append_child(Element, Element) -> Unit
+
 pub fn apply_mask(Canvas, ImageElement) -> Unit
 
 pub fn blit(Canvas, ImageElement, Double, Double) -> Unit
@@ -17,6 +19,8 @@ pub fn canvas_element(Canvas) -> Element
 pub fn canvas_height(Canvas) -> Int32
 
 pub fn canvas_width(Canvas) -> Int32
+
+pub fn center_element(Element, String) -> Unit
 
 pub fn clear_rect(Context2D, Double, Double, Double, Double) -> Unit
 
@@ -30,7 +34,11 @@ pub fn copy_region(Canvas, ImageElement, Double, Double, Double, Double, Double,
 
 pub fn create_canvas(Double, Double, Double, String, Bool) -> Canvas
 
+pub fn create_capture(Bool, Bool, Bool, String, (Int32, Int32) -> Unit, (String) -> Unit) -> Element
+
 pub fn create_element(String, String, String) -> Element
+
+pub fn create_media(String, FixedArray[String], String, (Int32, Int32) -> Unit, () -> Unit) -> Element
 
 pub fn date_part(Int32) -> Int32
 
@@ -52,6 +60,10 @@ pub fn draw_image(Context2D, ImageElement, Double, Double, Double, Double, Doubl
 
 pub fn draw_tinted_image(Context2D, ImageElement, Int32, Int32, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 
+pub fn element_as_image(Element) -> ImageElement
+
+pub fn element_attr_size(Element) -> FixedArray[Double]
+
 pub fn element_exists(Element) -> Bool
 
 pub fn element_height(Element) -> Double
@@ -64,6 +76,8 @@ pub fn fetch_bytes(String, (FixedArray[Byte]) -> Unit, (String) -> Unit) -> Unit
 
 pub fn fetch_text(String, (String) -> Unit, (String) -> Unit) -> Unit
 
+pub fn file_info(File) -> FixedArray[String]
+
 pub fn fill_path(Context2D, Path2D, String) -> Unit
 
 pub fn fill_rect(Context2D, Double, Double, Double, Double, String) -> Unit
@@ -74,6 +88,8 @@ pub fn get_attribute(Element, String) -> String
 
 pub fn get_checked(Element) -> Bool
 
+pub fn get_class(Element) -> String
+
 pub fn get_context(Canvas) -> Context2D
 
 pub fn get_html(Element) -> String
@@ -83,6 +99,8 @@ pub fn get_image_data(Context2D, Int32, Int32, Int32, Int32) -> ImageData
 pub fn get_style(Element, String) -> String
 
 pub fn get_value(Element) -> String
+
+pub fn has_class(Element, String) -> Bool
 
 pub fn has_query_param(String) -> Bool
 
@@ -110,9 +128,33 @@ pub fn load_font(String, String, (String) -> Unit, (String) -> Unit) -> Unit
 
 pub fn load_image(String, (ImageElement, Int32, Int32) -> Unit, (String) -> Unit) -> Unit
 
+pub fn make_draggable(Element, Element) -> Unit
+
 pub fn math_random() -> Double
 
 pub fn measure_text(Context2D, String) -> FixedArray[Double]
+
+pub fn media_get_number(Element, String) -> Double
+
+pub fn media_on_ended(Element, () -> Unit) -> Unit
+
+pub fn media_on_time_update(Element, (Double) -> Unit) -> Unit
+
+pub fn media_pause(Element) -> Unit
+
+pub fn media_play(Element) -> Unit
+
+pub fn media_set_autoplay(Element, Bool) -> Unit
+
+pub fn media_set_controls(Element, Bool) -> Unit
+
+pub fn media_set_loop(Element, Bool) -> Unit
+
+pub fn media_set_number(Element, String, Double) -> Unit
+
+pub fn media_stop(Element) -> Unit
+
+pub fn media_to_canvas(Element, Canvas, Bool) -> Unit
 
 pub fn now() -> Double
 
@@ -120,11 +162,19 @@ pub fn number_to_fixed(Double, Int32) -> String
 
 pub fn number_to_string(Double) -> String
 
+pub fn off_event(Element, String) -> Unit
+
+pub fn on_drop(Element, (File) -> Unit, () -> Unit) -> Unit
+
 pub fn on_event(Element, String, () -> Unit) -> Unit
+
+pub fn on_files_chosen(Element, (File) -> Unit) -> Unit
 
 pub fn on_focus_change((Bool) -> Unit) -> Unit
 
 pub fn on_ready(() -> Unit) -> Unit
+
+pub fn on_wheel(Element, (Double) -> Unit) -> Unit
 
 pub fn on_window_resize(() -> Unit) -> Unit
 
@@ -156,6 +206,14 @@ pub fn query_param(String) -> String
 
 pub fn query_selector(String) -> Element
 
+pub fn query_selector_all(String, String) -> FixedArray[Element]
+
+pub fn radio_option(Element, String, String, String) -> Element
+
+pub fn radio_options(Element) -> FixedArray[Element]
+
+pub fn read_file(File, (String, Bool) -> Unit) -> Unit
+
 pub fn remove_attribute(Element, String) -> Unit
 
 pub fn remove_canvas(Canvas) -> Unit
@@ -164,6 +222,8 @@ pub fn remove_class(Element, String) -> Unit
 
 pub fn remove_element(Element) -> Unit
 
+pub fn remove_radio_option(Element) -> Unit
+
 pub fn request_animation_frame((Double) -> Unit) -> Unit
 
 pub fn request_pointer_lock(Canvas) -> Bool
@@ -171,6 +231,8 @@ pub fn request_pointer_lock(Canvas) -> Bool
 pub fn resize_canvas(Canvas, Double, Double, Double) -> Unit
 
 pub fn restore(Context2D) -> Unit
+
+pub fn revoke_url(String) -> Unit
 
 pub fn save(Context2D) -> Unit
 
@@ -185,6 +247,8 @@ pub fn set_checked(Element, Bool) -> Unit
 pub fn set_composite(Context2D, String) -> Unit
 
 pub fn set_cursor(Canvas, String) -> Unit
+
+pub fn set_element_size(Element, Double, Double) -> Unit
 
 pub fn set_filter(Context2D, String) -> Unit
 
@@ -230,6 +294,8 @@ pub fn stroke_text(Context2D, String, Double, Double, String, Double, String) ->
 
 pub fn to_data_url(Canvas, String) -> String
 
+pub fn toggle_class(Element, String) -> Unit
+
 pub fn upload_canvas_png(Canvas, String, Int32, () -> Unit, (String) -> Unit) -> Unit
 
 pub fn window_height() -> Double
@@ -247,6 +313,9 @@ pub type Context2D
 
 #external
 pub type Element
+
+#external
+pub type File
 
 #external
 pub type ImageData

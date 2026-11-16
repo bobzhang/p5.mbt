@@ -99,6 +99,8 @@ pub fn second() -> Int32
 
 pub fn select(String) -> Element?
 
+pub fn select_all(String, container? : String) -> Array[Element]
+
 pub fn set_title(String) -> Unit
 
 pub fn spline_point(Double, Double, Double, Double, Double, tightness? : Double) -> Double
@@ -162,34 +164,73 @@ pub impl Surface for CanvasSurface
 
 pub struct Element {
   elt : @dom.Element
+  // private fields
 }
 pub fn Element::add_class(Self, String) -> Unit
+pub fn Element::append_html(Self, String) -> Unit
 pub fn Element::attribute(Self, String, String) -> Unit
+pub fn Element::center(Self, align? : String) -> Unit
 pub fn Element::changed(Self, () -> Unit) -> Unit
 pub fn Element::checked(Self) -> Bool
+pub fn Element::child(Self, Self) -> Unit
+pub fn Element::class_name(Self, String) -> Unit
 pub fn Element::color(Self) -> @color.Color
 pub fn Element::disable(Self) -> Unit
+pub fn Element::double_clicked(Self, () -> Unit) -> Unit
+pub fn Element::drag_leave(Self, () -> Unit) -> Unit
+pub fn Element::drag_over(Self, () -> Unit) -> Unit
+pub fn Element::draggable(Self, target? : Self) -> Unit
+pub fn Element::drop(Self, (File) -> Unit, on_drop? : () -> Unit) -> Unit
 pub fn Element::elt(Self) -> @dom.Element
 pub fn Element::enable(Self) -> Unit
+pub fn Element::get_attribute(Self, String) -> String
+pub fn Element::get_class(Self) -> String
+pub fn Element::get_html(Self) -> String
+pub fn Element::get_style(Self, String) -> String
+pub fn Element::has_class(Self, String) -> Bool
+pub fn Element::height(Self) -> Double
 pub fn Element::hide(Self) -> Unit
 pub fn Element::html(Self, String) -> Unit
 pub fn Element::id(Self, String) -> Unit
 pub fn Element::input(Self, () -> Unit) -> Unit
+pub fn Element::mouse_clicked(Self, () -> Unit) -> Unit
+pub fn Element::mouse_moved(Self, () -> Unit) -> Unit
+pub fn Element::mouse_out(Self, () -> Unit) -> Unit
+pub fn Element::mouse_over(Self, () -> Unit) -> Unit
 pub fn Element::mouse_pressed(Self, () -> Unit) -> Unit
+pub fn Element::mouse_released(Self, () -> Unit) -> Unit
+pub fn Element::mouse_wheel(Self, (Double) -> Unit) -> Unit
+pub fn Element::off(Self, String) -> Unit
 pub fn Element::on(Self, String, () -> Unit) -> Unit
 pub fn Element::option(Self, String, value? : String) -> Unit
 pub fn Element::parent(Self, String) -> Unit
 pub fn Element::position(Self, Double, Double) -> Unit
 pub fn Element::remove(Self) -> Unit
+pub fn Element::remove_attribute(Self, String) -> Unit
 pub fn Element::remove_class(Self, String) -> Unit
+pub fn Element::remove_option(Self, String) -> Unit
 pub fn Element::selected(Self, String) -> Unit
 pub fn Element::set_checked(Self, Bool) -> Unit
 pub fn Element::set_value(Self, String) -> Unit
 pub fn Element::show(Self) -> Unit
 pub fn Element::size(Self, Double, Double) -> Unit
 pub fn Element::style(Self, String, String) -> Unit
+pub fn Element::toggle_class(Self, String) -> Unit
 pub fn Element::value(Self) -> String
 pub fn Element::value_number(Self) -> Double
+pub fn Element::width(Self) -> Double
+
+pub struct File {
+  file : @dom.File
+  file_type : String
+  subtype : String
+  name : String
+  size : Int32
+  data : String
+  // private fields
+}
+pub fn File::json(Self) -> @json.Json?
+pub fn File::revoke(Self) -> Unit
 
 #derive(Eq, @debug.Debug)
 pub(all) enum Filter {
@@ -244,6 +285,40 @@ pub fn Image::set(Self, Double, Double, @color.Color) -> Unit
 pub fn Image::set_frame(Self, Int32) -> Unit
 pub fn Image::update_pixels(Self) -> Unit
 pub impl ImageSource for Image
+
+pub struct MediaElement {
+  element : Element
+  mut width : Double
+  mut height : Double
+  mut pixels : FixedArray[Byte]
+  // private fields
+}
+pub fn MediaElement::add_cue(Self, Double, () -> Unit) -> Int32
+pub fn MediaElement::autoplay(Self, Bool) -> Unit
+pub fn MediaElement::clear_cues(Self) -> Unit
+pub fn MediaElement::duration(Self) -> Double
+pub fn MediaElement::get(Self, Double, Double) -> @color.Color
+pub fn MediaElement::get_speed(Self) -> Double
+pub fn MediaElement::get_volume(Self) -> Double
+pub fn MediaElement::hide(Self) -> Unit
+pub fn MediaElement::hide_controls(Self) -> Unit
+pub fn MediaElement::load_pixels(Self) -> Unit
+pub fn MediaElement::loop_(Self) -> Unit
+pub fn MediaElement::no_loop(Self) -> Unit
+pub fn MediaElement::on_ended(Self, (Self) -> Unit) -> Unit
+pub fn MediaElement::pause(Self) -> Unit
+pub fn MediaElement::play(Self) -> Unit
+pub fn MediaElement::position(Self, Double, Double) -> Unit
+pub fn MediaElement::remove_cue(Self, Int32) -> Unit
+pub fn MediaElement::set_time(Self, Double) -> Unit
+pub fn MediaElement::show(Self) -> Unit
+pub fn MediaElement::show_controls(Self) -> Unit
+pub fn MediaElement::size(Self, Double, Double) -> Unit
+pub fn MediaElement::speed(Self, Double) -> Unit
+pub fn MediaElement::stop(Self) -> Unit
+pub fn MediaElement::time(Self) -> Double
+pub fn MediaElement::volume(Self, Double) -> Unit
+pub impl ImageSource for MediaElement
 
 #derive(Eq, @debug.Debug)
 pub(all) struct MouseButtons {
@@ -315,6 +390,7 @@ pub fn P5::blend_mode(Self, BlendMode) -> Unit
 pub fn[C : ColorArg] P5::blue(Self, C) -> Double
 pub fn[C : ColorArg] P5::brightness(Self, C) -> Double
 pub fn P5::canvas(Self) -> @dom.Canvas?
+pub fn P5::canvas_element(Self) -> Element?
 pub fn P5::circle(Self, Double, Double, Double) -> Unit
 pub fn P5::clear(Self) -> Unit
 pub fn P5::clip(Self, () -> Unit, invert? : Bool) -> Unit
@@ -325,20 +401,26 @@ pub fn P5::color_mode_maxes(Self, @color.ColorMode, Double, Double, Double, max_
 pub fn[I : ImageSource] P5::copy(Self, I, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::cos(Self, Double) -> Double
 pub fn P5::create_a(Self, String, String, target? : String) -> Element
+pub fn P5::create_audio(Self, Array[String], on_load? : (MediaElement) -> Unit) -> MediaElement
 pub fn P5::create_button(Self, String) -> Element
 pub fn P5::create_canvas(Self, Double, Double) -> Unit
+pub fn P5::create_capture(Self, video? : Bool, audio? : Bool, flipped? : Bool, on_ready? : (MediaElement) -> Unit) -> MediaElement
 pub fn P5::create_checkbox(Self, label? : String, checked? : Bool) -> Element
 pub fn P5::create_color_picker(Self, value? : String) -> Element
 pub fn P5::create_div(Self, html? : String) -> Element
+pub fn P5::create_element(Self, String, content? : String) -> Element
+pub fn P5::create_file_input(Self, (File) -> Unit, multiple? : Bool) -> Element
 pub fn P5::create_graphics(Self, Double, Double) -> Self
 pub fn P5::create_image(Self, Double, Double) -> Image
 pub fn P5::create_img(Self, String, alt? : String) -> Element
 pub fn P5::create_input(Self, value? : String, kind? : String) -> Element
 pub fn P5::create_p(Self, html? : String) -> Element
+pub fn P5::create_radio(Self, name? : String) -> Element
 pub fn P5::create_select(Self) -> Element
 pub fn P5::create_slider(Self, Double, Double, value? : Double, step? : Double) -> Element
 pub fn P5::create_span(Self, html? : String) -> Element
 pub fn P5::create_vector(Self, Double, Double, z? : Double) -> @math.Vector
+pub fn P5::create_video(Self, Array[String], on_load? : (MediaElement) -> Unit) -> MediaElement
 pub fn P5::cursor(Self, kind? : String) -> Unit
 pub fn P5::curve(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::curve_tightness(Self, Double) -> Unit
@@ -426,6 +508,7 @@ pub fn P5::rect_mode(Self, @shape.ShapeMode) -> Unit
 pub fn[C : ColorArg] P5::red(Self, C) -> Double
 pub fn P5::redraw(Self, n? : Int32) -> Unit
 pub fn P5::remove(Self) -> Unit
+pub fn P5::remove_elements(Self) -> Unit
 pub fn P5::request_pointer_lock(Self) -> Bool
 pub fn P5::reset_matrix(Self) -> Unit
 pub fn P5::resize_canvas(Self, Double, Double) -> Unit

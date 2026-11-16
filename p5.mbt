@@ -166,6 +166,8 @@ pub struct P5 {
   priv mut recording : Recording?
   priv degrees : Ref[Bool]
   priv motion : Motion
+  priv elements : Array[Element]
+  priv mut radio_counter : Int32
   priv mut container : String
 }
 
@@ -270,6 +272,8 @@ fn P5::make(
     recording: None,
     degrees: Ref(false),
     motion: Motion::new(),
+    elements: [],
+    radio_counter: 0,
     container: "",
   }
 }
