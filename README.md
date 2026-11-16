@@ -69,6 +69,22 @@ Then open <http://localhost:8765/examples/>. The examples are:
 | [`flowfield`](examples/flowfield/main.mbt) | vectors, Perlin noise, sliders and buttons |
 | [`input`](examples/input/main.mbt) | keyboard, mouse, wheel, `clip`, `erase` |
 | [`data`](examples/data/main.mbt) | `load_json` and `load_strings` |
+| [`history`](examples/history/main.mbt) | *A Short History of Computation*, a 104-second film made entirely with p5.mbt |
+
+### Recording a sketch to video
+
+`p.record(frames=…)` renders a sketch offline: `draw` runs as fast as
+possible with `delta_time` and `millis()` advancing as if it ran at exactly
+60 fps, and each frame is uploaded as a PNG. `tools/record.py` serves the
+repository and pipes the frames into ffmpeg:
+
+```bash
+moon build --target js --release
+python3 tools/record.py --out history.mp4
+```
+
+Then open <http://localhost:8766/examples/history/?record>. The film's page
+also accepts `?t=SECONDS&still` to inspect a single moment.
 
 ## From p5.js to MoonBit
 
@@ -156,6 +172,7 @@ rec.take() // ["…", "fill #ff0000 R10,10,20,20", "stroke #000000 w=1 …"]
   `moved_x`, `touches`, pressed/released/clicked/double-clicked/moved/
   dragged/wheel, touch callbacks), keyboard (`key`, `code`, `key_code`,
   `key_is_down`, pressed/released/typed), `window_resized`.
+- **Recording**: `record` for frame-exact offline rendering to video.
 - **Environment**: `frame_rate`, `delta_time`, `millis`, `cursor`,
   `no_cursor`, `fullscreen`, `pixel_density`, `display_density`,
   `window_width`/`window_height`, `resize_canvas`, `focused`.
