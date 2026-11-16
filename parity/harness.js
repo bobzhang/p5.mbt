@@ -1,6 +1,6 @@
 // Renders every case with p5.js and with p5.mbt and compares the pixels.
 // A pixel "differs" when any channel differs by more than TOLERANCE.
-import { cases, svgCases } from './cases.js';
+import { cases, svgCases, dataCases } from './cases.js';
 
 const TOLERANCE = 2;
 const only = new URLSearchParams(location.search).get('case');
@@ -100,6 +100,32 @@ async function run() {
       res.name = name; results.push(res); report(r, res);
     } catch (e) { r.innerHTML = `<span class=bad>${e}</span>`; results.push({ name, error: String(e) }); }
   }
+  for (const [name, [file, compute]] of Object.entries(dataCases)) {
+    if (only && only !== name) continue;
+    const row = document.createElement('tr');
+    document.getElementById('rows').appendChild(row);
+    cell(row).textContent = name + ' (data)';
+    const a = cell(row), b = cell(row), d = cell(row), r = cell(row);
+    try {
+      const js = await new Promise((resolve, reject) => {
+        new p5(p => { p.setup = async () => { try { p.createCanvas(100, 100); p.pixelDensity(1); p.noLoop();
+          const f = await p.loadFont('../examples/assets/' + file); resolve(compute(p, f)); p.remove(); } catch (e) { reject(e); } }; }, a);
+      });
+      const mbt = await new Promise((resolve, reject) => {
+        const holder = document.createElement('div'); holder.id = 'data-' + name; holder.style.display = 'none';
+        document.body.appendChild(holder);
+        const timer = setTimeout(() => reject(new Error('timed out')), 10000);
+        if (!globalThis.p5mbt_data(name, holder.id, s => { clearTimeout(timer); resolve(JSON.parse(s)); }))
+          reject(new Error('unknown data case'));
+      });
+      const res = compareData(js, mbt);
+      res.name = name; results.push(res);
+      a.textContent = summarize(js); b.textContent = summarize(mbt);
+      d.textContent = res.firstDiff || '';
+      r.innerHTML = res.differing === 0 ? `<span class=ok>identical</span> (${res.values} values, max Δ ${res.maxDelta})`
+        : `<span class=bad>${res.differing} of ${res.values} values differ</span> max Δ ${res.maxDelta}`;
+    } catch (e) { r.innerHTML = `<span class=bad>${e}</span>`; results.push({ name, error: String(e) }); }
+  }
   const failed = results.filter(r => r.error || r.differing !== 0);
   document.getElementById('summary').textContent =
     `${results.length - failed.length} / ${results.length} cases identical`;
@@ -135,4 +161,31 @@ function compare(ca, cb, w, h, d) {
 function report(r, res) {
   r.innerHTML = res.differing === 0 ? `<span class=ok>identical</span> (max Δ ${res.maxDelta})`
     : `<span class=bad>${res.differing} px (${res.percent}%)</span> max Δ ${res.maxDelta}`;
+}
+
+// Compares two JSON values; numbers may differ by DATA_TOLERANCE.
+const DATA_TOLERANCE = 1e-9;
+function compareData(a, b) {
+  const res = { differing: 0, values: 0, maxDelta: 0, firstDiff: '' };
+  const walk = (x, y, path) => {
+    if (Array.isArray(x) && Array.isArray(y)) {
+      if (x.length !== y.length) { res.differing++; res.firstDiff ||= `${path}: length ${x.length} vs ${y.length}`; }
+      for (let i = 0; i < Math.min(x.length, y.length); i++) walk(x[i], y[i], `${path}[${i}]`);
+    } else if (typeof x === 'number' && typeof y === 'number') {
+      res.values++;
+      const delta = Math.abs(x - y);
+      res.maxDelta = Math.max(res.maxDelta, delta);
+      if (!(delta <= DATA_TOLERANCE)) { res.differing++; res.firstDiff ||= `${path}: ${x} vs ${y}`; }
+    } else {
+      res.values++;
+      if (x !== y) { res.differing++; res.firstDiff ||= `${path}: ${JSON.stringify(x)} vs ${JSON.stringify(y)}`; }
+    }
+  };
+  walk(a, b, '');
+  return res;
+}
+
+function summarize(v) {
+  const s = JSON.stringify(v);
+  return s.length > 80 ? s.slice(0, 80) + '…' : s;
 }

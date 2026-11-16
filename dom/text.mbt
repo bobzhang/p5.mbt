@@ -54,3 +54,18 @@ pub extern "js" fn load_font(
   #|  const f = new FontFace(family, `url(${JSON.stringify(url)})`);
   #|  f.load().then(ff => { document.fonts.add(ff); done(family); }, e => failed(String(e)));
   #|}
+
+///|
+/// Registers font file bytes with the `FontFace` API and calls
+/// `done(family)` once it is ready (or `failed(message)`).
+pub extern "js" fn load_font_data(
+  data : FixedArray[Byte],
+  family : String,
+  done : (String) -> Unit,
+  failed : (String) -> Unit,
+) -> Unit =
+  #|(data, family, done, failed) => {
+  #|  let f;
+  #|  try { f = new FontFace(family, data); } catch (e) { failed(String(e)); return; }
+  #|  f.load().then(ff => { document.fonts.add(ff); done(family); }, e => failed(String(e)));
+  #|}

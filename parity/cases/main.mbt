@@ -71,8 +71,126 @@ fn cases() -> Map[String, Case] {
     },
   }
   all["svg_replay"] = { w: 220, h: 160, preload: None, draw: svg_replay, }
+  let inconsolata : Ref[@p5.Font?] = Ref(None)
+  all["font_points"] = {
+    w: 260,
+    h: 120,
+    preload: Some(p => {
+      inconsolata.val = Some(
+        p.load_font("../examples/assets/Inconsolata-Bold.ttf"),
+      )
+    }),
+    draw: p => if inconsolata.val is Some(f) { font_points(p, f) },
+  }
+  let source_sans : Ref[@p5.Font?] = Ref(None)
+  all["font_text"] = {
+    w: 260,
+    h: 120,
+    preload: Some(p => {
+      source_sans.val = Some(
+        p.load_font("../examples/assets/SourceSansPro-Regular.otf"),
+      )
+    }),
+    draw: p => if source_sans.val is Some(f) { font_text(p, f) },
+  }
   all
 }
+
+///|
+fn font_points(p : @p5.P5, font : @p5.Font) -> Unit {
+  p.background(255)
+  p.no_stroke()
+  p.fill(0)
+  p.text_size(64)
+  for q in font.text_to_points("p5*js", 10, 80, sample_factor=0.3) {
+    p.circle(q.x, q.y, 3)
+  }
+}
+
+///|
+fn font_text(p : @p5.P5, font : @p5.Font) -> Unit {
+  p.background(250)
+  p.fill((20, 40, 120))
+  p.text_font_face(font, size=40)
+  p.text("Typography", 10, 50)
+  p.text_size(20)
+  p.text_align(HCenter)
+  p.text("centred in a box that wraps", 20, 70, max_width=220)
+}
+
+///|
+extern "js" fn json_num(d : Double) -> String =
+  #|(d) => JSON.stringify(d)
+
+///|
+fn points_json(pts : Array[@p5.TextPoint]) -> String {
+  "[" +
+  pts
+  .map(q => "[\{json_num(q.x)},\{json_num(q.y)},\{json_num(q.angle)}]")
+  .join(",") +
+  "]"
+}
+
+///|
+/// Cases whose result is data (JSON) rather than pixels.
+fn data_cases() -> Map[String, (String, (@p5.P5, @p5.Font) -> String)] {
+  {
+    "font_points_ttf": (
+      "Inconsolata-Bold.ttf",
+      (p, f) => {
+        p.text_size(48)
+        points_json(f.text_to_points("p5*js", 10, 70, sample_factor=0.3))
+      },
+    ),
+    "font_contours_otf": (
+      "SourceSansPro-Regular.otf",
+      (p, f) => {
+        p.text_size(30)
+        p.text_align(HCenter)
+        p.rect_mode(Center)
+        p.angle_mode(Degrees)
+        let cs = f.text_to_contours(
+          "Hello brave new\nworld",
+          120,
+          70,
+          max_width=200,
+          max_height=120,
+          sample_factor=0.2,
+          simplify_threshold=0.05,
+        )
+        "[" + cs.map(points_json).join(",") + "]"
+      },
+    ),
+    "font_paths_woff": (
+      "Lato-Regular.woff",
+      (p, f) => {
+        p.text_size(36)
+        let cmds = f.text_to_paths("Quiz&", 5, 60)
+        "[" +
+        cmds
+        .map(c => {
+          match c {
+            MoveTo(x, y) => "[\"M\",\{json_num(x)},\{json_num(y)}]"
+            LineTo(x, y) => "[\"L\",\{json_num(x)},\{json_num(y)}]"
+            QuadraticCurveTo(a, b, x, y) =>
+              "[\"Q\",\{json_num(a)},\{json_num(b)},\{json_num(x)},\{json_num(y)}]"
+            BezierCurveTo(a, b, c, d, x, y) =>
+              "[\"C\",\{json_num(a)},\{json_num(b)},\{json_num(c)},\{json_num(d)},\{json_num(x)},\{json_num(y)}]"
+            ClosePath => "[\"Z\"]"
+            _ => "[\"?\"]"
+          }
+        })
+        .join(",") +
+        "]"
+      },
+    ),
+  }
+}
+
+///|
+extern "js" fn expose_data(
+  run : (String, String, (String) -> Unit) -> Bool,
+) -> Unit = "(f) => { globalThis.p5mbt_data = f; }"
 
 ///|
 fn svg_replay(p : @p5.P5) -> Unit {
@@ -697,6 +815,25 @@ fn main {
       p.no_loop()
       done(p.get_svg(p.build_shape(() => scene(p))))
     })
+    true
+  })
+  let datas = data_cases()
+  expose_data((name, container, done) => {
+    guard datas.get(name) is Some((file, compute)) else { return false }
+    let font : Ref[@p5.Font?] = Ref(None)
+    @p5.run(
+      container~,
+      seed=1,
+      preload=p => font.val = Some(p.load_font("../examples/assets/" + file)),
+      setup=p => {
+        p.create_canvas(100, 100)
+        p.pixel_density(1)
+        p.no_loop()
+        if font.val is Some(f) {
+          done(compute(p, f))
+        }
+      },
+    )
     true
   })
   let all = cases()

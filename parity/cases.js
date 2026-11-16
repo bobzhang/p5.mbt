@@ -222,6 +222,14 @@ export const cases = {
   filter_blur: [120, 90, p => { gradientScene(p); p.filter(p.BLUR, 3, false); }],
   svg_import: [240, 160, (p, rec) => { p.background(255); p.shape(rec, 0, 0); },
     async p => await p.loadSVG('../examples/assets/shapes.svg')],
+  font_points: [260, 120, (p, font) => {
+    p.background(255); p.noStroke(); p.fill(0); p.textSize(64);
+    for (const q of font.textToPoints('p5*js', 10, 80, { sampleFactor: 0.3 })) p.circle(q.x, q.y, 3);
+  }, async p => await p.loadFont('../examples/assets/Inconsolata-Bold.ttf')],
+  font_text: [260, 120, (p, font) => {
+    p.background(250); p.fill(20, 40, 120); p.textFont(font, 40); p.text('Typography', 10, 50);
+    p.textSize(20); p.textAlign(p.CENTER); p.text('centred in a box that wraps', 20, 70, 220);
+  }, async p => await p.loadFont('../examples/assets/SourceSansPro-Regular.otf')],
   svg_replay: [220, 160, p => {
     p.background(250);
     const rec = p.buildShape(() => {
@@ -230,6 +238,22 @@ export const cases = {
     });
     p.shape(rec, 0, 0);
     p.shape(rec, 60, 80, { scale: 0.6 });
+  }],
+};
+
+export const dataCases = {
+  font_points_ttf: ['Inconsolata-Bold.ttf', (p, f) => {
+    p.textSize(48);
+    return f.textToPoints('p5*js', 10, 70, { sampleFactor: 0.3 }).map(q => [q.x, q.y, q.angle]);
+  }],
+  font_contours_otf: ['SourceSansPro-Regular.otf', (p, f) => {
+    p.textSize(30); p.textAlign(p.CENTER); p.rectMode(p.CENTER); p.angleMode(p.DEGREES);
+    return f.textToContours('Hello brave new\nworld', 120, 70, 200, 120,
+      { sampleFactor: 0.2, simplifyThreshold: 0.05 }).map(c => c.map(q => [q.x, q.y, q.angle]));
+  }],
+  font_paths_woff: ['Lato-Regular.woff', (p, f) => {
+    p.textSize(36);
+    return f.textToPaths('Quiz&', 5, 60);
   }],
 };
 

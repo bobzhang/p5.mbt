@@ -1,0 +1,96 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/font"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn inflate(Bytes, zlib? : Bool) -> Bytes raise FontError
+
+pub fn path_to_points(ArrayView[PathCmd], ArrayView[Double], sample_factor? : Double, simplify_threshold? : Double) -> Array[PathPoint]
+
+pub fn woff_to_sfnt(Bytes) -> Bytes raise FontError
+
+// Errors
+#derive(@debug.Debug)
+pub suberror FontError {
+  FontError(String)
+}
+pub impl Show for FontError
+
+// Types and methods
+pub struct BezierPath {
+  // private fields
+}
+pub fn BezierPath::angle_at_length(Self, Double) -> Double
+pub fn BezierPath::from_commands(ArrayView[PathCmd], ArrayView[Double]) -> Self
+pub fn BezierPath::new(Array[BezierSegment]) -> Self
+pub fn BezierPath::point_at_length(Self, Double) -> Pt
+pub fn BezierPath::tangent_at_length(Self, Double) -> Pt
+pub fn BezierPath::total_length(Self) -> Double
+
+pub struct BezierSegment {
+  a : Pt
+  b : Pt
+  c : Pt
+  d : Pt
+  // private fields
+}
+pub fn BezierSegment::new(Pt, Pt, Pt, Pt) -> Self
+pub fn BezierSegment::point_at(Self, Double) -> Pt
+pub fn BezierSegment::tangent_at(Self, Double) -> Pt
+pub fn BezierSegment::total_length(Self) -> Double
+
+pub struct FontData {
+  units_per_em : Int32
+  ascender : Int32
+  descender : Int32
+  num_glyphs : Int32
+  // private fields
+}
+pub fn FontData::advance_width(Self, Int32) -> Int32
+pub fn FontData::code_to_glyph(Self, Int32) -> Int32
+pub fn FontData::glyph_path(Self, Int32) -> GlyphPath
+pub fn FontData::kerning(Self, Int32, Int32) -> Int32
+pub fn FontData::parse(Bytes) -> Self raise FontError
+pub fn FontData::shape(Self, String) -> Array[ShapedGlyph]
+
+#derive(@debug.Debug)
+pub struct GlyphPath {
+  cmds : Array[PathCmd]
+  crds : Array[Double]
+}
+
+#derive(Eq, Hash, @debug.Debug)
+pub(all) enum PathCmd {
+  M
+  L
+  Q
+  C
+  Z
+}
+pub fn PathCmd::letter(Self) -> String
+
+#derive(@debug.Debug)
+pub(all) struct PathPoint {
+  x : Double
+  y : Double
+  angle : Double
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Pt {
+  x : Double
+  y : Double
+}
+
+#derive(@debug.Debug)
+pub(all) struct ShapedGlyph {
+  glyph : Int32
+  advance : Int32
+}
+
+// Type aliases
+
+// Traits

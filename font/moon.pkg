@@ -1,0 +1,9 @@
+import {
+  "moonbitlang/core/math" @cmath,
+  "moonbitlang/core/double",
+  "moonbitlang/core/string",
+}
+
+import {
+  "moonbitlang/core/encoding/utf8",
+} for "test"

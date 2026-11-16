@@ -4,6 +4,7 @@ package "bobzhang/p5"
 import {
   "bobzhang/p5/color",
   "bobzhang/p5/dom",
+  "bobzhang/p5/font",
   "bobzhang/p5/io",
   "bobzhang/p5/math",
   "bobzhang/p5/shape",
@@ -288,7 +289,12 @@ pub(all) enum Filter {
 pub struct Font {
   family : String
   mut loaded : Bool
+  mut data : @font.FontData?
+  // private fields
 }
+pub fn Font::text_to_contours(Self, String, Double, Double, max_width? : Double, max_height? : Double, sample_factor? : Double, simplify_threshold? : Double) -> Array[Array[TextPoint]]
+pub fn Font::text_to_paths(Self, String, Double, Double, max_width? : Double, max_height? : Double) -> Array[@shape.PathCmd]
+pub fn Font::text_to_points(Self, String, Double, Double, max_width? : Double, max_height? : Double, sample_factor? : Double, simplify_threshold? : Double) -> Array[TextPoint]
 
 #derive(Eq, @debug.Debug)
 pub(all) enum HAlign {
@@ -679,6 +685,14 @@ pub(all) struct TextMetrics {
   font_descent : Double
   alphabetic_baseline : Double
 }
+
+#derive(@debug.Debug)
+pub(all) struct TextPoint {
+  x : Double
+  y : Double
+  angle : Double
+}
+pub fn TextPoint::alpha(Self) -> Double
 
 #derive(Eq, @debug.Debug)
 pub(all) enum TextStyle {

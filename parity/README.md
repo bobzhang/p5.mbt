@@ -24,3 +24,28 @@ than 2.
 3. Open <http://localhost:8765/parity/> (or `?case=NAME` for one case). The
    page shows both renderings and a difference image, and exposes the
    results as `window.parityResults`.
+
+## Data cases
+
+Some cases compare values instead of pixels: `dataCases` in `cases.js` and
+`data_cases()` in `cases/main.mbt` return JSON (for example the points of
+`font.textToPoints`), compared number by number with a tolerance of 1e-9.
+
+## Font outlines in node
+
+`font/` checks the `font` package against the libraries p5.js uses, without a
+browser:
+
+```bash
+# glyph outlines, advances and kerning vs Typr.js
+parity/font/compare.sh examples/assets/SourceSansPro-Regular.otf "Hamburgefonstiv"
+python3 parity/font/diff.py /path/to/font.ttf "text"   # detailed diff
+
+# contour sampling vs @davepagurek/bezier-path
+moon build --target js parity/font/points
+node parity/font/points_dump.mjs examples/assets/Lato-Regular.woff "Qg" 0.1 0.05
+```
+
+Run over the 400-odd fonts that ship with macOS, the outlines match Typr's
+byte for byte except for variable fonts (Typr applies `fvar`/`gvar` deltas,
+which the port does not do yet) and fonts Typr itself fails to read.

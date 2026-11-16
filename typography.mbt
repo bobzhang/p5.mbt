@@ -8,6 +8,10 @@ pub struct Font {
   family : String
   /// Whether the font finished loading.
   mut loaded : Bool
+  /// The parsed font file, when it could be read (TTF, OTF, WOFF): needed
+  /// for `text_to_points` and friends.
+  mut data : @font.FontData?
+  priv sketch : P5
 }
 
 ///|
@@ -443,6 +447,21 @@ fn P5::compute_bounds(
   max_width : Double?,
   max_height : Double?,
 ) -> Bounds {
+  self.compute_bounds_lines(tight, s, x, y, max_width, max_height).0
+}
+
+///|
+/// p5's `_computeBounds`: the bounds and the wrapped lines.
+fn P5::compute_bounds_lines(
+  self : P5,
+  tight : Bool,
+  s : String,
+  x : Double,
+  y : Double,
+  max_width : Double?,
+  max_height : Double?,
+  ignore_rect_mode~ : Bool = false,
+) -> (Bounds, Array[String]) {
   let st = self.state
   // p5's _rectModeAdjust: only the size changes
   let (width, height) = match (max_width, st.rect_mode) {
@@ -484,17 +503,20 @@ fn P5::compute_bounds(
   let dy = self.y_align_offset(lines.length(), height.unwrap_or(0))
   let boxes = boxes.map(b => { ..b, x: b.x + dx, y: b.y + dy, })
   if boxes.length() <= 1 {
-    return boxes.get(0).unwrap_or({ x, y, w: 0, h: 0, })
+    return (boxes.get(0).unwrap_or({ x, y, w: 0, h: 0, }), lines)
   }
   let min_x = boxes.fold(init=@double.infinity, (a, b) => a.min(b.x))
   let min_y = boxes.fold(init=@double.infinity, (a, b) => a.min(b.y))
   let max_x = boxes.fold(init=@double.neg_infinity, (a, b) => a.max(b.x + b.w))
   let max_y = boxes.fold(init=@double.neg_infinity, (a, b) => a.max(b.y + b.h))
   let bb = { x: min_x, y: min_y, w: max_x - min_x, h: max_y - min_y, }
+  if ignore_rect_mode {
+    return (bb, lines)
+  }
   // p5's _rectModeAlign
   let w = width.unwrap_or(0)
   let h = height.unwrap_or(0)
-  match st.rect_mode {
+  let bb = match st.rect_mode {
     Center => { ..bb, x: bb.x - (w - bb.w) / 2, y: bb.y - (h - bb.h) / 2, }
     Corners => { ..bb, w: bb.w + bb.x, h: bb.h + bb.y, }
     Radius =>
@@ -506,6 +528,7 @@ fn P5::compute_bounds(
       }
     Corner => bb
   }
+  (bb, lines)
 }
 
 ///|
@@ -534,38 +557,4 @@ pub fn P5::font_bounds(
   max_height? : Double,
 ) -> Bounds {
   self.compute_bounds(false, s, x, y, max_width, max_height)
-}
-
-///|
-/// Loads a font file (`.ttf`, `.otf`, `.woff`, `.woff2`). In `preload`,
-/// `setup` waits for it. `on_load` is called when it is ready.
-pub fn P5::load_font(
-  self : P5,
-  url : String,
-  family? : String,
-  on_load? : (Font) -> Unit,
-) -> Font {
-  let family = match family {
-    Some(f) => f
-    None => "p5mbt-font-\{self.font_counter}"
-  }
-  self.font_counter += 1
-  let font = { family, loaded: false, }
-  self.begin_load()
-  @dom.load_font(
-    url,
-    family,
-    _ => {
-      font.loaded = true
-      if on_load is Some(f) {
-        f(font)
-      }
-      self.end_load()
-    },
-    msg => {
-      warn(msg)
-      self.end_load()
-    },
-  )
-  font
 }

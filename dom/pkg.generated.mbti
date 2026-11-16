@@ -130,6 +130,8 @@ pub fn listen_wheel(Canvas, (Double, Double) -> Bool) -> Unit
 
 pub fn load_font(String, String, (String) -> Unit, (String) -> Unit) -> Unit
 
+pub fn load_font_data(FixedArray[Byte], String, (String) -> Unit, (String) -> Unit) -> Unit
+
 pub fn load_image(String, (ImageElement, Int32, Int32) -> Unit, (String) -> Unit) -> Unit
 
 pub fn make_draggable(Element, Element) -> Unit
