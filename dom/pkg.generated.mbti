@@ -1,0 +1,199 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/dom"
+
+// Values
+pub fn canvas_as_image(Canvas) -> ImageElement
+
+pub fn canvas_height(Canvas) -> Int32
+
+pub fn canvas_width(Canvas) -> Int32
+
+pub fn clear_rect(Context2D, Double, Double, Double, Double) -> Unit
+
+pub fn clip_path(Context2D, Path2D) -> Unit
+
+pub fn console_log(String) -> Unit
+
+pub fn console_warn(String) -> Unit
+
+pub fn create_canvas(Double, Double, Double, String, Bool) -> Canvas
+
+pub fn date_part(Int32) -> Int32
+
+pub fn device_pixel_ratio() -> Double
+
+pub fn display_height() -> Double
+
+pub fn display_width() -> Double
+
+pub fn document_has_focus() -> Bool
+
+pub fn download_url(String, String) -> Unit
+
+pub fn draw_image(Context2D, ImageElement, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+
+pub fn draw_tinted_image(Context2D, ImageElement, Int32, Int32, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+
+pub fn fill_path(Context2D, Path2D, String) -> Unit
+
+pub fn fill_rect(Context2D, Double, Double, Double, Double, String) -> Unit
+
+pub fn fill_text(Context2D, String, Double, Double, String) -> Unit
+
+pub fn get_context(Canvas) -> Context2D
+
+pub fn get_image_data(Context2D, Int32, Int32, Int32, Int32) -> ImageData
+
+pub fn image_data_copy_from(ImageData, FixedArray[Byte]) -> Unit
+
+pub fn image_data_copy_to(ImageData, FixedArray[Byte]) -> Unit
+
+pub fn image_data_get(ImageData, Int32) -> Int32
+
+pub fn image_data_length(ImageData) -> Int32
+
+pub fn image_data_set(ImageData, Int32, Int32) -> Unit
+
+pub fn is_fullscreen() -> Bool
+
+pub fn listen_keys((String, String, String, Int32) -> Bool) -> Unit
+
+pub fn listen_pointer(Canvas, () -> Double, () -> Double, (PointerEvent) -> Bool) -> Unit
+
+pub fn listen_wheel(Canvas, (Double, Double) -> Bool) -> Unit
+
+pub fn load_font(String, String, (String) -> Unit, (String) -> Unit) -> Unit
+
+pub fn load_image(String, (ImageElement, Int32, Int32) -> Unit, (String) -> Unit) -> Unit
+
+pub fn math_random() -> Double
+
+pub fn measure_ascent(Context2D) -> Double
+
+pub fn measure_descent(Context2D) -> Double
+
+pub fn measure_tight_width(Context2D, String) -> Double
+
+pub fn measure_width(Context2D, String) -> Double
+
+pub fn now() -> Double
+
+pub fn on_focus_change((Bool) -> Unit) -> Unit
+
+pub fn on_ready(() -> Unit) -> Unit
+
+pub fn on_window_resize(() -> Unit) -> Unit
+
+pub fn path_bezier_curve_to(Path2D, Double, Double, Double, Double, Double, Double) -> Unit
+
+pub fn path_close(Path2D) -> Unit
+
+pub fn path_ellipse(Path2D, Double, Double, Double, Double, Double, Double, Double) -> Unit
+
+pub fn path_line_to(Path2D, Double, Double) -> Unit
+
+pub fn path_move_to(Path2D, Double, Double) -> Unit
+
+pub fn path_new() -> Path2D
+
+pub fn path_quadratic_curve_to(Path2D, Double, Double, Double, Double) -> Unit
+
+pub fn path_rect(Path2D, Double, Double, Double, Double) -> Unit
+
+pub fn path_round_rect(Path2D, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+
+pub fn put_image_data(Context2D, ImageData, Int32, Int32) -> Unit
+
+pub fn remove_canvas(Canvas) -> Unit
+
+pub fn request_animation_frame((Double) -> Unit) -> Unit
+
+pub fn resize_canvas(Canvas, Double, Double, Double) -> Unit
+
+pub fn restore(Context2D) -> Unit
+
+pub fn save(Context2D) -> Unit
+
+pub fn set_canvas_id(Canvas, String) -> Unit
+
+pub fn set_composite(Context2D, String) -> Unit
+
+pub fn set_cursor(Canvas, String) -> Unit
+
+pub fn set_filter(Context2D, String) -> Unit
+
+pub fn set_fullscreen(Canvas, Bool) -> Unit
+
+pub fn set_global_alpha(Context2D, Double) -> Unit
+
+pub fn set_image_smoothing(Context2D, Bool) -> Unit
+
+pub fn set_line_dash(Context2D, FixedArray[Double]) -> Unit
+
+pub fn set_shadow(Context2D, Double, Double, Double, String) -> Unit
+
+pub fn set_text_style(Context2D, String, String, String) -> Unit
+
+pub fn set_timeout(() -> Unit, Double) -> Unit
+
+pub fn set_title(String) -> Unit
+
+pub fn set_transform(Context2D, Double, Double, Double, Double, Double, Double) -> Unit
+
+pub fn storage_clear() -> Unit
+
+pub fn storage_get(String) -> String
+
+pub fn storage_remove(String) -> Unit
+
+pub fn storage_set(String, String) -> Unit
+
+pub fn stroke_path(Context2D, Path2D, String, Double, String, String) -> Unit
+
+pub fn stroke_text(Context2D, String, Double, Double, String, Double, String) -> Unit
+
+pub fn to_data_url(Canvas, String) -> String
+
+pub fn window_height() -> Double
+
+pub fn window_width() -> Double
+
+// Errors
+
+// Types and methods
+#external
+pub type Canvas
+
+#external
+pub type Context2D
+
+#external
+pub type Element
+
+#external
+pub type ImageData
+
+#external
+pub type ImageElement
+
+#external
+pub type Path2D
+
+pub(all) struct PointerEvent {
+  kind : String
+  x : Double
+  y : Double
+  win_x : Double
+  win_y : Double
+  moved_x : Double
+  moved_y : Double
+  button : Int32
+  buttons : Int32
+  pointer_id : Int32
+  pointer_type : String
+  is_primary : Bool
+}
+
+// Type aliases
+
+// Traits

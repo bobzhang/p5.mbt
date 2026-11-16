@@ -1,0 +1,404 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5"
+
+import {
+  "bobzhang/p5/color",
+  "bobzhang/p5/dom",
+  "bobzhang/p5/math",
+  "bobzhang/p5/shape",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const DEG_TO_RAD : Double = 0.017453292519943295
+
+pub const HALF_PI : Double = 1.5707963267948966
+
+pub const PI : Double = 3.141592653589793
+
+pub const QUARTER_PI : Double = 0.7853981633974483
+
+pub const RAD_TO_DEG : Double = 57.29577951308232
+
+pub const TAU : Double = 6.283185307179586
+
+pub const TWO_PI : Double = 6.283185307179586
+
+pub fn bezier_point(Double, Double, Double, Double, Double) -> Double
+
+pub fn bezier_tangent(Double, Double, Double, Double, Double) -> Double
+
+pub fn constrain(Double, Double, Double) -> Double
+
+pub fn degrees(Double) -> Double
+
+pub fn dist(Double, Double, Double, Double) -> Double
+
+pub fn dist3(Double, Double, Double, Double, Double, Double) -> Double
+
+pub fn fract(Double) -> Double
+
+pub fn lerp(Double, Double, Double) -> Double
+
+pub fn mag(Double, Double) -> Double
+
+pub fn map(Double, Double, Double, Double, Double, within_bounds? : Bool) -> Double
+
+pub fn max_of(ArrayView[Double]) -> Double
+
+pub fn min_of(ArrayView[Double]) -> Double
+
+pub fn norm(Double, Double, Double) -> Double
+
+pub fn palette_lerp(ArrayView[(@color.Color, Double)], Double) -> @color.Color
+
+pub fn print(String) -> Unit
+
+pub fn radians(Double) -> Double
+
+pub fn round(Double, decimals? : Int32) -> Double
+
+pub fn run(preload? : (P5) -> Unit, setup? : (P5) -> Unit, draw? : (P5) -> Unit, mouse_pressed? : (P5) -> Unit, mouse_released? : (P5) -> Unit, mouse_clicked? : (P5) -> Unit, double_clicked? : (P5) -> Unit, mouse_moved? : (P5) -> Unit, mouse_dragged? : (P5) -> Unit, mouse_wheel? : (P5, Double) -> Unit, key_pressed? : (P5) -> Unit, key_released? : (P5) -> Unit, key_typed? : (P5) -> Unit, touch_started? : (P5) -> Unit, touch_moved? : (P5) -> Unit, touch_ended? : (P5) -> Unit, window_resized? : (P5) -> Unit, container? : String, seed? : Double) -> Unit
+
+pub fn set_title(String) -> Unit
+
+pub fn spline_point(Double, Double, Double, Double, Double, tightness? : Double) -> Double
+
+pub fn spline_tangent(Double, Double, Double, Double, Double, tightness? : Double) -> Double
+
+pub fn sq(Double) -> Double
+
+// Errors
+
+// Types and methods
+#derive(Eq, @debug.Debug)
+pub(all) enum AngleMode {
+  Radians
+  Degrees
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum BlendMode {
+  Blend
+  Remove
+  Add
+  Darkest
+  Lightest
+  Difference
+  Exclusion
+  Multiply
+  Screen
+  Replace
+  Overlay
+  HardLight
+  SoftLight
+  Dodge
+  Burn
+}
+
+pub struct CanvasSurface {
+  canvas : @dom.Canvas
+  ctx : @dom.Context2D
+}
+pub fn CanvasSurface::new(@dom.Canvas) -> Self
+pub impl Surface for CanvasSurface
+
+#derive(Eq, @debug.Debug)
+pub(all) enum Filter {
+  Threshold(Double)
+  Gray
+  Opaque
+  Invert
+  Posterize(Int32)
+  Blur(Double)
+  Erode
+  Dilate
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum HAlign {
+  Left
+  HCenter
+  Right
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) struct MouseButtons {
+  mut left : Bool
+  mut center : Bool
+  mut right : Bool
+}
+
+pub struct P5 {
+  mut width : Double
+  mut height : Double
+  mut frame_count : Int32
+  mut delta_time : Double
+  mut mouse_x : Double
+  mut mouse_y : Double
+  mut pmouse_x : Double
+  mut pmouse_y : Double
+  mut win_mouse_x : Double
+  mut win_mouse_y : Double
+  mut pwin_mouse_x : Double
+  mut pwin_mouse_y : Double
+  mut moved_x : Double
+  mut moved_y : Double
+  mouse_button : MouseButtons
+  mut mouse_is_pressed : Bool
+  mut key : String
+  mut code : String
+  mut key_code : Int32
+  mut key_is_pressed : Bool
+  mut touches : Array[Touch]
+  mut focused : Bool
+  mut window_width : Double
+  mut window_height : Double
+  mut pixels : FixedArray[Byte]
+  // private fields
+}
+pub fn P5::acos(Self, Double) -> Double
+pub fn[C : ColorArg] P5::alpha(Self, C) -> Double
+pub fn P5::angle_mode(Self, AngleMode) -> Unit
+pub fn P5::apply_matrix(Self, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::arc(Self, Double, Double, Double, Double, Double, Double, mode? : @shape.ArcMode) -> Unit
+pub fn P5::asin(Self, Double) -> Double
+pub fn P5::atan(Self, Double) -> Double
+pub fn P5::atan2(Self, Double, Double) -> Double
+pub fn[C : ColorArg] P5::background(Self, C) -> Unit
+pub fn P5::begin_clip(Self, invert? : Bool) -> Unit
+pub fn P5::begin_contour(Self, kind? : @shape.ShapeKind) -> Unit
+pub fn P5::begin_shape(Self, kind? : @shape.ShapeKind) -> Unit
+pub fn P5::bezier(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::bezier_order(Self, Int32) -> Unit
+pub fn P5::bezier_vertex(Self, Double, Double) -> Unit
+pub fn P5::bezier_vertex3(Self, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::blend_mode(Self, BlendMode) -> Unit
+pub fn[C : ColorArg] P5::blue(Self, C) -> Double
+pub fn[C : ColorArg] P5::brightness(Self, C) -> Double
+pub fn P5::canvas(Self) -> @dom.Canvas?
+pub fn P5::circle(Self, Double, Double, Double) -> Unit
+pub fn P5::clear(Self) -> Unit
+pub fn P5::clip(Self, () -> Unit, invert? : Bool) -> Unit
+pub fn[C : ColorArg] P5::color(Self, C) -> @color.Color
+pub fn P5::color_mode(Self, @color.ColorMode) -> Unit
+pub fn P5::color_mode_max(Self, @color.ColorMode, Double) -> Unit
+pub fn P5::color_mode_maxes(Self, @color.ColorMode, Double, Double, Double, max_alpha? : Double) -> Unit
+pub fn P5::cos(Self, Double) -> Double
+pub fn P5::create_canvas(Self, Double, Double) -> Unit
+pub fn P5::create_vector(Self, Double, Double, z? : Double) -> @math.Vector
+pub fn P5::cursor(Self, kind? : String) -> Unit
+pub fn P5::curve(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::curve_tightness(Self, Double) -> Unit
+pub fn P5::curve_vertex(Self, Double, Double) -> Unit
+pub fn P5::display_density(Self) -> Double
+pub fn P5::display_height(Self) -> Double
+pub fn P5::display_width(Self) -> Double
+pub fn P5::ellipse(Self, Double, Double, Double, h? : Double) -> Unit
+pub fn P5::ellipse_mode(Self, @shape.ShapeMode) -> Unit
+pub fn P5::end_clip(Self) -> Unit
+pub fn P5::end_contour(Self, mode? : @shape.CloseMode) -> Unit
+pub fn P5::end_shape(Self, mode? : @shape.CloseMode) -> Unit
+pub fn P5::erase(Self, strength_fill? : Double, strength_stroke? : Double) -> Unit
+pub fn[C : ColorArg] P5::fill(Self, C) -> Unit
+pub fn P5::frame_rate(Self, Double) -> Unit
+pub fn P5::fullscreen(Self, Bool) -> Unit
+pub fn P5::get_angle_mode(Self) -> AngleMode
+pub fn P5::get_color_mode(Self) -> @color.ColorMode
+pub fn P5::get_fill(Self) -> @color.Color?
+pub fn P5::get_frame_rate(Self) -> Double
+pub fn P5::get_matrix(Self) -> @math.Matrix2D
+pub fn P5::get_pixel_density(Self) -> Double
+pub fn P5::get_stroke(Self) -> @color.Color?
+pub fn P5::get_target_frame_rate(Self) -> Double
+pub fn[C : ColorArg] P5::green(Self, C) -> Double
+pub fn P5::headless(&Surface, Double, Double, pixel_density? : Double, seed? : Double) -> Self
+pub fn[C : ColorArg] P5::hue(Self, C) -> Double
+pub fn P5::is_fullscreen(Self) -> Bool
+pub fn P5::is_looping(Self) -> Bool
+pub fn P5::key_is_down(Self, String) -> Bool
+pub fn P5::lerp_color(Self, @color.Color, @color.Color, Double) -> @color.Color
+pub fn[C : ColorArg] P5::lightness(Self, C) -> Double
+pub fn P5::line(Self, Double, Double, Double, Double) -> Unit
+pub fn P5::loop_(Self) -> Unit
+pub fn P5::millis(Self) -> Double
+pub fn P5::no_cursor(Self) -> Unit
+pub fn P5::no_erase(Self) -> Unit
+pub fn P5::no_fill(Self) -> Unit
+pub fn P5::no_loop(Self) -> Unit
+pub fn P5::no_smooth(Self) -> Unit
+pub fn P5::no_stroke(Self) -> Unit
+pub fn P5::noise(Self, Double, y? : Double, z? : Double) -> Double
+pub fn P5::noise_detail(Self, Int32, falloff? : Double) -> Unit
+pub fn P5::noise_seed(Self, Double) -> Unit
+pub fn P5::pixel_density(Self, Double) -> Unit
+pub fn P5::point(Self, Double, Double) -> Unit
+pub fn P5::point_vec(Self, @math.Vector) -> Unit
+pub fn P5::pop(Self) -> Unit
+pub fn P5::push(Self) -> Unit
+pub fn P5::quad(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::quadratic_vertex(Self, Double, Double, Double, Double) -> Unit
+pub fn P5::random(Self) -> Double
+pub fn P5::random2d(Self) -> @math.Vector
+pub fn P5::random3d(Self) -> @math.Vector
+pub fn[T] P5::random_choice(Self, ArrayView[T]) -> T
+pub fn P5::random_gaussian(Self, mean? : Double, sd? : Double) -> Double
+pub fn P5::random_max(Self, Double) -> Double
+pub fn P5::random_range(Self, Double, Double) -> Double
+pub fn P5::random_seed(Self, Double) -> Unit
+pub fn P5::rect(Self, Double, Double, Double, Double, tl? : Double, tr? : Double, br? : Double, bl? : Double) -> Unit
+pub fn P5::rect_mode(Self, @shape.ShapeMode) -> Unit
+pub fn[C : ColorArg] P5::red(Self, C) -> Double
+pub fn P5::redraw(Self, n? : Int32) -> Unit
+pub fn P5::reset_matrix(Self) -> Unit
+pub fn P5::resize_canvas(Self, Double, Double) -> Unit
+pub fn P5::rng(Self) -> @math.Random
+pub fn P5::rotate(Self, Double) -> Unit
+pub fn[C : ColorArg] P5::saturation(Self, C) -> Double
+pub fn P5::save_canvas(Self, filename? : String, ext? : String) -> Unit
+pub fn P5::scale(Self, Double, y? : Double) -> Unit
+pub fn P5::screen_to_world(Self, Double, Double) -> (Double, Double)
+pub fn P5::set_draw(Self, (Self) -> Unit) -> Unit
+pub fn P5::shear_x(Self, Double) -> Unit
+pub fn P5::shear_y(Self, Double) -> Unit
+pub fn P5::sin(Self, Double) -> Double
+pub fn P5::smooth(Self) -> Unit
+pub fn P5::spline(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::spline_ends(Self, @shape.SplineEnds) -> Unit
+pub fn P5::spline_point(Self, Double, Double, Double, Double, Double) -> Double
+pub fn P5::spline_tangent(Self, Double, Double, Double, Double, Double) -> Double
+pub fn P5::spline_tightness(Self, Double) -> Unit
+pub fn P5::spline_vertex(Self, Double, Double) -> Unit
+pub fn P5::square(Self, Double, Double, Double, tl? : Double, tr? : Double, br? : Double, bl? : Double) -> Unit
+pub fn[C : ColorArg] P5::stroke(Self, C) -> Unit
+pub fn P5::stroke_cap(Self, StrokeCap) -> Unit
+pub fn P5::stroke_join(Self, StrokeJoin) -> Unit
+pub fn P5::stroke_weight(Self, Double) -> Unit
+pub fn P5::surface(Self) -> &Surface
+pub fn P5::tan(Self, Double) -> Double
+pub fn P5::translate(Self, Double, Double) -> Unit
+pub fn P5::triangle(Self, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn P5::vertex(Self, Double, Double) -> Unit
+pub fn P5::with_push(Self, () -> Unit) -> Unit
+pub fn P5::world_to_screen(Self, Double, Double) -> (Double, Double)
+
+pub struct Recorder {
+  log : Array[String]
+  // private fields
+}
+pub fn Recorder::new() -> Self
+pub fn Recorder::take(Self) -> Array[String]
+pub impl Surface for Recorder
+
+#derive(Eq, @debug.Debug)
+pub(all) enum StrokeCap {
+  Round
+  Square
+  Project
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum StrokeJoin {
+  Miter
+  Bevel
+  RoundJoin
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum TextStyle {
+  Normal
+  Italic
+  Bold
+  BoldItalic
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum TextWrap {
+  Word
+  Char
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) struct Touch {
+  x : Double
+  y : Double
+  win_x : Double
+  win_y : Double
+  id : Int32
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum VAlign {
+  Top
+  VCenter
+  Bottom
+  Baseline
+}
+
+// Type aliases
+pub using @shape {type ArcMode}
+
+pub using @shape {type CloseMode}
+
+pub using @color {type Color}
+
+pub using @color {type ColorMode}
+
+pub using @math {type Matrix2D}
+
+pub using @math {type Noise}
+
+pub using @math {type Random}
+
+pub using @shape {type Shape}
+
+pub using @shape {type ShapeKind}
+
+pub using @shape {type ShapeMode}
+
+pub using @shape {type SplineEnds}
+
+pub using @math {type Vector}
+
+// Traits
+pub(open) trait ColorArg {
+  fn to_color(Self, P5) -> @color.Color
+}
+pub impl ColorArg for Int32
+pub impl ColorArg for Double
+pub impl ColorArg for String
+pub impl ColorArg for @color.Color
+pub impl ColorArg for Array[Double]
+pub impl[A : Num, B : Num] ColorArg for (A, B)
+pub impl[A : Num, B : Num, C : Num] ColorArg for (A, B, C)
+pub impl[A : Num, B : Num, C : Num, D : Num] ColorArg for (A, B, C, D)
+
+pub(open) trait Num {
+  fn to_num(Self) -> Double
+}
+pub impl Num for Int32
+pub impl Num for Double
+
+pub(open) trait Surface {
+  fn set_transform(Self, @math.Matrix2D) -> Unit
+  fn save(Self) -> Unit
+  fn restore(Self) -> Unit
+  fn fill_path(Self, Array[@shape.PathCmd], String) -> Unit
+  fn stroke_path(Self, Array[@shape.PathCmd], String, Double, StrokeCap, StrokeJoin) -> Unit
+  fn clip(Self, Array[@shape.PathCmd]) -> Unit
+  fn fill_rect(Self, Double, Double, Double, Double, String) -> Unit
+  fn clear_rect(Self, Double, Double, Double, Double) -> Unit
+  fn set_blend_mode(Self, BlendMode) -> Unit
+  fn set_text_style(Self, String, HAlign, VAlign) -> Unit
+  fn fill_text(Self, String, Double, Double, String) -> Unit
+  fn stroke_text(Self, String, Double, Double, String, Double, StrokeJoin) -> Unit
+  fn text_width(Self, String) -> Double
+  fn text_ascent(Self) -> Double
+  fn text_descent(Self) -> Double
+  fn draw_image(Self, @dom.ImageElement, Int32, Int32, (Double, Double, Double, Double)?, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+  fn read_pixels(Self, Int32, Int32, Int32, Int32) -> FixedArray[Byte]
+  fn write_pixels(Self, FixedArray[Byte], Int32, Int32, Int32, Int32) -> Unit
+  fn resize(Self, Double, Double, Double) -> Unit
+  fn set_smoothing(Self, Bool) -> Unit
+  fn set_css_filter(Self, String) -> Unit
+}

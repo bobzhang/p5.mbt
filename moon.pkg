@@ -1,0 +1,10 @@
+import {
+  "moonbitlang/core/math" @cmath,
+  "bobzhang/p5/math",
+  "bobzhang/p5/color",
+  "bobzhang/p5/shape",
+  "bobzhang/p5/dom",
+  "moonbitlang/core/string",
+}
+
+supported_targets = "js"

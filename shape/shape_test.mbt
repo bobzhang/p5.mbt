@@ -1,6 +1,6 @@
 ///|
 fn cmds(s : @shape.Shape) -> String {
-  to_repr(s.to_paths().path).to_string()
+  Repr(s.to_paths().path).to_string()
 }
 
 ///|
