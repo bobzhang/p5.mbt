@@ -40,6 +40,9 @@ priv struct Callbacks {
   mut touch_moved : (P5) -> Unit
   mut touch_ended : (P5) -> Unit
   mut window_resized : (P5) -> Unit
+  mut device_moved : ((P5) -> Unit)?
+  mut device_turned : ((P5) -> Unit)?
+  mut device_shaken : ((P5) -> Unit)?
 }
 
 ///|
@@ -99,6 +102,35 @@ pub struct P5 {
   mut window_width : Double
   /// Inner height of the browser window.
   mut window_height : Double
+  /// Device acceleration along x (×2 m/s², as in p5), from `devicemotion`.
+  mut acceleration_x : Double
+  /// Device acceleration along y.
+  mut acceleration_y : Double
+  /// Device acceleration along z.
+  mut acceleration_z : Double
+  /// Previous `acceleration_x`.
+  mut p_acceleration_x : Double
+  /// Previous `acceleration_y`.
+  mut p_acceleration_y : Double
+  /// Previous `acceleration_z`.
+  mut p_acceleration_z : Double
+  /// Device rotation about x (beta), in the current angle mode.
+  mut rotation_x : Double
+  /// Device rotation about y (gamma), in the current angle mode.
+  mut rotation_y : Double
+  /// Device rotation about z (alpha), in the current angle mode.
+  mut rotation_z : Double
+  /// Previous `rotation_x`.
+  mut p_rotation_x : Double
+  /// Previous `rotation_y`.
+  mut p_rotation_y : Double
+  /// Previous `rotation_z`.
+  mut p_rotation_z : Double
+  /// The axis (`"X"`, `"Y"` or `"Z"`) of the turn that fired
+  /// `device_turned`, empty otherwise.
+  mut turn_axis : String
+  /// `"landscape"`, `"portrait"` or `"undefined"`.
+  mut device_orientation : String
   /// Pixel data filled by `load_pixels()` (RGBA, row-major, device pixels).
   mut pixels : FixedArray[Byte]
   priv mut surface : &Surface
@@ -133,6 +165,7 @@ pub struct P5 {
   priv mut font_counter : Int32
   priv mut recording : Recording?
   priv degrees : Ref[Bool]
+  priv motion : Motion
   priv mut container : String
 }
 
@@ -170,6 +203,20 @@ fn P5::make(
     window_width: w,
     window_height: h,
     pixels: [],
+    acceleration_x: 0,
+    acceleration_y: 0,
+    acceleration_z: 0,
+    p_acceleration_x: 0,
+    p_acceleration_y: 0,
+    p_acceleration_z: 0,
+    rotation_x: 0,
+    rotation_y: 0,
+    rotation_z: 0,
+    p_rotation_x: 0,
+    p_rotation_y: 0,
+    p_rotation_z: 0,
+    turn_axis: "",
+    device_orientation: "landscape",
     surface,
     canvas: None,
     density,
@@ -195,6 +242,9 @@ fn P5::make(
       touch_moved: nop,
       touch_ended: nop,
       window_resized: nop,
+      device_moved: None,
+      device_turned: None,
+      device_shaken: None,
     },
     looping: true,
     target_frame_rate: 60,
@@ -219,6 +269,7 @@ fn P5::make(
     font_counter: 0,
     recording: None,
     degrees: Ref(false),
+    motion: Motion::new(),
     container: "",
   }
 }

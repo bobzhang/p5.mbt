@@ -89,7 +89,7 @@ pub fn remove_item(String) -> Unit
 
 pub fn round(Double, decimals? : Int32) -> Double
 
-pub fn run(preload? : (P5) -> Unit, setup? : (P5) -> Unit, draw? : (P5) -> Unit, mouse_pressed? : (P5) -> Unit, mouse_released? : (P5) -> Unit, mouse_clicked? : (P5) -> Unit, double_clicked? : (P5) -> Unit, mouse_moved? : (P5) -> Unit, mouse_dragged? : (P5) -> Unit, mouse_wheel? : (P5, Double) -> Unit, key_pressed? : (P5) -> Unit, key_released? : (P5) -> Unit, key_typed? : (P5) -> Unit, touch_started? : (P5) -> Unit, touch_moved? : (P5) -> Unit, touch_ended? : (P5) -> Unit, window_resized? : (P5) -> Unit, container? : String, seed? : Double) -> Unit
+pub fn run(preload? : (P5) -> Unit, setup? : (P5) -> Unit, draw? : (P5) -> Unit, mouse_pressed? : (P5) -> Unit, mouse_released? : (P5) -> Unit, mouse_clicked? : (P5) -> Unit, double_clicked? : (P5) -> Unit, mouse_moved? : (P5) -> Unit, mouse_dragged? : (P5) -> Unit, mouse_wheel? : (P5, Double) -> Unit, key_pressed? : (P5) -> Unit, key_released? : (P5) -> Unit, key_typed? : (P5) -> Unit, touch_started? : (P5) -> Unit, touch_moved? : (P5) -> Unit, touch_ended? : (P5) -> Unit, window_resized? : (P5) -> Unit, device_moved? : (P5) -> Unit, device_turned? : (P5) -> Unit, device_shaken? : (P5) -> Unit, container? : String, seed? : Double) -> Unit
 
 pub fn save_json(@json.Json, String, pretty? : Bool) -> Unit
 
@@ -277,6 +277,20 @@ pub struct P5 {
   mut focused : Bool
   mut window_width : Double
   mut window_height : Double
+  mut acceleration_x : Double
+  mut acceleration_y : Double
+  mut acceleration_z : Double
+  mut p_acceleration_x : Double
+  mut p_acceleration_y : Double
+  mut p_acceleration_z : Double
+  mut rotation_x : Double
+  mut rotation_y : Double
+  mut rotation_z : Double
+  mut p_rotation_x : Double
+  mut p_rotation_y : Double
+  mut p_rotation_z : Double
+  mut turn_axis : String
+  mut device_orientation : String
   mut pixels : FixedArray[Byte]
   // private fields
 }
@@ -338,6 +352,7 @@ pub fn P5::end_clip(Self) -> Unit
 pub fn P5::end_contour(Self, mode? : @shape.CloseMode) -> Unit
 pub fn P5::end_shape(Self, mode? : @shape.CloseMode) -> Unit
 pub fn P5::erase(Self, strength_fill? : Double, strength_stroke? : Double) -> Unit
+pub fn P5::exit_pointer_lock(Self) -> Unit
 pub fn[C : ColorArg] P5::fill(Self, C) -> Unit
 pub fn P5::filter(Self, Filter) -> Unit
 pub fn P5::font_ascent(Self) -> Double
@@ -411,6 +426,7 @@ pub fn P5::rect_mode(Self, @shape.ShapeMode) -> Unit
 pub fn[C : ColorArg] P5::red(Self, C) -> Double
 pub fn P5::redraw(Self, n? : Int32) -> Unit
 pub fn P5::remove(Self) -> Unit
+pub fn P5::request_pointer_lock(Self) -> Bool
 pub fn P5::reset_matrix(Self) -> Unit
 pub fn P5::resize_canvas(Self, Double, Double) -> Unit
 pub fn P5::rng(Self) -> @math.Random
@@ -423,6 +439,8 @@ pub fn P5::scale(Self, Double, y? : Double) -> Unit
 pub fn P5::screen_to_world(Self, Double, Double) -> (Double, Double)
 pub fn[C : ColorArg] P5::set(Self, Double, Double, C) -> Unit
 pub fn P5::set_draw(Self, (Self) -> Unit) -> Unit
+pub fn P5::set_move_threshold(Self, Double) -> Unit
+pub fn P5::set_shake_threshold(Self, Double) -> Unit
 pub fn P5::shear_x(Self, Double) -> Unit
 pub fn P5::shear_y(Self, Double) -> Unit
 pub fn[T] P5::shuffle(Self, ArrayView[T]) -> Array[T]

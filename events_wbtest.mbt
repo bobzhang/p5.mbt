@@ -99,3 +99,43 @@ test "clip without push ends with the frame" {
     ),
   )
 }
+
+///|
+test "device motion and orientation follow p5's _handleMotion" {
+  let p = P5::headless(Recorder::new(), 10, 10)
+  let events : Array[String] = []
+  p.callbacks.device_moved = Some(_ => events.push("moved"))
+  p.callbacks.device_shaken = Some(_ => events.push("shaken"))
+  p.callbacks.device_turned = Some(p => events.push("turned \{p.turn_axis}"))
+  p.on_device_motion(0.1, 0.1, 0.1) // change 0.2 < 0.5: nothing
+  p.on_device_motion(1, 0, 0) // change 1.8: moved
+  p.on_device_motion(20, 5, 0) // change 38 + 10 > 30: moved and shaken
+  inspect(p.acceleration_x, content="40")
+  p.angle_mode(Degrees)
+  p.on_device_orientation(0, 10, 0)
+  p.on_device_orientation(0, 50, 0)
+  p.on_device_orientation(0, 110, 0) // more than 90° from the start: turned X
+  // As in p5.js, orientation events re-run the motion checks against the
+  // last acceleration change, so "moved"/"shaken" fire again.
+  inspect(p.rotation_x, content="110")
+  inspect(p.p_rotation_x, content="50")
+  debug_inspect(
+    events,
+    content=(
+      #|[
+      #|  "moved",
+      #|  "moved",
+      #|  "shaken",
+      #|  "moved",
+      #|  "shaken",
+      #|  "moved",
+      #|  "shaken",
+      #|  "moved",
+      #|  "turned X",
+      #|  "shaken",
+      #|]
+    ),
+  )
+  p.angle_mode(Radians)
+  inspect(@math.round(p.p_rotation_x, decimals=4), content="0.8727")
+}

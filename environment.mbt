@@ -122,8 +122,15 @@ pub fn P5::display_height(_self : P5) -> Double {
 /// Sets the angle unit used by `rotate`, `arc`, `sin`, `atan2`, etc.
 pub fn P5::angle_mode(self : P5, mode : AngleMode) -> Unit {
   // Like p5.js, the angle mode belongs to the sketch: push()/pop() don't
-  // save it.
-  self.degrees.val = mode is Degrees
+  // save it. Switching converts the previous device rotations.
+  let to_degrees = mode is Degrees
+  if to_degrees != self.degrees.val {
+    let k = if to_degrees { RAD_TO_DEG } else { DEG_TO_RAD }
+    self.p_rotation_x *= k
+    self.p_rotation_y *= k
+    self.p_rotation_z *= k
+  }
+  self.degrees.val = to_degrees
 }
 
 ///|

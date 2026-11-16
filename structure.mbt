@@ -38,6 +38,9 @@ pub fn run(
   touch_moved? : (P5) -> Unit,
   touch_ended? : (P5) -> Unit,
   window_resized? : (P5) -> Unit,
+  device_moved? : (P5) -> Unit,
+  device_turned? : (P5) -> Unit,
+  device_shaken? : (P5) -> Unit,
   container~ : String = "",
   seed? : Double,
 ) -> Unit {
@@ -101,6 +104,14 @@ pub fn run(
     }
     if window_resized is Some(f) {
       cb.window_resized = f
+    }
+    cb.device_moved = device_moved
+    cb.device_turned = device_turned
+    cb.device_shaken = device_shaken
+    p.device_orientation = if p.window_width / p.window_height > 1.0 {
+      "landscape"
+    } else {
+      "portrait"
     }
     p.apply_defaults()
     p.install_events(canvas)

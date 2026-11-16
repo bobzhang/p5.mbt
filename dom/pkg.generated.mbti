@@ -58,6 +58,8 @@ pub fn element_height(Element) -> Double
 
 pub fn element_width(Element) -> Double
 
+pub fn exit_pointer_lock() -> Unit
+
 pub fn fetch_bytes(String, (FixedArray[Byte]) -> Unit, (String) -> Unit) -> Unit
 
 pub fn fetch_text(String, (String) -> Unit, (String) -> Unit) -> Unit
@@ -95,6 +97,8 @@ pub fn image_data_length(ImageData) -> Int32
 pub fn image_data_set(ImageData, Int32, Int32) -> Unit
 
 pub fn is_fullscreen() -> Bool
+
+pub fn listen_device((Double, Double, Double) -> Unit, (Double, Double, Double) -> Unit) -> Unit
 
 pub fn listen_keys((String, String, String, Int32) -> Bool) -> Unit
 
@@ -162,11 +166,15 @@ pub fn remove_element(Element) -> Unit
 
 pub fn request_animation_frame((Double) -> Unit) -> Unit
 
+pub fn request_pointer_lock(Canvas) -> Bool
+
 pub fn resize_canvas(Canvas, Double, Double, Double) -> Unit
 
 pub fn restore(Context2D) -> Unit
 
 pub fn save(Context2D) -> Unit
+
+pub fn screen_orientation_type() -> String
 
 pub fn set_attribute(Element, String, String) -> Unit
 

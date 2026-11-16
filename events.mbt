@@ -157,4 +157,8 @@ fn P5::install_events(self : P5, canvas : @dom.Canvas) -> Unit {
     (self.callbacks.window_resized)(self)
   })
   @dom.on_focus_change(f => self.focused = f)
+  @dom.listen_device(
+    (alpha, beta, gamma) => self.on_device_orientation(alpha, beta, gamma),
+    (x, y, z) => self.on_device_motion(x, y, z),
+  )
 }

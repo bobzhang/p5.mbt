@@ -121,3 +121,27 @@ pub extern "js" fn listen_keys(
   #|  window.addEventListener('keyup', e => { if (f('up', e.key, e.code, e.keyCode) === false) e.preventDefault(); });
   #|  window.addEventListener('blur', () => f('blur', '', '', 0));
   #|}
+
+///|
+/// Listens to `deviceorientation` (`orient(alpha, beta, gamma)`, degrees)
+/// and `devicemotion` (`motion(x, y, z)`, acceleration in m/s²).
+pub extern "js" fn listen_device(
+  orient : (Double, Double, Double) -> Unit,
+  motion : (Double, Double, Double) -> Unit,
+) -> Unit =
+  #|(orient, motion) => {
+  #|  window.addEventListener('deviceorientation', e => orient(e.alpha ?? 0, e.beta ?? 0, e.gamma ?? 0), { passive: false });
+  #|  window.addEventListener('devicemotion', e => { const a = e.acceleration || {}; motion(a.x ?? 0, a.y ?? 0, a.z ?? 0); }, { passive: false });
+  #|}
+
+///|
+/// `screen.orientation.type` (empty when unavailable).
+pub extern "js" fn screen_orientation_type() -> String = "() => (typeof screen !== 'undefined' && screen.orientation && screen.orientation.type) || ''"
+
+///|
+/// Requests pointer lock on the canvas; returns false when unsupported.
+pub extern "js" fn request_pointer_lock(c : Canvas) -> Bool = "(c) => { const f = c.requestPointerLock || c.mozRequestPointerLock; if (!f) return false; f.call(c); return true; }"
+
+///|
+/// Exits pointer lock.
+pub extern "js" fn exit_pointer_lock() -> Unit = "() => { if (document.exitPointerLock) document.exitPointerLock(); }"
