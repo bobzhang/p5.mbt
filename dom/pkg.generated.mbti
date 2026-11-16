@@ -78,6 +78,8 @@ pub fn get_style(Element, String) -> String
 
 pub fn get_value(Element) -> String
 
+pub fn has_query_param(String) -> Bool
+
 pub fn image_data_copy_from(ImageData, FixedArray[Byte]) -> Unit
 
 pub fn image_data_copy_to(ImageData, FixedArray[Byte]) -> Unit
@@ -142,7 +144,11 @@ pub fn path_rect(Path2D, Double, Double, Double, Double) -> Unit
 
 pub fn path_round_rect(Path2D, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 
+pub fn post_text(String, String) -> Unit
+
 pub fn put_image_data(Context2D, ImageData, Int32, Int32) -> Unit
+
+pub fn query_param(String) -> String
 
 pub fn query_selector(String) -> Element
 
@@ -215,6 +221,8 @@ pub fn stroke_path(Context2D, Path2D, String, Double, String, String) -> Unit
 pub fn stroke_text(Context2D, String, Double, Double, String, Double, String) -> Unit
 
 pub fn to_data_url(Canvas, String) -> String
+
+pub fn upload_canvas_png(Canvas, String, Int32, () -> Unit, (String) -> Unit) -> Unit
 
 pub fn window_height() -> Double
 

@@ -145,7 +145,11 @@ fn P5::start(self : P5) -> Unit {
   self.last_real_frame_time = now
   self.setup_done = true
   self.millis_start = now
-  self.schedule_frame(immediate=true)
+  if self.recording is Some(_) {
+    self.record_step()
+  } else {
+    self.schedule_frame(immediate=true)
+  }
 }
 
 ///|

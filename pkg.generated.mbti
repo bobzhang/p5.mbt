@@ -51,6 +51,8 @@ pub fn hex(Int32, digits? : Int32) -> String
 
 pub fn hour() -> Int32
 
+pub fn js_rem(Double, Double) -> Double
+
 pub fn lerp(Double, Double, Double) -> Double
 
 pub fn mag(Double, Double) -> Double
@@ -78,6 +80,8 @@ pub fn norm(Double, Double, Double) -> Double
 pub fn palette_lerp(ArrayView[(@color.Color, Double)], Double) -> @color.Color
 
 pub fn print(String) -> Unit
+
+pub fn query_param(String) -> String?
 
 pub fn radians(Double) -> Double
 
@@ -337,6 +341,7 @@ pub fn P5::image_mode(Self, @shape.ShapeMode) -> Unit
 pub fn[I : ImageSource] P5::image_region(Self, I, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::is_fullscreen(Self) -> Bool
 pub fn P5::is_looping(Self) -> Bool
+pub fn P5::is_recording(Self) -> Bool
 pub fn P5::key_is_down(Self, String) -> Bool
 pub fn P5::lerp_color(Self, @color.Color, @color.Color, Double) -> @color.Color
 pub fn[C : ColorArg] P5::lightness(Self, C) -> Double
@@ -374,6 +379,7 @@ pub fn P5::random_gaussian(Self, mean? : Double, sd? : Double) -> Double
 pub fn P5::random_max(Self, Double) -> Double
 pub fn P5::random_range(Self, Double, Double) -> Double
 pub fn P5::random_seed(Self, Double) -> Unit
+pub fn P5::record(Self, frames~ : Int32, fps? : Double, endpoint? : String, on_done? : () -> Unit) -> Unit
 pub fn P5::rect(Self, Double, Double, Double, Double, tl? : Double, tr? : Double, br? : Double, bl? : Double) -> Unit
 pub fn P5::rect_mode(Self, @shape.ShapeMode) -> Unit
 pub fn[C : ColorArg] P5::red(Self, C) -> Double

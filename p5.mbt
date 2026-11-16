@@ -130,6 +130,7 @@ pub struct P5 {
   priv mut is_main : Bool
   priv mut erase_strength : (Double, Double)
   priv mut font_counter : Int32
+  priv mut recording : Recording?
   priv mut container : String
 }
 
@@ -213,6 +214,7 @@ fn P5::make(
     is_main: false,
     erase_strength: (255, 255),
     font_counter: 0,
+    recording: None,
     container: "",
   }
 }

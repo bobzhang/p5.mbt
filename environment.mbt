@@ -68,7 +68,9 @@ pub fn P5::get_target_frame_rate(self : P5) -> Double {
 ///|
 /// Milliseconds since the sketch started drawing.
 pub fn P5::millis(self : P5) -> Double {
-  if self.is_main {
+  if self.recording is Some(r) {
+    (self.frame_count - 1).max(0).to_double() * 1000.0 / r.fps
+  } else if self.is_main {
     @dom.now() - self.millis_start
   } else {
     0

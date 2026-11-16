@@ -17,6 +17,7 @@ pub using @math {
   radians,
   max_of,
   min_of,
+  js_rem,
 }
 
 ///|
