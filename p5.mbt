@@ -141,6 +141,7 @@ pub struct P5 {
   priv mut gl_join : Int32
   priv mut gl_normal : (Double, Double, Double)
   priv framebuffers : Array[@webgl.Framebuffer]
+  priv mut filter2d : @webgl.Filter2D?
   priv mut density : Double
   priv mut state : State
   priv stack : Array[State]
@@ -234,6 +235,7 @@ fn P5::make(
     gl_join: 0,
     gl_normal: (0, 0, 1),
     framebuffers: [],
+    filter2d: None,
     density,
     state: State::new(),
     stack: [],

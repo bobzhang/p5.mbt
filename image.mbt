@@ -567,7 +567,25 @@ pub fn[C : ColorArg] P5::set(self : P5, x : Double, y : Double, c : C) -> Unit {
 ///|
 /// Applies a filter to the whole canvas, on the CPU (like p5's
 /// `filter(type, param, false)`).
-pub fn P5::filter(self : P5, f : Filter) -> Unit {
+pub fn P5::filter(self : P5, f : Filter, use_webgl~ : Bool = true) -> Unit {
+  let (op, param) : (String, Double?) = match f {
+    Threshold(t) => ("threshold", Some(t))
+    Gray => ("gray", None)
+    Opaque => ("opaque", None)
+    Invert => ("invert", None)
+    Posterize(n) => ("posterize", Some(n.to_double()))
+    Blur(r) => ("blur", Some(r))
+    Erode => ("erode", None)
+    Dilate => ("dilate", None)
+  }
+  if self.gl is Some(r) {
+    r.filter(op, param, self.gl_style(), None)
+    return
+  }
+  if use_webgl && self.canvas is Some(c) {
+    self.filter_webgl_2d(c, op, param)
+    return
+  }
   let (w, _) = self.device_size()
   self.load_pixels()
   apply_filter(self.pixels, w, f)
@@ -599,4 +617,65 @@ pub fn P5::remove(self : P5) -> Unit {
   if self.canvas is Some(c) {
     @dom.remove_canvas(c)
   }
+}
+
+///|
+/// p5's FilterRenderer2D: the filter shader runs on a helper WebGL canvas
+/// reading this canvas, and the result is drawn back.
+fn P5::filter_webgl_2d(
+  self : P5,
+  c : @dom.Canvas,
+  op : String,
+  param : Double?,
+) -> Unit {
+  let fr = match self.filter2d {
+    Some(f) => f
+    None => {
+      let f = @webgl.Filter2D::new(self.width, self.height)
+      self.filter2d = Some(f)
+      f
+    }
+  }
+  let src = @dom.canvas_as_image(c)
+  let w = self.width
+  let h = self.height
+  let draw_back = (out : @dom.ImageElement) => {
+    self.surface.save()
+    self.surface.set_transform(@math.identity)
+    self.surface.clear_rect(0, 0, w * self.density, h * self.density)
+    self.surface.set_transform(@math.identity.scale(self.density, self.density))
+    self.surface.set_blend_mode(Blend)
+    self.surface.draw_image(
+      out,
+      w.to_int(),
+      h.to_int(),
+      None,
+      0,
+      0,
+      w,
+      h,
+      0,
+      0,
+      w,
+      h,
+    )
+    self.surface.restore()
+  }
+  if op == "blur" {
+    if fr.pass(op, param, (1, 0), src, w, h, self.density) is Some(out) {
+      draw_back(out)
+    }
+    if fr.pass(op, param, (0, 1), src, w, h, self.density) is Some(out) {
+      draw_back(out)
+    }
+  } else if fr.pass(op, param, (0, 0), src, w, h, self.density) is Some(out) {
+    draw_back(out)
+  }
+  self.surface.set_blend_mode(
+    if self.state.erasing {
+      Remove
+    } else {
+      self.state.blend_mode
+    },
+  )
 }

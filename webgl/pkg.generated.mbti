@@ -32,6 +32,8 @@ pub let extra_stroke : Int32
 
 pub let extra_u : Int32
 
+pub fn filter_default_param(String) -> Double?
+
 pub fn js_string(Double) -> String
 
 pub fn libtess_triangulate(Array[Array[FixedArray[Double]]], Int32) -> Array[Double]
@@ -95,6 +97,12 @@ pub(all) enum DrawMode {
   TriangleStrip
   TriangleFan
 }
+
+pub struct Filter2D {
+  // private fields
+}
+pub fn Filter2D::new(Double, Double) -> Self
+pub fn Filter2D::pass(Self, String, Double?, (Double, Double), @dom.ImageElement, Double, Double, Double) -> @dom.ImageElement?
 
 pub struct Framebuffer {
   mut width : Double
@@ -208,6 +216,8 @@ pub struct Renderer3D {
   mut density : Double
   mut state : GLState
   main_camera : Camera
+  canvas : @dom.ImageElement
+  antialias : Bool
   mut curve_detail : Double
   simple_lines : Bool
   // private fields
@@ -228,6 +238,7 @@ pub fn Renderer3D::draw_geometry(Self, Geometry, Style, mode? : DrawMode, count?
 pub fn Renderer3D::draw_scaled(Self, Geometry, Double, Double, Double, Style) -> Unit
 pub fn Renderer3D::draw_shape(Self, @shape.ShapeKind, Array[Array[@shape.Pt]], Style, count? : Int32) -> Unit
 pub fn Renderer3D::emissive_material(Self, FixedArray[Double]) -> Unit
+pub fn Renderer3D::filter(Self, String, Double?, Style, Shader?) -> Unit
 pub fn Renderer3D::free_geometry(Self, Geometry) -> Unit
 pub fn Renderer3D::frustum(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
 pub fn Renderer3D::geometry(Self, String) -> Geometry?
@@ -238,7 +249,7 @@ pub fn Renderer3D::lights(Self) -> Unit
 pub fn Renderer3D::line_perspective(Self, Bool) -> Unit
 pub fn Renderer3D::metalness(Self, Double) -> Unit
 pub fn Renderer3D::model_matrix(Self) -> @math.Matrix
-pub fn Renderer3D::new(@gl.GL, Double, Double, Double) -> Self
+pub fn Renderer3D::new(@gl.GL, @dom.ImageElement, Bool, Double, Double, Double) -> Self
 pub fn Renderer3D::no_lights(Self) -> Unit
 pub fn Renderer3D::on_fill(Self) -> Unit
 pub fn Renderer3D::on_shader(Self) -> Unit

@@ -55,7 +55,16 @@ fn P5::create_webgl_canvas(self : P5, w : Double, h : Double) -> Unit {
     true,
     true,
   )
-  self.gl = Some(@webgl.Renderer3D::new(gl, w, h, self.density))
+  self.gl = Some(
+    @webgl.Renderer3D::new(
+      gl,
+      @dom.canvas_as_image(c),
+      @gl.default_antialias(),
+      w,
+      h,
+      self.density,
+    ),
+  )
   self.gl_canvas = Some(c)
 }
 

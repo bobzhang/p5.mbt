@@ -13,6 +13,7 @@ pub struct Shader {
   modified : Array[String]
   priv mut program : @gl.Program?
   priv mut kind : String
+  priv raw : Bool
   priv uniforms : Map[String, UniformValue]
 }
 
@@ -47,7 +48,14 @@ pub fn Shader::new(vert : String, frag : String) -> Shader {
     program: None,
     kind: "",
     uniforms: Map([]),
+    raw: false,
   }
+}
+
+///|
+/// A shader from complete sources (hooks already filled in).
+fn Shader::raw(vert : String, frag : String) -> Shader {
+  { ..Shader::new(vert, frag), raw: true, }
 }
 
 ///|
@@ -153,12 +161,18 @@ fn populate_hooks(
 ///|
 /// The vertex source with hooks filled in.
 pub fn Shader::vert_src(self : Shader) -> String {
+  if self.raw {
+    return self.vert
+  }
   populate_hooks(self.vert, self.vertex_hooks, self.modified)
 }
 
 ///|
 /// The fragment source with hooks filled in.
 pub fn Shader::frag_src(self : Shader) -> String {
+  if self.raw {
+    return self.frag
+  }
   populate_hooks(self.frag, self.fragment_hooks, self.modified)
 }
 

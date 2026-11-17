@@ -504,7 +504,7 @@ pub fn P5::end_shape(Self, mode? : @shape.CloseMode) -> Unit
 pub fn P5::erase(Self, strength_fill? : Double, strength_stroke? : Double) -> Unit
 pub fn P5::exit_pointer_lock(Self) -> Unit
 pub fn[C : ColorArg] P5::fill(Self, C) -> Unit
-pub fn P5::filter(Self, Filter) -> Unit
+pub fn P5::filter(Self, Filter, use_webgl? : Bool) -> Unit
 pub fn P5::font_ascent(Self) -> Double
 pub fn P5::font_bounds(Self, String, Double, Double, max_width? : Double, max_height? : Double) -> Bounds
 pub fn P5::font_descent(Self) -> Double

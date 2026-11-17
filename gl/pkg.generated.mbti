@@ -28,11 +28,15 @@ pub fn compile_program(GL, String, String) -> Result[Program, String]
 
 pub fn compile_program_js(GL, String, String, (Program) -> Unit, (String) -> Unit) -> Unit
 
+pub fn context_canvas(GL) -> @dom.ImageElement
+
 pub fn create_buffer(GL) -> Buffer
 
 pub fn create_context(@dom.Canvas, Bool, Bool, Bool, Bool, Bool, Bool) -> GL
 
 pub fn create_fbo(GL, Int32, Int32, Int32, Bool, Bool, Bool, Bool, Bool, String, String) -> FBO
+
+pub fn create_plain_context(@dom.Canvas) -> GL
 
 pub fn create_white_texture(GL) -> Texture
 

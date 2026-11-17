@@ -640,3 +640,19 @@ extern "js" fn fbo_read_pixels_js(
   #|  for (let i = 0; i < h; i++) out.set(buf.subarray((h - 1 - i) * row, (h - i) * row), i * row);
   #|  return out;
   #|}
+
+///|
+/// A plain WebGL context with default attributes for a helper canvas
+/// (p5's FilterRenderer2D): only premultiplied uploads are set.
+pub extern "js" fn create_plain_context(canvas : @dom.Canvas) -> GL =
+  #|(canvas) => {
+  #|  let gl = canvas.getContext('webgl2');
+  #|  if (gl) gl.__p5mbtVersion = 2; else { gl = canvas.getContext('webgl'); gl.__p5mbtVersion = 1; }
+  #|  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+  #|  gl.__p5mbtEnabled = new Set(); gl.__p5mbtCur = null;
+  #|  return gl;
+  #|}
+
+///|
+/// The canvas element of a context, as an image source.
+pub extern "js" fn context_canvas(gl : GL) -> @dom.ImageElement = "(gl) => gl.canvas"

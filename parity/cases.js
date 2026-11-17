@@ -220,6 +220,11 @@ export const cases = {
   filter_erode: [120, 90, p => { gradientScene(p); p.filter(p.ERODE, false); }],
   filter_dilate: [120, 90, p => { gradientScene(p); p.filter(p.DILATE, false); }],
   filter_blur: [120, 90, p => { gradientScene(p); p.filter(p.BLUR, 3, false); }],
+  shader_filter_gray: [120, 90, p => { gradientScene(p); p.filter(p.GRAY); }],
+  shader_filter_threshold: [120, 90, p => { gradientScene(p); p.filter(p.THRESHOLD, 0.4); }],
+  shader_filter_posterize: [120, 90, p => { gradientScene(p); p.filter(p.POSTERIZE, 3); }],
+  shader_filter_blur: [120, 90, p => { gradientScene(p); p.filter(p.BLUR, 3); }],
+  shader_filter_erode: [120, 90, p => { gradientScene(p); p.filter(p.ERODE); }],
   svg_import: [240, 160, (p, rec) => { p.background(255); p.shape(rec, 0, 0); },
     async p => await p.loadSVG('../examples/assets/shapes.svg')],
   font_points: [260, 120, (p, font) => {
@@ -252,6 +257,13 @@ function checker(p) {
 }
 
 export const glCases = {
+  gl_filter: [240, 160, p => {
+    p.background(30, 40, 60); p.noStroke(); p.lights();
+    p.fill(250, 120, 60); p.push(); p.translate(-60, 0); p.rotateX(0.5); p.rotateY(0.7); p.box(70); p.pop();
+    p.fill(80, 200, 160); p.push(); p.translate(60, 0); p.sphere(45); p.pop();
+    p.filter(p.GRAY); p.filter(p.BLUR, 2);
+    p.fill(255); p.circle(0, 55, 30);
+  }],
   gl_framebuffer: [260, 180, p => {
     const fb = p.createFramebuffer({ width: 120, height: 90 });
     fb.draw(() => {

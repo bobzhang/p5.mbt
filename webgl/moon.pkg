@@ -1,5 +1,6 @@
 import {
   "moonbitlang/core/math" @cmath,
+  "moonbitlang/core/double",
   "bobzhang/p5/math",
   "bobzhang/p5/gl",
   "bobzhang/p5/shape",

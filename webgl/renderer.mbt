@@ -94,6 +94,14 @@ pub struct Renderer3D {
   priv immediate : Geometry
   priv mut drawing_image : Bool
   priv active_fbs : Array[Framebuffer]
+  priv filter_shaders : Map[String, Shader]
+  priv mut filter_layer : Framebuffer?
+  priv mut filter_layer_temp : Framebuffer?
+  priv mut drawing_filter : Bool
+  /// The canvas element (for using the canvas as a texture).
+  canvas : @dom.ImageElement
+  /// Whether the context is antialiased (framebuffer default).
+  antialias : Bool
   priv mut user_sampler : Bool
   /// Points per unit length when sampling curves (`curveDetail`, 1/4).
   mut curve_detail : Double
@@ -149,6 +157,8 @@ fn default_state(cam : Camera) -> GLState {
 /// A renderer drawing into `gl` for a `width × height` canvas.
 pub fn Renderer3D::new(
   gl : @gl.GL,
+  canvas : @dom.ImageElement,
+  antialias : Bool,
   width : Double,
   height : Double,
   density : Double,
@@ -170,6 +180,12 @@ pub fn Renderer3D::new(
     immediate: { ..Geometry::new(), gid: "__IMMEDIATE_MODE_GEOMETRY__", },
     drawing_image: false,
     active_fbs: [],
+    filter_shaders: Map([]),
+    filter_layer: None,
+    filter_layer_temp: None,
+    drawing_filter: false,
+    canvas,
+    antialias,
     user_sampler: false,
     curve_detail: 0.25,
     simple_lines: false,

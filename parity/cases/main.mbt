@@ -42,6 +42,11 @@ fn cases() -> Map[String, Case] {
     "filter_erode": (120, 90, p => filtered(p, Erode)),
     "filter_dilate": (120, 90, p => filtered(p, Dilate)),
     "filter_blur": (120, 90, p => filtered(p, Blur(3))),
+    "shader_filter_gray": (120, 90, p => filtered_gl(p, Gray)),
+    "shader_filter_threshold": (120, 90, p => filtered_gl(p, Threshold(0.4))),
+    "shader_filter_posterize": (120, 90, p => filtered_gl(p, Posterize(3))),
+    "shader_filter_blur": (120, 90, p => filtered_gl(p, Blur(3))),
+    "shader_filter_erode": (120, 90, p => filtered_gl(p, Erode)),
   }
   let all : Map[String, Case] = Map([])
   for name, c in sync {
@@ -115,6 +120,7 @@ fn gl_cases() -> Map[String, (Double, Double, (@p5.P5) -> Unit)] {
   {
     "gl_primitives": (260, 200, gl_primitives),
     "gl_2d": (280, 200, gl_2d),
+    "gl_filter": (240, 160, gl_filter),
     "gl_framebuffer": (260, 180, gl_framebuffer),
     "gl_textures": (280, 200, gl_textures),
     "gl_shader": (240, 160, gl_shader),
@@ -259,6 +265,29 @@ fn gl_framebuffer(p : @p5.P5) -> Unit {
   p.no_stroke()
   p.sphere(r=30)
   p.pop()
+}
+
+///|
+fn gl_filter(p : @p5.P5) -> Unit {
+  p.background((30, 40, 60))
+  p.no_stroke()
+  p.lights()
+  p.fill((250, 120, 60))
+  p.push()
+  p.translate(-60, 0)
+  p.rotate_x(0.5)
+  p.rotate_y(0.7)
+  p.box(w=70)
+  p.pop()
+  p.fill((80, 200, 160))
+  p.push()
+  p.translate(60, 0)
+  p.sphere(r=45)
+  p.pop()
+  p.filter(Gray)
+  p.filter(Blur(2))
+  p.fill(255)
+  p.circle(0, 55, 30)
 }
 
 ///|
@@ -664,6 +693,12 @@ fn gradient_scene(p : @p5.P5) -> Unit {
 
 ///|
 fn filtered(p : @p5.P5, f : @p5.Filter) -> Unit {
+  gradient_scene(p)
+  p.filter(f, use_webgl=false)
+}
+
+///|
+fn filtered_gl(p : @p5.P5, f : @p5.Filter) -> Unit {
   gradient_scene(p)
   p.filter(f)
 }
