@@ -28,6 +28,8 @@ pub struct FontData {
   descender : Int32
   /// Number of glyphs.
   num_glyphs : Int32
+  /// `sCapHeight` from the OS/2 table (version 2+), in font units.
+  cap_height : Int32?
   priv advance : Array[Int32]
   priv cmap : CmapTable
   priv loca : Array[Double]
@@ -219,12 +221,17 @@ pub fn FontData::parse(input : Bytes) -> FontData raise FontError {
     None => None
   }
   let kern = find_table(data, "kern", foff).map(t => parse_kern(data, t.0))
+  let cap_height = match find_table(data, "OS/2", foff) {
+    Some((off, _)) if u16(data, off) >= 2 => Some(i16(data, off + 88))
+    _ => None
+  }
   {
     data,
     units_per_em,
     ascender,
     descender,
     num_glyphs,
+    cap_height,
     advance,
     cmap,
     loca,

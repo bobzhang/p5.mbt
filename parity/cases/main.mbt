@@ -122,6 +122,19 @@ fn cases() -> Map[String, Case] {
     draw: p => gl_models(p, models.val[0], models.val[1]),
     webgl: true,
   }
+  let fonts : Ref[Array[@p5.Font]] = Ref([])
+  all["gl_text"] = {
+    w: 280,
+    h: 180,
+    preload: Some(p => {
+      fonts.val = [
+        p.load_font("../examples/assets/Inconsolata-Bold.ttf"),
+        p.load_font("../examples/assets/SourceSansPro-Regular.otf"),
+      ]
+    }),
+    draw: p => gl_text(p, fonts.val[0], fonts.val[1]),
+    webgl: true,
+  }
   for name, c in gl_cases() {
     all[name] = { w: c.0, h: c.1, draw: c.2, preload: None, webgl: true, }
   }
@@ -357,6 +370,31 @@ fn gl_models(p : @p5.P5, obj : @p5.Geometry, stl : @p5.Geometry) -> Unit {
   p.fill((255, 220, 0))
   p.model(g)
   p.pop()
+}
+
+///|
+fn gl_text(p : @p5.P5, inc : @p5.Font, src : @p5.Font) -> Unit {
+  p.background(245)
+  p.text_font_face(inc)
+  p.text_size(30)
+  p.text("Hello WebGL", -130, -50)
+  p.fill((200, 40, 90))
+  p.text_align(HCenter, vertical=VCenter)
+  p.text("centred", 0, 0)
+  p.push()
+  p.translate(60, 50)
+  p.rotate_y(0.6)
+  p.rotate_z(-0.2)
+  p.fill((30, 90, 200))
+  p.text_font_face(src, size=26)
+  p.text_align(Left, vertical=Baseline)
+  p.text("Qg & 9", -60, 0)
+  p.pop()
+  p.text_font_face(src)
+  p.text_size(14)
+  p.fill(0)
+  p.text_align(Right, vertical=Top)
+  p.text("right top", 130, -85)
 }
 
 ///|

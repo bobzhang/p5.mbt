@@ -5,6 +5,7 @@ import {
   "bobzhang/p5/gl",
   "bobzhang/p5/shape",
   "bobzhang/p5/dom",
+  "bobzhang/p5/font",
 }
 
 supported_targets = "js"

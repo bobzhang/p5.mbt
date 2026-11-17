@@ -47,6 +47,7 @@ pub struct FontData {
   ascender : Int32
   descender : Int32
   num_glyphs : Int32
+  cap_height : Int32?
   // private fields
 }
 pub fn FontData::advance_width(Self, Int32) -> Int32

@@ -95,6 +95,7 @@ pub struct Renderer3D {
   priv mut drawing_image : Bool
   priv active_fbs : Array[Framebuffer]
   priv mut builder : GeometryBuilder?
+  priv font_infos : Map[String, FontInfo]
   priv filter_shaders : Map[String, Shader]
   priv mut filter_layer : Framebuffer?
   priv mut filter_layer_temp : Framebuffer?
@@ -182,6 +183,7 @@ pub fn Renderer3D::new(
     drawing_image: false,
     active_fbs: [],
     builder: None,
+    font_infos: Map([]),
     filter_shaders: Map([]),
     filter_layer: None,
     filter_layer_temp: None,

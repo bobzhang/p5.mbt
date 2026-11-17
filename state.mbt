@@ -20,6 +20,8 @@ priv struct State {
   mut text_leading : Double
   mut leading_set : Bool
   mut text_font : String
+  /// The loaded font set with `text_font_face`, if any.
+  mut font_obj : Font?
   mut text_style : TextStyle
   mut text_align : HAlign
   mut text_baseline : VAlign
@@ -65,6 +67,7 @@ fn State::new() -> State {
     text_leading: 15,
     leading_set: false,
     text_font: "sans-serif",
+    font_obj: None,
     text_style: Normal,
     text_align: Left,
     text_baseline: Baseline,

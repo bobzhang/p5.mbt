@@ -656,3 +656,38 @@ pub extern "js" fn create_plain_context(canvas : @dom.Canvas) -> GL =
 ///|
 /// The canvas element of a context, as an image source.
 pub extern "js" fn context_canvas(gl : GL) -> @dom.ImageElement = "(gl) => gl.canvas"
+
+///|
+/// A texture holding `data` (RGBA values stored through a
+/// Uint8ClampedArray, as p5's ImageData) of `w × h`, re-uploaded when
+/// `dirty`. Uploaded without premultiplied alpha (p5's text path).
+pub extern "js" fn data_texture(
+  gl : GL,
+  data : FixedArray[Double],
+  w : Int32,
+  h : Int32,
+  dirty : Bool,
+) -> Texture =
+  #|(gl, data, w, h, dirty) => {
+  #|  let t = data.__p5mbtTex;
+  #|  const prev = gl.getParameter(gl.TEXTURE_BINDING_2D);
+  #|  if (!t) {
+  #|    t = data.__p5mbtTex = gl.createTexture();
+  #|    gl.bindTexture(gl.TEXTURE_2D, t);
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  #|    dirty = true;
+  #|  }
+  #|  if (dirty) {
+  #|    const img = new ImageData(w, h);
+  #|    img.data.set(data);
+  #|    gl.bindTexture(gl.TEXTURE_2D, t);
+  #|    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+  #|    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+  #|    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+  #|  }
+  #|  gl.bindTexture(gl.TEXTURE_2D, prev);
+  #|  return t;
+  #|}

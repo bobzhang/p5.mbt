@@ -40,6 +40,8 @@ pub fn create_plain_context(@dom.Canvas) -> GL
 
 pub fn create_white_texture(GL) -> Texture
 
+pub fn data_texture(GL, FixedArray[Double], Int32, Int32, Bool) -> Texture
+
 pub fn default_antialias() -> Bool
 
 pub fn delete_buffer(GL, Buffer) -> Unit

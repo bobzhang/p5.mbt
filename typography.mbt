@@ -142,6 +142,7 @@ pub fn P5::get_text_leading(self : P5) -> Double {
 /// optionally with a size.
 pub fn P5::text_font(self : P5, family : String, size? : Double) -> Unit {
   self.state.text_font = family
+  self.state.font_obj = None
   if size is Some(s) {
     self.text_size(s)
   }
@@ -151,6 +152,7 @@ pub fn P5::text_font(self : P5, family : String, size? : Double) -> Unit {
 /// Uses a font returned by `load_font`.
 pub fn P5::text_font_face(self : P5, font : Font, size? : Double) -> Unit {
   self.text_font(font.family, size?)
+  self.state.font_obj = Some(font)
 }
 
 ///|
@@ -320,7 +322,15 @@ fn x_align_offset(align : HAlign, width : Double) -> Double {
 /// p5's `_middleAlignOffset`, measured with the current text style.
 fn P5::middle_align_offset(self : P5) -> Double {
   let m = self.surface.measure_text("X")
-  m.alphabetic_baseline + m.font_ascent / 2
+  // p5 uses the font's OS/2 cap height when it has the font data
+  let cap = match self.state.font_obj {
+    Some({ data: Some(d), .. }) if d.cap_height is Some(c) && c != 0 =>
+      c.to_double() *
+      self.state.text_size /
+      (if d.units_per_em == 0 { 1000 } else { d.units_per_em }).to_double()
+    _ => m.font_ascent
+  }
+  m.alphabetic_baseline + cap / 2
 }
 
 ///|
@@ -352,6 +362,10 @@ pub fn P5::text(
 ) -> Unit {
   let st = self.state
   let (x, y, width, height) = self.text_rect_mode(x, y, max_width, max_height)
+  if self.gl is Some(r) {
+    self.gl_text(r, s, x, y, width, height)
+    return
+  }
   // Inside a box the alphabetic baseline is replaced by 'top'.
   let ctx_baseline = if width is Some(_) && st.text_baseline is Baseline {
     VAlign::Top
@@ -557,4 +571,72 @@ pub fn P5::font_bounds(
   max_height? : Double,
 ) -> Bounds {
   self.compute_bounds(false, s, x, y, max_width, max_height)
+}
+
+///|
+/// `text()` in WEBGL: p5's WebGL `_positionLines` / `_yAlignOffset`, then
+/// each line drawn with the font shader.
+fn P5::gl_text(
+  self : P5,
+  r : @webgl.Renderer3D,
+  s : String,
+  x : Double,
+  y : Double,
+  width : Double?,
+  height : Double?,
+) -> Unit {
+  let st = self.state
+  guard st.font_obj is Some(font) && font.data is Some(data) else {
+    warn(
+      "WEBGL: you must load and set a font (load_font + text_font_face) before drawing text",
+    )
+    return
+  }
+  guard st.fill is Some(_) else { return }
+  self.apply_text_style()
+  let lines = self.process_lines(s, width, height)
+  let widths = lines.map(l => self.surface.measure_text(l).width)
+  let adj_w = match width {
+    Some(w) => w
+    None => widths.fold(init=0.0, (a, b) => a.max(b))
+  }
+  let adj_h = height.unwrap_or(0)
+  let n = lines.length()
+  let size = st.text_size
+  let total = size * n.to_double() +
+    (st.text_leading - size) * (n - 1).to_double()
+  let vertical_align_font = () => {
+    let m = self.surface.measure_text("X")
+    if m.alphabetic_baseline != 0 {
+      -m.alphabetic_baseline
+    } else {
+      -m.font_ascent + m.font_descent
+    }
+  }
+  let y_off = match st.text_baseline {
+    Top => vertical_align_font()
+    Baseline => 0.0
+    VCenter =>
+      (-total + size + adj_h) / 2 +
+      vertical_align_font() +
+      self.middle_align_offset()
+    Bottom => -(total - size) + adj_h
+    _ => 0.0
+  }
+  let fill = if st.fill_set {
+    self.gl_style().fill.unwrap_or([0, 0, 0, 1])
+  } else {
+    [0.0, 0, 0, 1]
+  }
+  let style = self.gl_style()
+  for i, line in lines {
+    let w = widths[i]
+    let lx = match st.text_align {
+      HCenter => x + (adj_w - w) / 2 - adj_w / 2 + width.unwrap_or(0) / 2
+      Right => x + adj_w - w - adj_w + width.unwrap_or(0)
+      _ => x
+    }
+    let ly = y + i.to_double() * st.text_leading + y_off
+    r.render_text(font.family, data, line, lx, ly, size, fill, style)
+  }
 }

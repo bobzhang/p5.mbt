@@ -3,6 +3,7 @@ package "bobzhang/p5/webgl"
 
 import {
   "bobzhang/p5/dom",
+  "bobzhang/p5/font",
   "bobzhang/p5/gl",
   "bobzhang/p5/math",
   "bobzhang/p5/shape",
@@ -270,6 +271,7 @@ pub fn Renderer3D::point_light(Self, Double, Double, Double, Double, Double, Dou
 pub fn Renderer3D::pop(Self) -> Unit
 pub fn Renderer3D::push(Self) -> Unit
 pub fn Renderer3D::read_pixels(Self, Int32, Int32, Int32, Int32) -> FixedArray[Byte]
+pub fn Renderer3D::render_text(Self, String, @font.FontData, String, Double, Double, Double, FixedArray[Double], Style) -> Unit
 pub fn Renderer3D::reset_matrix(Self) -> Unit
 pub fn Renderer3D::resize(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::rotate(Self, Double, Double, Double, Double) -> Unit

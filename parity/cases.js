@@ -257,6 +257,14 @@ function checker(p) {
 }
 
 export const glCases = {
+  gl_text: [280, 180, (p, [inc, src]) => {
+    p.background(245);
+    p.textFont(inc); p.textSize(30); p.text('Hello WebGL', -130, -50);
+    p.fill(200, 40, 90); p.textAlign(p.CENTER, p.CENTER); p.text('centred', 0, 0);
+    p.push(); p.translate(60, 50); p.rotateY(0.6); p.rotateZ(-0.2); p.fill(30, 90, 200);
+    p.textFont(src, 26); p.textAlign(p.LEFT, p.BASELINE); p.text('Qg & 9', -60, 0); p.pop();
+    p.textFont(src); p.textSize(14); p.fill(0); p.textAlign(p.RIGHT, p.TOP); p.text('right top', 130, -85);
+  }, async p => [await p.loadFont('../examples/assets/Inconsolata-Bold.ttf'), await p.loadFont('../examples/assets/SourceSansPro-Regular.otf')]],
   gl_models: [280, 200, (p, [obj, stl]) => {
     p.background(235); p.lights(); p.stroke(0); p.strokeWeight(1);
     p.push(); p.translate(-90, -40); p.rotateY(0.6); p.rotateX(0.4); p.fill(120, 180, 255); p.model(obj); p.pop();
