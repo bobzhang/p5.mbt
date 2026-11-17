@@ -137,16 +137,24 @@ pub fn P5::key_is_down(self : P5, key : String) -> Bool {
 }
 
 ///|
-fn P5::install_events(self : P5, canvas : @dom.Canvas) -> Unit {
+/// Pointer and wheel listeners on the canvas (re-installed on the WebGL
+/// canvas in WEBGL mode).
+fn P5::install_canvas_events(self : P5, canvas : @dom.Canvas) -> Unit {
   let active : Map[Int32, (Double, Double, Double, Double, Int32)] = Map([])
   @dom.listen_pointer(canvas, () => self.width, () => self.height, e => {
     self.handle_pointer(e, active)
     true
   })
   @dom.listen_wheel(canvas, (_, dy) => {
+    self.wheel_delta_y = dy
     (self.callbacks.mouse_wheel)(self, dy)
     true
   })
+}
+
+///|
+fn P5::install_events(self : P5, canvas : @dom.Canvas) -> Unit {
+  self.install_canvas_events(canvas)
   @dom.listen_keys((kind, key, code, key_code) => {
     self.handle_key(kind, key, code, key_code)
     true

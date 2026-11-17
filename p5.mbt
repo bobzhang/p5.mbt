@@ -143,6 +143,9 @@ pub struct P5 {
   priv framebuffers : Array[@webgl.Framebuffer]
   priv mut filter2d : @webgl.Filter2D?
   priv mut gl_fill_override : FixedArray[Double]?
+  priv mut wheel_delta_y : Double
+  priv mut orbit : (Double, Double, Double, Double, Double, Bool, Bool)
+  priv mut prev_touches : Array[Touch]
   priv mut density : Double
   priv mut state : State
   priv stack : Array[State]
@@ -238,6 +241,9 @@ fn P5::make(
     framebuffers: [],
     filter2d: None,
     gl_fill_override: None,
+    wheel_delta_y: 0,
+    orbit: (0, 0, 0, 0, 0, false, false),
+    prev_touches: [],
     density,
     state: State::new(),
     stack: [],

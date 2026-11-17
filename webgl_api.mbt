@@ -66,6 +66,9 @@ fn P5::create_webgl_canvas(self : P5, w : Double, h : Double) -> Unit {
     ),
   )
   self.gl_canvas = Some(c)
+  if self.is_main {
+    self.install_canvas_events(c)
+  }
 }
 
 ///|
@@ -1120,3 +1123,174 @@ pub fn P5::create_model(
   ignore(g.make_triangle_edges())
   g
 }
+
+// ---- orbitControl ----
+
+///|
+/// Lets the mouse (drag to rotate, right-drag to move, wheel to zoom) or
+/// touches (one finger rotates, two pinch and move) control the camera,
+/// with p5's damping. Call it in `draw()`.
+pub fn P5::orbit_control(
+  self : P5,
+  sensitivity_x~ : Double = 1,
+  sensitivity_y? : Double,
+  sensitivity_z~ : Double = 1,
+) -> Unit {
+  guard self.gl_renderer("orbit_control") is Some(r) else { return }
+  let sx = sensitivity_x
+  let sy = sensitivity_y.unwrap_or(sx)
+  let sz = sensitivity_z
+  if self.gl_canvas is Some(c) {
+    @dom.disable_canvas_gestures(c)
+  }
+  let cam = r.current_camera()
+  let (zoom_v0, rot_x0, rot_y0, move_x0, move_y0, exec_zoom0, exec_rm0) = self.orbit
+  let mut zoom_v = zoom_v0
+  let mut rot_x = rot_x0
+  let mut rot_y = rot_y0
+  let mut move_x = move_x0
+  let mut move_y = move_y0
+  let mut exec_zoom = exec_zoom0
+  let mut exec_rm = exec_rm0
+  // touches that were also present last frame
+  let moved : Array[(Double, Double, Double, Double)] = []
+  for t in self.touches {
+    for pt in self.prev_touches {
+      if t.id == pt.id {
+        moved.push((t.x, t.y, pt.x, pt.y))
+      }
+    }
+  }
+  self.prev_touches = self.touches.copy()
+  let mut d_radius = 0.0
+  let mut d_theta = 0.0
+  let mut d_phi = 0.0
+  let mut move_dx = 0.0
+  let mut move_dy = 0.0
+  let damping = 0.85
+  let scale = if self.height < self.width { self.height } else { self.width }
+  if moved.length() > 0 {
+    let (x0, y0, _, _) = moved[0]
+    let inside = x0 > 0 && x0 < self.width && y0 > 0 && y0 < self.height
+    if moved.length() == 1 {
+      let (x, y, px, py) = moved[0]
+      d_theta = -sx * (x - px) / scale
+      d_phi = sy * (y - py) / scale
+    } else {
+      let (ax, ay, apx, apy) = moved[0]
+      let (bx, by, bpx, bpy) = moved[1]
+      let dist = js_hypot2(ax - bx, ay - by)
+      let prev = js_hypot2(apx - bpx, apy - bpy)
+      d_radius = -(dist - prev) * sz * 0.0004
+      move_dx = 0.5 * (ax + bx) - 0.5 * (apx + bpx)
+      move_dy = 0.5 * (ay + by) - 0.5 * (apy + bpy)
+    }
+    if self.touches.length() > 0 {
+      if inside {
+        exec_rm = true
+        exec_zoom = true
+      }
+    } else {
+      exec_rm = false
+      exec_zoom = false
+    }
+  } else {
+    let inside = self.mouse_x > 0 &&
+      self.mouse_x < self.width &&
+      self.mouse_y > 0 &&
+      self.mouse_y < self.height
+    if self.wheel_delta_y != 0 {
+      d_radius = (if self.wheel_delta_y > 0 { 1.0 } else { -1.0 }) * sz * 0.01
+      self.wheel_delta_y = 0
+      if inside {
+        exec_zoom = true
+      }
+    } else {
+      exec_zoom = false
+    }
+    if self.mouse_is_pressed {
+      if self.mouse_button.left {
+        d_theta = -sx * self.moved_x / scale
+        d_phi = sy * self.moved_y / scale
+      } else if self.mouse_button.right {
+        move_dx = self.moved_x
+        move_dy = self.moved_y * cam.y_scale
+      }
+      if inside {
+        exec_rm = true
+      }
+    } else {
+      exec_rm = false
+    }
+  }
+  if d_radius != 0 && exec_zoom {
+    zoom_v += d_radius
+  }
+  if zoom_v.abs() > 0.001 {
+    cam.orbit(0, 0, zoom_v)
+    cam.zoom_projection(js_pow10(-zoom_v))
+    zoom_v *= damping
+  } else {
+    zoom_v = 0
+  }
+  if (d_theta != 0 || d_phi != 0) && exec_rm {
+    rot_x += d_theta * 0.6
+    rot_y += d_phi * 0.6
+  }
+  if rot_x * rot_x + rot_y * rot_y > 0.000001 {
+    cam.orbit(rot_x, rot_y, 0)
+    rot_x *= damping
+    rot_y *= damping
+  } else {
+    rot_x = 0
+    rot_y = 0
+  }
+  r.sync_camera()
+  if (move_dx != 0 || move_dy != 0) && exec_rm {
+    move_x += move_dx * 2 / self.width * 0.15
+    move_y += -move_dy * 2 / self.height * 0.15
+  }
+  if move_x * move_x + move_y * move_y > 0.000001 {
+    let ((lxx, lxy, lxz), (lyx, lyy, lyz), _) = cam.axes()
+    let dxe = cam.eye_x - cam.center_x
+    let dye = cam.eye_y - cam.center_y
+    let dze = cam.eye_z - cam.center_z
+    let view_z = (dxe * dxe + dye * dye + dze * dze).sqrt()
+    let (cx, cy, cz, _) = cam.camera_matrix.multiply_vec4(
+      cam.center_x,
+      cam.center_y,
+      cam.center_z,
+      1,
+    )
+    let up = cam.proj_matrix
+    let (px, py, _, pw) = up.multiply_vec4(cx, cy, cz, 1)
+    let nx = px / pw - move_x
+    let ny = py / pw - move_y
+    let (dx, dy) = if up.get(15) == 0 {
+      (
+        (up.get(8) + nx) / up.get(0) * view_z,
+        (up.get(9) + ny) / up.get(5) * view_z,
+      )
+    } else {
+      ((nx - up.get(12)) / up.get(0), (ny - up.get(13)) / up.get(5))
+    }
+    cam.set_position(
+      cam.eye_x + dx * lxx + dy * lyx,
+      cam.eye_y + dx * lxy + dy * lyy,
+      cam.eye_z + dx * lxz + dy * lyz,
+    )
+    r.sync_camera()
+    move_x *= damping
+    move_y *= damping
+  } else {
+    move_x = 0
+    move_y = 0
+  }
+  self.orbit = (zoom_v, rot_x, rot_y, move_x, move_y, exec_zoom, exec_rm)
+}
+
+///|
+extern "js" fn js_hypot2(x : Double, y : Double) -> Double = "Math.hypot"
+
+///|
+extern "js" fn js_pow10(x : Double) -> Double = "(x) => Math.pow(10, x)"

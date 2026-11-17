@@ -97,3 +97,9 @@ pub extern "js" fn replace_canvas(
   #|  old.style.display = 'none';
   #|  return c;
   #|}
+
+///|
+/// Disables the context menu, page scrolling by wheel and touch gestures on
+/// a canvas (what p5's `orbitControl` does).
+pub extern "js" fn disable_canvas_gestures(c : Canvas) -> Unit =
+  #|(c) => { c.oncontextmenu = () => false; c.onwheel = () => false; c.style.touchAction = 'none'; }

@@ -83,6 +83,7 @@ pub struct Camera {
   mut default_camera_near : Double
   mut default_camera_far : Double
 }
+pub fn Camera::axes(Self) -> ((Double, Double, Double), (Double, Double, Double), (Double, Double, Double))
 pub fn Camera::camera(Self, eye? : (Double, Double, Double), center? : (Double, Double, Double), up? : (Double, Double, Double)) -> Unit
 pub fn Camera::copy(Self) -> Self
 pub fn Camera::frustum(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
@@ -96,6 +97,7 @@ pub fn Camera::perspective(Self, fovy? : Double, aspect? : Double, near? : Doubl
 pub fn Camera::resize(Self, Double, Double) -> Unit
 pub fn Camera::set_position(Self, Double, Double, Double) -> Unit
 pub fn Camera::tilt(Self, Double) -> Unit
+pub fn Camera::zoom_projection(Self, Double) -> Unit
 
 pub(all) enum DrawMode {
   Triangles

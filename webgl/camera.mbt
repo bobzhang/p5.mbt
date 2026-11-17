@@ -508,3 +508,26 @@ extern "js" fn js_hypot3(x : Double, y : Double, z : Double) -> Double = "Math.h
 
 ///|
 extern "js" fn js_acos(x : Double) -> Double = "Math.acos"
+
+///|
+/// The camera's local axes (x, y, z), each as a tuple.
+pub fn Camera::axes(
+  self : Camera,
+) -> (
+  (Double, Double, Double),
+  (Double, Double, Double),
+  (Double, Double, Double),
+) {
+  let (x, y, z) = self.local_axes()
+  ((x.x, x.y, x.z), (y.x, y.y, y.z), (z.x, z.y, z.z))
+}
+
+///|
+/// Scales the projection's x/y focal terms (perspective zoom in
+/// `orbitControl`).
+pub fn Camera::zoom_projection(self : Camera, factor : Double) -> Unit {
+  if self.proj_matrix.get(15) == 0 {
+    self.proj_matrix.set_element(0, self.proj_matrix.get(0) * factor)
+    self.proj_matrix.set_element(5, self.proj_matrix.get(5) * factor)
+  }
+}

@@ -44,6 +44,8 @@ pub fn date_part(Int32) -> Int32
 
 pub fn device_pixel_ratio() -> Double
 
+pub fn disable_canvas_gestures(Canvas) -> Unit
+
 pub fn display_height() -> Double
 
 pub fn display_width() -> Double

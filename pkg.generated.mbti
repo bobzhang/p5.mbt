@@ -578,6 +578,7 @@ pub fn P5::noise_detail(Self, Int32, falloff? : Double) -> Unit
 pub fn P5::noise_seed(Self, Double) -> Unit
 pub fn P5::normal(Self, Double, Double, Double) -> Unit
 pub fn P5::normal_material(Self) -> Unit
+pub fn P5::orbit_control(Self, sensitivity_x? : Double, sensitivity_y? : Double, sensitivity_z? : Double) -> Unit
 pub fn P5::ortho(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
 pub fn P5::perspective(Self, fovy? : Double, aspect? : Double, near? : Double, far? : Double) -> Unit
 pub fn P5::pixel_density(Self, Double) -> Unit
