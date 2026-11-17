@@ -24,6 +24,18 @@
         "8766"
       ],
       "port": 8766
+    },
+    {
+      "name": "record-asia",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "tools/record.py",
+        "--out",
+        "asia.mp4",
+        "--port",
+        "8767"
+      ],
+      "port": 8767
     }
   ]
 }

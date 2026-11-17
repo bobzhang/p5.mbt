@@ -95,7 +95,7 @@ pub impl ImageSource for Image with fn image_source(self) {
 
 ///|
 pub impl ImageSource for P5 with fn image_source(self) {
-  match self.canvas {
+  match self.canvas() {
     None => None
     Some(c) =>
       Some(

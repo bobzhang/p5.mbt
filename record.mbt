@@ -49,7 +49,7 @@ pub fn P5::is_recording(self : P5) -> Bool {
 ///|
 fn P5::record_step(self : P5) -> Unit {
   guard self.recording is Some(r) else { return }
-  guard self.canvas is Some(canvas) else { return }
+  guard self.canvas() is Some(canvas) else { return }
   if r.index >= r.total {
     self.looping = false
     @dom.post_text(r.endpoint + "/done", "\{r.total}")

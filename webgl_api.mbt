@@ -1294,3 +1294,12 @@ extern "js" fn js_hypot2(x : Double, y : Double) -> Double = "Math.hypot"
 
 ///|
 extern "js" fn js_pow10(x : Double) -> Double = "(x) => Math.pow(10, x)"
+
+///|
+/// Clears the depth buffer, so what is drawn next is not hidden by earlier
+/// 3D shapes (`clearDepth`).
+pub fn P5::clear_depth(self : P5, depth~ : Double = 1) -> Unit {
+  if self.gl_renderer("clear_depth") is Some(r) {
+    r.clear_depth(depth~)
+  }
+}

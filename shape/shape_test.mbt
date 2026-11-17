@@ -261,3 +261,17 @@ test "curve evaluation" {
   inspect(@shape.spline_tangent(0, 10, 20, 30, 0.5), content="10")
   inspect(@shape.spline_point(0, 10, 20, 30, 0), content="10")
 }
+
+///|
+test "to_vertices skips an unfinished Bezier segment" {
+  let s = @shape.Shape::new()
+  s.begin_shape()
+  s.vertex(0, 0)
+  s.bezier_vertex(10, 0)
+  s.bezier_vertex(10, 10)
+  s.vertex(0, 10)
+  s.end_shape()
+  let contours = s.to_vertices()
+  inspect(contours.length(), content="1")
+  debug_inspect(contours[0].map(p => (p.x, p.y)), content="[(0, 0), (0, 10)]")
+}

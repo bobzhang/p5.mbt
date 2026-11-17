@@ -88,6 +88,9 @@ pub fn Shape::to_vertices(
           }
         }
         LineSegment => last().append(v)
+        // an unfinished curve (too few control points) is skipped, as the
+        // 2D path does
+        BezierSegment(order) if v.length() < order => ()
         BezierSegment(order) => {
           let start = start_vertex(contour, index)
           let hull = [start]

@@ -83,6 +83,7 @@ Then open <http://localhost:8765/examples/>. The examples are:
 | [`feedback`](examples/feedback/main.mbt) | WEBGL: framebuffer feedback trails |
 | [`particles`](examples/particles/main.mbt) | `text_to_points`: words made of springy particles |
 | [`history`](examples/history/main.mbt) | *A Short History of Computation*, a 104-second film made entirely with p5.mbt |
+| [`asia`](examples/asia/main.mbt) | *Five Thousand Years of Asia*, a two-minute WEBGL film: 13 chapters from the Indus cities to the Shinkansen, with lit 3D scenes and CJK captions |
 
 ### Recording a sketch to video
 
@@ -96,8 +97,9 @@ moon build --target js --release
 python3 tools/record.py --out history.mp4
 ```
 
-Then open <http://localhost:8766/examples/history/?record>. The film's page
-also accepts `?t=SECONDS&still` to inspect a single moment.
+Then open <http://localhost:8766/examples/history/?record> (or
+`examples/asia/?record`). The films' pages also accept `?t=SECONDS&still` to
+inspect a single moment.
 
 ## From p5.js to MoonBit
 

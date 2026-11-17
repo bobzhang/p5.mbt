@@ -452,6 +452,7 @@ pub fn P5::canvas(Self) -> @dom.Canvas?
 pub fn P5::canvas_element(Self) -> Element?
 pub fn P5::circle(Self, Double, Double, Double) -> Unit
 pub fn P5::clear(Self) -> Unit
+pub fn P5::clear_depth(Self, depth? : Double) -> Unit
 pub fn P5::clip(Self, () -> Unit, invert? : Bool) -> Unit
 pub fn[C : ColorArg] P5::color(Self, C) -> @color.Color
 pub fn P5::color_mode(Self, @color.ColorMode) -> Unit
