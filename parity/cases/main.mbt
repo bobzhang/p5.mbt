@@ -115,6 +115,7 @@ fn gl_cases() -> Map[String, (Double, Double, (@p5.P5) -> Unit)] {
   {
     "gl_primitives": (260, 200, gl_primitives),
     "gl_2d": (280, 200, gl_2d),
+    "gl_framebuffer": (260, 180, gl_framebuffer),
     "gl_textures": (280, 200, gl_textures),
     "gl_shader": (240, 160, gl_shader),
     "gl_shapes": (280, 200, gl_shapes),
@@ -219,6 +220,45 @@ fn gl_shader(p : @p5.P5) -> Unit {
   p.reset_shader()
   p.fill(255)
   p.circle(0, 60, 20)
+}
+
+///|
+fn gl_framebuffer(p : @p5.P5) -> Unit {
+  guard p.create_framebuffer(width=120, height=90) is Some(fb) else { return }
+  fb.draw(() => {
+    p.background((40, 60, 120))
+    p.no_stroke()
+    p.lights()
+    p.rotate_x(0.6)
+    p.rotate_y(0.8)
+    p.fill((250, 180, 60))
+    p.box(w=45)
+  })
+  guard p.create_framebuffer(width=64, height=64, antialias=0) is Some(small) else {
+    return
+  }
+  small.draw(() => {
+    p.clear()
+    p.fill((255, 60, 120))
+    p.no_stroke()
+    p.circle(0, 0, 50)
+  })
+  p.background(230)
+  p.image(fb, -125, -85)
+  p.push()
+  p.translate(65, -20)
+  p.rotate_y(0.5)
+  p.texture(fb)
+  p.no_stroke()
+  p.plane(w=110, h=80)
+  p.pop()
+  p.image(small, -60, 20, w=64, h=64)
+  p.push()
+  p.translate(70, 55)
+  p.texture(small)
+  p.no_stroke()
+  p.sphere(r=30)
+  p.pop()
 }
 
 ///|

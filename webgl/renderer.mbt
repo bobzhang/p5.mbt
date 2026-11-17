@@ -93,6 +93,7 @@ pub struct Renderer3D {
   main_camera : Camera
   priv immediate : Geometry
   priv mut drawing_image : Bool
+  priv active_fbs : Array[Framebuffer]
   priv mut user_sampler : Bool
   /// Points per unit length when sampling curves (`curveDetail`, 1/4).
   mut curve_detail : Double
@@ -168,6 +169,7 @@ pub fn Renderer3D::new(
     main_camera: cam,
     immediate: { ..Geometry::new(), gid: "__IMMEDIATE_MODE_GEOMETRY__", },
     drawing_image: false,
+    active_fbs: [],
     user_sampler: false,
     curve_detail: 0.25,
     simple_lines: false,
@@ -222,6 +224,10 @@ pub fn Renderer3D::clear(
   b : Double,
   a : Double,
 ) -> Unit {
+  let a = match self.active_fbs.last() {
+    Some(fb) if !fb.antialias && a == 0 => 1.0e-10
+    _ => a
+  }
   @gl.clear(self.gl, r * a, g * a, b * a, a)
 }
 
@@ -419,7 +425,10 @@ pub fn Renderer3D::sync_camera(self : Renderer3D) -> Unit {
 ///|
 /// An image source used as a texture: the element and its logical size.
 pub(all) struct TexSource {
-  elt : @dom.ImageElement
+  /// The image, canvas or video element (`None` for a framebuffer).
+  elt : @dom.ImageElement?
+  /// The framebuffer, when texturing with one.
+  fb : Framebuffer?
   width : Double
   height : Double
 }
@@ -458,13 +467,28 @@ pub fn Renderer3D::texture_wrap(
 
 ///|
 fn Renderer3D::gl_texture(self : Renderer3D, src : TexSource) -> @gl.Texture {
-  @gl.texture_for(
-    self.gl,
-    src.elt,
-    self.state.wrap_x,
-    self.state.wrap_y,
-    "linear",
-  )
+  match (src.fb, src.elt) {
+    (Some(fb), _) =>
+      // sampling the framebuffer being drawn into reads nothing (p5 binds
+      // the empty texture) unless it is antialiased
+      if !fb.antialias &&
+        self.active_fbs.last() is Some(a) &&
+        physical_equal(a, fb) {
+        self.empty_texture()
+      } else {
+        fb.resolve(false)
+        @gl.fbo_texture(fb.fbo, false)
+      }
+    (None, Some(elt)) =>
+      @gl.texture_for(
+        self.gl,
+        elt,
+        self.state.wrap_x,
+        self.state.wrap_y,
+        "linear",
+      )
+    (None, None) => self.empty_texture()
+  }
 }
 
 ///|

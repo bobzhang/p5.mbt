@@ -252,6 +252,20 @@ function checker(p) {
 }
 
 export const glCases = {
+  gl_framebuffer: [260, 180, p => {
+    const fb = p.createFramebuffer({ width: 120, height: 90 });
+    fb.draw(() => {
+      p.background(40, 60, 120); p.noStroke(); p.lights();
+      p.rotateX(0.6); p.rotateY(0.8); p.fill(250, 180, 60); p.box(45);
+    });
+    const small = p.createFramebuffer({ width: 64, height: 64, antialias: false });
+    small.draw(() => { p.clear(); p.fill(255, 60, 120); p.noStroke(); p.circle(0, 0, 50); });
+    p.background(230);
+    p.image(fb, -125, -85);
+    p.push(); p.translate(65, -20); p.rotateY(0.5); p.texture(fb); p.noStroke(); p.plane(110, 80); p.pop();
+    p.image(small, -60, 20, 64, 64);
+    p.push(); p.translate(70, 55); p.texture(small); p.noStroke(); p.sphere(30); p.pop();
+  }],
   gl_textures: [280, 200, p => {
     const img = checker(p);
     p.background(200); p.noStroke();

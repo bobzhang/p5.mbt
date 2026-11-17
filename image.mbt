@@ -64,6 +64,15 @@ pub(open) trait ImageSource {
   /// Called before the source is drawn at time `now` (ms), so animated
   /// sources can advance.
   fn advance(Self, now : Double) -> Unit = _
+  /// The source as a WEBGL texture.
+  fn gl_source(Self) -> @webgl.TexSource? = _
+}
+
+///|
+impl ImageSource with fn gl_source(self) {
+  self
+  .image_source()
+  .map(s => { elt: Some(s.0), fb: None, width: s.3, height: s.4, })
 }
 
 ///|
@@ -392,7 +401,11 @@ pub fn[I : ImageSource] P5::image(
   w? : Double,
   h? : Double,
 ) -> Unit {
-  guard img.image_source() is Some((_, _, _, lw, lh)) else { return }
+  let size = match img.image_source() {
+    Some((_, _, _, lw, lh)) => Some((lw, lh))
+    None => img.gl_source().map(s => (s.width, s.height))
+  }
+  guard size is Some((lw, lh)) else { return }
   self.image_region(img, x, y, w.unwrap_or(lw), h.unwrap_or(lh), 0, 0, lw, lh)
 }
 
@@ -419,26 +432,22 @@ pub fn[I : ImageSource] P5::image_region(
       @dom.now()
     },
   )
-  guard img.image_source() is Some((elt, pw, ph, lw, lh)) else { return }
+  if self.gl is Some(r) {
+    guard img.gl_source() is Some(src) else { return }
+    let (x, y, w, h) = @shape.mode_adjust(dx, dy, dw, dh, self.state.image_mode)
+    let (w, h) = if self.state.image_mode is Corner { (dw, dh) } else { (w, h) }
+    let s = match img.image_source() {
+      Some((_, pw, _, lw, _)) => pw.to_double() / lw
+      None => 1.0
+    }
+    self.gl_sync_tint()
+    r.image(src, sx * s, sy * s, sw * s, sh * s, x, y, w, h, self.gl_style())
+    return
+  }
+  guard img.image_source() is Some((elt, pw, ph, lw, _)) else { return }
   let (x, y, w, h) = @shape.mode_adjust(dx, dy, dw, dh, self.state.image_mode)
   let (w, h) = if self.state.image_mode is Corner { (dw, dh) } else { (w, h) }
   let s = pw.to_double() / lw
-  if self.gl is Some(r) {
-    self.gl_sync_tint()
-    r.image(
-      { elt, width: lw, height: lh, },
-      sx * s,
-      sy * s,
-      sw * s,
-      sh * s,
-      x,
-      y,
-      w,
-      h,
-      self.gl_style(),
-    )
-    return
-  }
   let tint = self.state.tint.map(c => c.rgba())
   self.sync_transform()
   if self.state.erasing {

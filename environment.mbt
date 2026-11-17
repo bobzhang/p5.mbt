@@ -27,6 +27,9 @@ pub fn P5::resize_canvas(self : P5, w : Double, h : Double) -> Unit {
   if self.gl is Some(r) && self.gl_canvas is Some(c) {
     @dom.resize_canvas(c, w, h, self.density)
     r.resize(w, h, self.density)
+    for fb in self.framebuffers {
+      fb.canvas_resized()
+    }
   }
   self.surface.set_blend_mode(self.state.blend_mode)
   self.surface.set_smoothing(self.state.smooth)

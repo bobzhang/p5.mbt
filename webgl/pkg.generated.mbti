@@ -96,6 +96,37 @@ pub(all) enum DrawMode {
   TriangleFan
 }
 
+pub struct Framebuffer {
+  mut width : Double
+  mut height : Double
+  mut density : Double
+  antialias : Bool
+  default_camera : Camera
+  // private fields
+}
+pub fn Framebuffer::begin(Self) -> Unit
+pub fn Framebuffer::canvas_resized(Self) -> Unit
+pub fn Framebuffer::draw(Self, () -> Unit) -> Unit
+pub fn Framebuffer::end(Self) -> Unit
+pub fn Framebuffer::pixel_density(Self, Double) -> Unit
+pub fn Framebuffer::read_pixels(Self) -> FixedArray[Byte]
+pub fn Framebuffer::remove(Self) -> Unit
+pub fn Framebuffer::resize(Self, Double, Double) -> Unit
+pub fn Framebuffer::source(Self) -> TexSource
+
+pub(all) struct FramebufferOptions {
+  width : Double?
+  height : Double?
+  density : Double?
+  antialias : Int32?
+  depth : Bool
+  stencil : Bool
+  depth_float : Bool
+  alpha : Bool?
+  linear : Bool
+}
+pub fn FramebufferOptions::default() -> Self
+
 pub struct GLState {
   mut model : @math.Matrix
   mut view : @math.Matrix
@@ -190,6 +221,7 @@ pub fn Renderer3D::camera(Self, eye? : (Double, Double, Double), center? : (Doub
 pub fn Renderer3D::clear(Self, Double, Double, Double, Double) -> Unit
 pub fn Renderer3D::clear_depth(Self, depth? : Double) -> Unit
 pub fn Renderer3D::create_camera(Self) -> Camera
+pub fn Renderer3D::create_framebuffer(Self, FramebufferOptions, Bool) -> Framebuffer
 pub fn Renderer3D::current_camera(Self) -> Camera
 pub fn Renderer3D::directional_light(Self, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn Renderer3D::draw_geometry(Self, Geometry, Style, mode? : DrawMode, count? : Int32, skip_fill? : Bool) -> Unit
@@ -275,7 +307,8 @@ pub(all) struct Style {
 }
 
 pub(all) struct TexSource {
-  elt : @dom.ImageElement
+  elt : @dom.ImageElement?
+  fb : Framebuffer?
   width : Double
   height : Double
 }

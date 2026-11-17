@@ -455,3 +455,188 @@ pub extern "js" fn set_all_wrap(
   #|  }
   #|  gl.bindTexture(gl.TEXTURE_2D, prev);
   #|}
+
+///|
+/// A p5 framebuffer's GL objects: color/depth textures, and multisampled
+/// renderbuffers when antialiased.
+#external
+pub type FBO
+
+///|
+/// Creates (or recreates, when `old` is given) a framebuffer's GL objects
+/// like p5's `createFramebufferResources` + `recreateFramebufferTextures`.
+pub extern "js" fn create_fbo(
+  gl : GL,
+  w : Int32,
+  h : Int32,
+  samples : Int32,
+  use_depth : Bool,
+  use_stencil : Bool,
+  depth_float : Bool,
+  alpha : Bool,
+  linear : Bool,
+  wrap_s : String,
+  wrap_t : String,
+) -> FBO =
+  #|(gl, w, h, samples, useDepth, useStencil, depthFloat, alpha, linear, ws, wt) => {
+  #|  const fb = { gl, w, h, samples, useDepth, useStencil, dirty: false };
+  #|  fb.framebuffer = gl.createFramebuffer();
+  #|  if (samples > 0) fb.aaFramebuffer = gl.createFramebuffer();
+  #|  const prevTex = gl.getParameter(gl.TEXTURE_BINDING_2D);
+  #|  const prevFb = gl.getParameter(gl.FRAMEBUFFER_BINDING);
+  #|  const v2 = gl.__p5mbtVersion === 2;
+  #|  const format = alpha ? gl.RGBA : gl.RGB;
+  #|  const internal = v2 ? (alpha ? gl.RGBA8 : gl.RGB8) : format;
+  #|  const wrap = m => m === 'repeat' ? gl.REPEAT : m === 'mirror' ? gl.MIRRORED_REPEAT : gl.CLAMP_TO_EDGE;
+  #|  const params = (filter, s, t) => {
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap(s));
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap(t));
+  #|  };
+  #|  fb.colorTexture = gl.createTexture();
+  #|  gl.bindTexture(gl.TEXTURE_2D, fb.colorTexture);
+  #|  gl.texImage2D(gl.TEXTURE_2D, 0, internal, w, h, 0, format, gl.UNSIGNED_BYTE, null);
+  #|  gl.bindFramebuffer(gl.FRAMEBUFFER, fb.framebuffer);
+  #|  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fb.colorTexture, 0);
+  #|  let dInternal, dFormat, dType;
+  #|  if (useStencil) {
+  #|    dType = depthFloat ? gl.FLOAT_32_UNSIGNED_INT_24_8_REV : gl.UNSIGNED_INT_24_8;
+  #|    dFormat = gl.DEPTH_STENCIL;
+  #|    dInternal = depthFloat ? gl.DEPTH32F_STENCIL8 : gl.DEPTH24_STENCIL8;
+  #|  } else {
+  #|    dType = depthFloat ? gl.FLOAT : gl.UNSIGNED_INT;
+  #|    dFormat = gl.DEPTH_COMPONENT;
+  #|    dInternal = depthFloat ? gl.DEPTH_COMPONENT32F : gl.DEPTH_COMPONENT24;
+  #|  }
+  #|  if (useDepth) {
+  #|    fb.depthTexture = gl.createTexture();
+  #|    gl.bindTexture(gl.TEXTURE_2D, fb.depthTexture);
+  #|    gl.texImage2D(gl.TEXTURE_2D, 0, dInternal, w, h, 0, dFormat, dType, null);
+  #|    gl.framebufferTexture2D(gl.FRAMEBUFFER, useStencil ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, fb.depthTexture, 0);
+  #|  }
+  #|  if (samples > 0) {
+  #|    const n = Math.max(0, Math.min(samples, gl.getParameter(gl.MAX_SAMPLES)));
+  #|    fb.colorRenderbuffer = gl.createRenderbuffer();
+  #|    gl.bindRenderbuffer(gl.RENDERBUFFER, fb.colorRenderbuffer);
+  #|    gl.renderbufferStorageMultisample(gl.RENDERBUFFER, n, internal, w, h);
+  #|    if (useDepth) {
+  #|      fb.depthRenderbuffer = gl.createRenderbuffer();
+  #|      gl.bindRenderbuffer(gl.RENDERBUFFER, fb.depthRenderbuffer);
+  #|      gl.renderbufferStorageMultisample(gl.RENDERBUFFER, n, dInternal, w, h);
+  #|    }
+  #|    gl.bindFramebuffer(gl.FRAMEBUFFER, fb.aaFramebuffer);
+  #|    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, fb.colorRenderbuffer);
+  #|    if (useDepth) gl.framebufferRenderbuffer(gl.FRAMEBUFFER, useStencil ? gl.DEPTH_STENCIL_ATTACHMENT : gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, fb.depthRenderbuffer);
+  #|  }
+  #|  // p5.Texture settings: color linear/nearest with the current wrap, depth nearest
+  #|  gl.bindTexture(gl.TEXTURE_2D, fb.colorTexture);
+  #|  params(linear ? gl.LINEAR : gl.NEAREST, ws, wt);
+  #|  if (useDepth) { gl.bindTexture(gl.TEXTURE_2D, fb.depthTexture); params(gl.NEAREST, ws, wt); }
+  #|  gl.bindTexture(gl.TEXTURE_2D, prevTex);
+  #|  gl.bindFramebuffer(gl.FRAMEBUFFER, prevFb);
+  #|  return fb;
+  #|}
+
+///|
+/// Deletes a framebuffer's GL objects.
+pub extern "js" fn delete_fbo(fb : FBO) -> Unit =
+  #|(fb) => {
+  #|  const gl = fb.gl;
+  #|  gl.deleteTexture(fb.colorTexture); if (fb.depthTexture) gl.deleteTexture(fb.depthTexture);
+  #|  if (fb.colorRenderbuffer) gl.deleteRenderbuffer(fb.colorRenderbuffer);
+  #|  if (fb.depthRenderbuffer) gl.deleteRenderbuffer(fb.depthRenderbuffer);
+  #|  gl.deleteFramebuffer(fb.framebuffer); if (fb.aaFramebuffer) gl.deleteFramebuffer(fb.aaFramebuffer);
+  #|}
+
+///|
+/// Binds a framebuffer for drawing (its multisampled one when antialiased),
+/// or the canvas.
+pub fn bind_fbo(gl : GL, fb : FBO?) -> Unit {
+  match fb {
+    Some(f) => bind_fbo_js(gl, f)
+    None => bind_canvas(gl)
+  }
+}
+
+///|
+extern "js" fn bind_fbo_js(gl : GL, fb : FBO) -> Unit =
+  #|(gl, fb) => gl.bindFramebuffer(gl.FRAMEBUFFER, fb.aaFramebuffer || fb.framebuffer)
+
+///|
+extern "js" fn bind_canvas(gl : GL) -> Unit =
+  #|(gl) => gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
+///|
+/// Marks an antialiased framebuffer's textures as needing a resolve.
+pub extern "js" fn fbo_mark_dirty(fb : FBO) -> Unit =
+  #|(fb) => { if (fb.aaFramebuffer) { fb.dirty = true; fb.dirtyDepth = true; } }
+
+///|
+/// Resolves multisampled contents into the textures (blit) when needed,
+/// then rebinds `active` for drawing. `depth` picks the depth texture.
+pub fn fbo_resolve(
+  fb : FBO,
+  depth : Bool,
+  linear : Bool,
+  active : FBO?,
+) -> Unit {
+  fbo_resolve_js(fb, depth, linear, active is Some(_), active.unwrap_or(fb))
+}
+
+///|
+extern "js" fn fbo_resolve_js(
+  fb : FBO,
+  depth : Bool,
+  linear : Bool,
+  has_active : Bool,
+  active : FBO,
+) -> Unit =
+  #|(fb, depth, linear, hasActive, active) => {
+  #|  if (!fb.aaFramebuffer || !(depth ? fb.dirtyDepth : fb.dirty)) return;
+  #|  const gl = fb.gl;
+  #|  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, fb.aaFramebuffer);
+  #|  gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, fb.framebuffer);
+  #|  gl.blitFramebuffer(0, 0, fb.w, fb.h, 0, 0, fb.w, fb.h, depth ? gl.DEPTH_BUFFER_BIT : gl.COLOR_BUFFER_BIT, depth || !linear ? gl.NEAREST : gl.LINEAR);
+  #|  if (depth) fb.dirtyDepth = false; else fb.dirty = false;
+  #|  gl.bindFramebuffer(gl.FRAMEBUFFER, hasActive ? (active.aaFramebuffer || active.framebuffer) : null);
+  #|}
+
+///|
+/// The color (or depth) texture of a framebuffer.
+pub extern "js" fn fbo_texture(fb : FBO, depth : Bool) -> Texture =
+  #|(fb, depth) => depth ? fb.depthTexture : fb.colorTexture
+
+///|
+/// Reads a framebuffer's RGBA pixels, top row first.
+pub fn fbo_read_pixels(
+  fb : FBO,
+  x : Int32,
+  y : Int32,
+  w : Int32,
+  h : Int32,
+  active : FBO?,
+) -> FixedArray[Byte] {
+  fbo_read_pixels_js(fb, x, y, w, h, active is Some(_), active.unwrap_or(fb))
+}
+
+///|
+extern "js" fn fbo_read_pixels_js(
+  fb : FBO,
+  x : Int32,
+  y : Int32,
+  w : Int32,
+  h : Int32,
+  has_active : Bool,
+  active : FBO,
+) -> FixedArray[Byte] =
+  #|(fb, x, y, w, h, hasActive, active) => {
+  #|  const gl = fb.gl;
+  #|  gl.bindFramebuffer(gl.FRAMEBUFFER, fb.framebuffer);
+  #|  const buf = new Uint8Array(w * h * 4);
+  #|  gl.readPixels(x, fb.h - y - h, w, h, gl.RGBA, gl.UNSIGNED_BYTE, buf);
+  #|  gl.bindFramebuffer(gl.FRAMEBUFFER, hasActive ? (active.aaFramebuffer || active.framebuffer) : null);
+  #|  const out = new Uint8Array(w * h * 4), row = w * 4;
+  #|  for (let i = 0; i < h; i++) out.set(buf.subarray((h - 1 - i) * row, (h - i) * row), i * row);
+  #|  return out;
+  #|}

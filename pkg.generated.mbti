@@ -470,6 +470,7 @@ pub fn P5::create_color_picker(Self, value? : String) -> Element
 pub fn P5::create_div(Self, html? : String) -> Element
 pub fn P5::create_element(Self, String, content? : String) -> Element
 pub fn P5::create_file_input(Self, (File) -> Unit, multiple? : Bool) -> Element
+pub fn P5::create_framebuffer(Self, width? : Double, height? : Double, density? : Double, antialias? : Int32, depth? : Bool, stencil? : Bool, depth_float? : Bool, linear? : Bool) -> @webgl.Framebuffer?
 pub fn P5::create_graphics(Self, Double, Double) -> Self
 pub fn P5::create_image(Self, Double, Double) -> Image
 pub fn P5::create_img(Self, String, alt? : String) -> Element
@@ -809,6 +810,8 @@ pub using @color {type ColorMode}
 
 pub using @io {type Column}
 
+pub using @webgl {type Framebuffer}
+
 pub using @webgl {type Geometry}
 
 pub using @math {type Matrix2D}
@@ -853,7 +856,9 @@ pub impl[A : Num, B : Num, C : Num, D : Num] ColorArg for (A, B, C, D)
 pub(open) trait ImageSource {
   fn image_source(Self) -> (@dom.ImageElement, Int32, Int32, Double, Double)?
   fn advance(Self, Double) -> Unit = _
+  fn gl_source(Self) -> @webgl.TexSource? = _
 }
+pub impl ImageSource for @webgl.Framebuffer
 
 pub(open) trait Num {
   fn to_num(Self) -> Double

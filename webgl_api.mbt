@@ -827,7 +827,7 @@ pub type Shader = @webgl.Shader
 
 ///|
 fn[I : ImageSource] tex_source(img : I) -> @webgl.TexSource? {
-  img.image_source().map(s => { elt: s.0, width: s.3, height: s.4, })
+  img.gl_source()
 }
 
 ///|
@@ -973,4 +973,52 @@ pub fn[I : ImageSource] P5::set_uniform_texture(
   if tex_source(img) is Some(src) {
     s.set_uniform(name, Tex(src))
   }
+}
+
+// ---- framebuffers ----
+
+///|
+/// An offscreen WEBGL surface (p5.Framebuffer).
+pub type Framebuffer = @webgl.Framebuffer
+
+///|
+pub impl ImageSource for @webgl.Framebuffer with fn image_source(_self) {
+  None
+}
+
+///|
+pub impl ImageSource for @webgl.Framebuffer with fn gl_source(self) {
+  Some(self.source())
+}
+
+///|
+/// Creates a framebuffer. Without a size it follows the canvas.
+pub fn P5::create_framebuffer(
+  self : P5,
+  width? : Double,
+  height? : Double,
+  density? : Double,
+  antialias? : Int32,
+  depth~ : Bool = true,
+  stencil~ : Bool = true,
+  depth_float~ : Bool = true,
+  linear~ : Bool = true,
+) -> @webgl.Framebuffer? {
+  guard self.gl_renderer("create_framebuffer") is Some(r) else { return None }
+  let fb = r.create_framebuffer(
+    {
+      width,
+      height,
+      density,
+      antialias,
+      depth,
+      stencil,
+      depth_float,
+      alpha: None,
+      linear,
+    },
+    @gl.default_antialias(),
+  )
+  self.framebuffers.push(fb)
+  Some(fb)
 }

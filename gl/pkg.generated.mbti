@@ -14,6 +14,8 @@ pub fn attrib_pointer(GL, Buffer, Int32, Int32) -> Unit
 
 pub fn attribute_location(Program, String) -> Int32
 
+pub fn bind_fbo(GL, FBO?) -> Unit
+
 pub fn bind_textures(Program, Texture) -> Unit
 
 pub fn clear(GL, Double, Double, Double, Double) -> Unit
@@ -30,11 +32,15 @@ pub fn create_buffer(GL) -> Buffer
 
 pub fn create_context(@dom.Canvas, Bool, Bool, Bool, Bool, Bool, Bool) -> GL
 
+pub fn create_fbo(GL, Int32, Int32, Int32, Bool, Bool, Bool, Bool, Bool, String, String) -> FBO
+
 pub fn create_white_texture(GL) -> Texture
 
 pub fn default_antialias() -> Bool
 
 pub fn delete_buffer(GL, Buffer) -> Unit
+
+pub fn delete_fbo(FBO) -> Unit
 
 pub fn disable_attrib(GL, Int32) -> Unit
 
@@ -47,6 +53,14 @@ pub fn draw_elements(GL, Buffer, Int32, Bool, Int32) -> Unit
 pub fn drawing_buffer_height(GL) -> Int32
 
 pub fn drawing_buffer_width(GL) -> Int32
+
+pub fn fbo_mark_dirty(FBO) -> Unit
+
+pub fn fbo_read_pixels(FBO, Int32, Int32, Int32, Int32, FBO?) -> FixedArray[Byte]
+
+pub fn fbo_resolve(FBO, Bool, Bool, FBO?) -> Unit
+
+pub fn fbo_texture(FBO, Bool) -> Texture
 
 pub fn has_attribute(Program, String) -> Bool
 
@@ -85,6 +99,9 @@ pub fn viewport(GL, Int32, Int32, Int32, Int32) -> Unit
 // Types and methods
 #external
 pub type Buffer
+
+#external
+pub type FBO
 
 #external
 pub type Framebuffer
