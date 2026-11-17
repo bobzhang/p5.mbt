@@ -3,12 +3,20 @@
 A port of [p5.js](https://p5js.org) to [MoonBit](https://www.moonbitlang.com),
 running on MoonBit's JavaScript backend and drawing on an HTML canvas.
 
-It covers the 2D core of p5.js 2.x: the setup/draw lifecycle, shapes and
-custom shapes, color (including p5 2.x's color spaces), transforms,
-typography, images and pixels, events, math (vectors, noise, random), DOM
-helpers, and data loading. The algorithms follow the p5.js sources closely:
-`random()`/`noise()` produce the same numbers as p5.js for the same seed, and
-shapes go through a port of p5 2.x's `Shape` → `Path2D` pipeline.
+It covers p5.js 2.x in 2D **and WEBGL**: the setup/draw lifecycle, shapes
+and custom shapes, color (including p5 2.x's color spaces), transforms,
+typography with font glyph data (`text_to_points`), images, pixels and
+shader filters, SVG import/export, GIFs, media, events, math, DOM helpers
+and data loading; and in WEBGL, 3D primitives, cameras, lights and
+materials, textures, custom shaders, framebuffers, `build_geometry`,
+OBJ/STL models, text and `orbit_control`.
+
+The port follows the p5.js sources closely and is checked against p5.js
+itself: [55 parity cases](parity/README.md) are drawn by both and compare
+**pixel-identical** (2D and WebGL). `random()`/`noise()` give the same
+numbers for the same seed, font outlines match p5's Typr.js byte for byte,
+and the WebGL renderer uses p5's own GLSL with the same geometry, uniforms
+and tessellation (a port of libtess).
 
 ```moonbit
 fn main {
@@ -68,7 +76,12 @@ Then open <http://localhost:8765/examples/>. The examples are:
 | [`images`](examples/images/main.mbt) | `load_image` in `preload`, filters, tint, per-pixel edits, graphics buffers |
 | [`flowfield`](examples/flowfield/main.mbt) | vectors, Perlin noise, sliders and buttons |
 | [`input`](examples/input/main.mbt) | keyboard, mouse, wheel, `clip`, `erase` |
-| [`data`](examples/data/main.mbt) | `load_json` and `load_strings` |
+| [`data`](examples/data/main.mbt) | `load_json`, `load_strings`, CSV tables, XML |
+| [`dom`](examples/dom/main.mbt) | video as pixels, radio buttons, file input, dropping files |
+| [`orrery`](examples/orrery/main.mbt) | WEBGL: lights, emissive/specular materials, generated textures, font-shader labels, `orbit_control` |
+| [`terrain`](examples/terrain/main.mbt) | WEBGL: noise terrain from triangle strips, fog added to p5's material shader with a hook |
+| [`feedback`](examples/feedback/main.mbt) | WEBGL: framebuffer feedback trails |
+| [`particles`](examples/particles/main.mbt) | `text_to_points`: words made of springy particles |
 | [`history`](examples/history/main.mbt) | *A Short History of Computation*, a 104-second film made entirely with p5.mbt |
 
 ### Recording a sketch to video
@@ -129,6 +142,11 @@ arguments (`ellipse(…, h=…)`), separate functions (`random_max`,
 | `bobzhang/p5/color` | `Color`: RGB/HSB/HSL/HWB/Lab/LCH/OKLab/OKLCH, CSS parsing, `lerp` | all |
 | `bobzhang/p5/shape` | the p5 2.x shape model and its conversion to canvas path commands | all |
 | `bobzhang/p5/filters` | CPU image filters (threshold, gray, invert, posterize, erode, dilate, blur) | all |
+| `bobzhang/p5/font` | font files (TrueType, CFF/OpenType, WOFF via a DEFLATE decoder), glyph outlines, kerning, arc-length sampling (ports of Typr.js and bezier-path) | all |
+| `bobzhang/p5/gif` | GIF encoding (gifenc) and decoding (omggif) | all |
+| `bobzhang/p5/io` | CSV, `Table`, `XML` | all |
+| `bobzhang/p5/webgl` | the WEBGL renderer: geometry, primitives, camera, shaders, lights, textures, framebuffers, libtess, text | js |
+| `bobzhang/p5/gl` | a thin WebGL binding | js |
 | `bobzhang/p5/dom` | JavaScript FFI bindings (canvas, events, images, DOM) | js |
 
 The sketch draws through the `Surface` trait. `CanvasSurface` paints on an
@@ -163,11 +181,32 @@ rec.take() // ["…", "fill #ff0000 R10,10,20,20", "stroke #000000 w=1 …"]
   `apply_matrix`, `reset_matrix`, `angle_mode`.
 - **Typography**: `text` (multi-line, wrapped in a box, truncated),
   `text_size`, `text_leading`, `text_font`, `load_font`, `text_style`,
-  `text_align`, `text_wrap`, `text_width`, `text_ascent`, `text_descent`.
+  `text_weight`, `text_align`, `text_wrap`, `text_width`, `font_width`,
+  `text_bounds`, `font_bounds`, `text_ascent`, `text_descent`; with a
+  loaded font: `Font::text_to_points`, `text_to_contours`, `text_to_paths`.
+- **WEBGL** (`create_canvas(w, h, renderer=WebGL)`): `box`, `sphere`,
+  `ellipsoid`, `cylinder`, `cone`, `torus`, `plane`, 2D primitives and
+  custom shapes in 3D (`vertex(x, y, z=…, u=…, v=…)`, `normal`); 3D
+  transforms; `camera`, `perspective`, `ortho`, `frustum`, `create_camera`,
+  `set_camera`, `orbit_control`; `ambient_light`, `directional_light`,
+  `point_light`, `spot_light`, `lights`, `light_falloff`,
+  `normal_material`, `ambient_material`, `emissive_material`,
+  `specular_material`, `shininess`, `metalness`; `texture`,
+  `texture_mode`, `texture_wrap`, `image`, `tint`; `create_shader`,
+  `shader`, `set_uniform`, `base_material_shader().modify(…)` with GLSL
+  hooks; `create_framebuffer` (`begin`/`end`/`draw`, antialiasing, use as a
+  texture); `filter` with p5's shader filters; `build_geometry`,
+  `load_model` (OBJ, STL), `model`; `text` with a loaded font;
+  `load_pixels`/`get`.
 - **Image**: `load_image`, `create_image`, `image`/`image_region`,
   `image_mode`, `tint`, `pixels`/`load_pixels`/`update_pixels`, `get`/`set`,
-  `filter`, `create_graphics`, `save_canvas`; `Image` `resize`/`copy`/
-  `copy_from`/`mask`/`filter`/`save`.
+  `filter` (p5's WebGL shader filters by default, CPU with
+  `use_webgl=false`), `copy`, `blend`, `create_graphics`, `save_canvas`,
+  animated GIFs (`load_image`, playback control, `save_gif`), `Image`
+  `resize`/`copy`/`copy_from`/`mask`/`filter`/`save`.
+- **SVG**: `load_svg`/`create_svg` and `shape()`, `build_shape`,
+  `get_svg`/`save_svg`.
+- **Media**: `create_video`, `create_audio`, `create_capture`.
 - **Events**: mouse/pointer (`mouse_x`, `pmouse_x`, `mouse_button`,
   `moved_x`, `touches`, pressed/released/clicked/double-clicked/moved/
   dragged/wheel, touch callbacks), keyboard (`key`, `code`, `key_code`,
@@ -191,12 +230,13 @@ rec.take() // ["…", "fill #ff0000 R10,10,20,20", "stroke #000000 w=1 …"]
 
 ## Not ported
 
-WebGL and WebGPU rendering (3D, shaders, p5.strands, framebuffers),
-`p5.Font` glyph access (`textToPoints`, `textToContours`), SVG import/export,
-media elements (video, audio, camera capture), `p5.Table`/`p5.XML`,
-accessibility outputs (`describe`, `gridOutput`), and the Friendly Error
-System. Color strings for non-RGB colors are serialized as CSS `rgb()` instead
-of color.js's formats.
+WebGPU; p5.strands (shaders written as JavaScript functions; GLSL string
+hooks through `modify` are supported, and the built-in filters use the GLSL
+strands generates); `imageLight`; clipping and `debugMode` in WEBGL; MTL
+materials and multi-material parts in models; variable-font axes; WOFF2;
+accessibility outputs (`describe`, `gridOutput`); and the Friendly Error
+System. Color strings for non-RGB colors are serialized as CSS `rgb()`
+instead of color.js's formats.
 
 ## Development
 
@@ -208,7 +248,10 @@ moon info        # regenerates pkg.generated.mbti
 ```
 
 Reference values in the math tests come from running the original p5.js
-sources under Node.
+sources under Node. The font package is also compared with Typr.js and
+bezier-path under Node (`parity/font/`), and the libtess port with
+libtess.js; the browser parity page compares whole sketches with p5.js (see
+[parity/README.md](parity/README.md)).
 
 ## License
 

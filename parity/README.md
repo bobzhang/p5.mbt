@@ -25,6 +25,14 @@ than 2.
    page shows both renderings and a difference image, and exposes the
    results as `window.parityResults`.
 
+## WebGL cases
+
+`glCases` in `cases.js` (and the cases with `webgl: true` in
+`cases/main.mbt`) create a `WEBGL` canvas: 3D primitives, lights and
+materials, cameras, 2D shapes and custom shapes in 3D, textures, custom
+shaders, framebuffers, shader filters, models, `build_geometry` and text.
+The harness reads both canvases back through a 2D canvas to compare them.
+
 ## Data cases
 
 Some cases compare values instead of pixels: `dataCases` in `cases.js` and
