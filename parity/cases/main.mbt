@@ -109,6 +109,19 @@ fn cases() -> Map[String, Case] {
     draw: p => if source_sans.val is Some(f) { font_text(p, f) },
     webgl: false,
   }
+  let models : Ref[Array[@p5.Geometry]] = Ref([])
+  all["gl_models"] = {
+    w: 280,
+    h: 200,
+    preload: Some(p => {
+      models.val = [
+        p.load_model("../examples/assets/octahedron.obj", normalize=true),
+        p.load_model("../examples/assets/tetrahedron.stl", normalize=true),
+      ]
+    }),
+    draw: p => gl_models(p, models.val[0], models.val[1]),
+    webgl: true,
+  }
   for name, c in gl_cases() {
     all[name] = { w: c.0, h: c.1, draw: c.2, preload: None, webgl: true, }
   }
@@ -288,6 +301,62 @@ fn gl_filter(p : @p5.P5) -> Unit {
   p.filter(Blur(2))
   p.fill(255)
   p.circle(0, 55, 30)
+}
+
+///|
+fn gl_models(p : @p5.P5, obj : @p5.Geometry, stl : @p5.Geometry) -> Unit {
+  p.background(235)
+  p.lights()
+  p.stroke(0)
+  p.stroke_weight(1)
+  p.push()
+  p.translate(-90, -40)
+  p.rotate_y(0.6)
+  p.rotate_x(0.4)
+  p.fill((120, 180, 255))
+  p.model(obj)
+  p.pop()
+  p.push()
+  p.translate(0, -40)
+  p.rotate_y(0.5)
+  p.rotate_x(-0.3)
+  p.fill((250, 160, 80))
+  p.model(stl)
+  p.pop()
+  guard p.build_geometry(() => {
+      p.push()
+      p.translate(-20, 0)
+      p.box(w=30)
+      p.pop()
+      p.push()
+      p.translate(20, 0)
+      p.fill((255, 0, 100))
+      p.sphere(r=18, detail_x=12, detail_y=8)
+      p.pop()
+      p.push()
+      p.translate(0, 20)
+      p.rotate_x(@p5.HALF_PI)
+      p.fill((60, 200, 90))
+      p.cone(r=15, h=30)
+      p.pop()
+    })
+    is Some(g) else {
+    return
+  }
+  p.push()
+  p.translate(90, 30)
+  p.rotate_y(0.7)
+  p.rotate_x(0.3)
+  p.no_stroke()
+  p.fill(200)
+  p.model(g)
+  p.pop()
+  p.push()
+  p.translate(-50, 60)
+  p.rotate_z(0.3)
+  p.fill((255, 220, 0))
+  p.model(g)
+  p.pop()
 }
 
 ///|

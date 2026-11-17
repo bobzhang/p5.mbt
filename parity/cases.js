@@ -257,6 +257,18 @@ function checker(p) {
 }
 
 export const glCases = {
+  gl_models: [280, 200, (p, [obj, stl]) => {
+    p.background(235); p.lights(); p.stroke(0); p.strokeWeight(1);
+    p.push(); p.translate(-90, -40); p.rotateY(0.6); p.rotateX(0.4); p.fill(120, 180, 255); p.model(obj); p.pop();
+    p.push(); p.translate(0, -40); p.rotateY(0.5); p.rotateX(-0.3); p.fill(250, 160, 80); p.model(stl); p.pop();
+    const g = p.buildGeometry(() => {
+      p.push(); p.translate(-20, 0); p.box(30); p.pop();
+      p.push(); p.translate(20, 0); p.fill(255, 0, 100); p.sphere(18, 12, 8); p.pop();
+      p.push(); p.translate(0, 20); p.rotateX(p.HALF_PI); p.fill(60, 200, 90); p.cone(15, 30); p.pop();
+    });
+    p.push(); p.translate(90, 30); p.rotateY(0.7); p.rotateX(0.3); p.noStroke(); p.fill(200); p.model(g); p.pop();
+    p.push(); p.translate(-50, 60); p.rotateZ(0.3); p.fill(255, 220, 0); p.model(g); p.pop();
+  }, async p => [await p.loadModel('../examples/assets/octahedron.obj', true), await p.loadModel('../examples/assets/tetrahedron.stl', true)]],
   gl_filter: [240, 160, p => {
     p.background(30, 40, 60); p.noStroke(); p.lights();
     p.fill(250, 120, 60); p.push(); p.translate(-60, 0); p.rotateX(0.5); p.rotateY(0.7); p.box(70); p.pop();

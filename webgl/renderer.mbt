@@ -94,6 +94,7 @@ pub struct Renderer3D {
   priv immediate : Geometry
   priv mut drawing_image : Bool
   priv active_fbs : Array[Framebuffer]
+  priv mut builder : GeometryBuilder?
   priv filter_shaders : Map[String, Shader]
   priv mut filter_layer : Framebuffer?
   priv mut filter_layer_temp : Framebuffer?
@@ -180,6 +181,7 @@ pub fn Renderer3D::new(
     immediate: { ..Geometry::new(), gid: "__IMMEDIATE_MODE_GEOMETRY__", },
     drawing_image: false,
     active_fbs: [],
+    builder: None,
     filter_shaders: Map([]),
     filter_layer: None,
     filter_layer_temp: None,
@@ -865,6 +867,10 @@ pub fn Renderer3D::draw_geometry(
   count~ : Int32 = 1,
   skip_fill~ : Bool = false,
 ) -> Unit {
+  if self.builder is Some(_) {
+    self.builder_add(g, g.faces, style)
+    return
+  }
   let b = self.cached(g)
   let dirty = g.dirty
   g.dirty = false
@@ -1102,6 +1108,7 @@ pub fn Renderer3D::draw_shape(
     return
   }
   let g = self.immediate
+  let building = self.builder is Some(_)
   let mode = build_immediate(
     g,
     kind,
@@ -1109,7 +1116,12 @@ pub fn Renderer3D::draw_shape(
     style.fill is Some(_),
     style.stroke is Some(_),
     self.simple_lines,
+    building~,
   )
+  if building {
+    self.builder_add(g, immediate_faces(g, mode, style.fill is Some(_)), style)
+    return
+  }
   if !self.state.texture_mode_normal &&
     self.state.tex is Some(t) &&
     t.width > 0 &&

@@ -221,6 +221,7 @@ pub fn[C : ColorArg] P5::fill(self : P5, c : C) -> Unit {
   self.state.fill_set = true
   if self.gl is Some(r) {
     r.on_fill()
+    self.gl_fill_override = None
   }
 }
 

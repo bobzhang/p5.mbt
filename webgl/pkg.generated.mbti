@@ -14,7 +14,7 @@ pub fn arc_geometry(Double, Double, String, Int32) -> Geometry
 
 pub fn box_geometry(Int32, Int32) -> Geometry
 
-pub fn build_immediate(Geometry, @shape.ShapeKind, Array[Array[@shape.Pt]], Bool, Bool, Bool) -> ShapeMode
+pub fn build_immediate(Geometry, @shape.ShapeKind, Array[Array[@shape.Pt]], Bool, Bool, Bool, building? : Bool) -> ShapeMode
 
 pub fn cone_geometry(Int32, Int32, Bool) -> Geometry
 
@@ -37,6 +37,10 @@ pub fn filter_default_param(String) -> Double?
 pub fn js_string(Double) -> String
 
 pub fn libtess_triangulate(Array[Array[FixedArray[Double]]], Int32) -> Array[Double]
+
+pub fn parse_obj(String) -> Geometry
+
+pub fn parse_stl(FixedArray[Byte]) -> Geometry
 
 pub fn plane_geometry(Int32, Int32) -> Geometry
 
@@ -195,14 +199,19 @@ pub struct Geometry {
   line_vertex_colors : Array[Double]
   // private fields
 }
+pub fn Geometry::assign(Self, Self) -> Unit
 pub fn Geometry::compute_faces(Self) -> Self
 pub fn Geometry::compute_normals(Self, mode? : NormalMode, round_to_precision? : Int32) -> Self
 pub fn Geometry::edges_to_vertices(Self, simple_lines? : Bool) -> Self
+pub fn Geometry::flip_u(Self) -> Unit
+pub fn Geometry::flip_v(Self) -> Unit
 pub fn Geometry::has_fill_transparency(Self) -> Bool
 pub fn Geometry::has_stroke_transparency(Self) -> Bool
 pub fn Geometry::make_triangle_edges(Self) -> Self
 pub fn Geometry::mark_dirty(Self) -> Unit
 pub fn Geometry::new(detail_x? : Int32, detail_y? : Int32) -> Self
+pub fn Geometry::normalize(Self) -> Self
+pub fn Geometry::set_gid(Self, String) -> Unit
 
 pub(all) enum NormalMode {
   KeepConnections
@@ -226,6 +235,7 @@ pub fn Renderer3D::ambient_light(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::ambient_material(Self, FixedArray[Double]) -> Unit
 pub fn Renderer3D::apply_matrix(Self, ArrayView[Double]) -> Unit
 pub fn Renderer3D::base_shader(Self, String) -> Shader
+pub fn Renderer3D::begin_geometry(Self) -> Unit
 pub fn Renderer3D::cached_geometry(Self, String, () -> Geometry) -> Geometry
 pub fn Renderer3D::camera(Self, eye? : (Double, Double, Double), center? : (Double, Double, Double), up? : (Double, Double, Double)) -> Unit
 pub fn Renderer3D::clear(Self, Double, Double, Double, Double) -> Unit
@@ -238,6 +248,7 @@ pub fn Renderer3D::draw_geometry(Self, Geometry, Style, mode? : DrawMode, count?
 pub fn Renderer3D::draw_scaled(Self, Geometry, Double, Double, Double, Style) -> Unit
 pub fn Renderer3D::draw_shape(Self, @shape.ShapeKind, Array[Array[@shape.Pt]], Style, count? : Int32) -> Unit
 pub fn Renderer3D::emissive_material(Self, FixedArray[Double]) -> Unit
+pub fn Renderer3D::end_geometry(Self) -> Geometry
 pub fn Renderer3D::filter(Self, String, Double?, Style, Shader?) -> Unit
 pub fn Renderer3D::free_geometry(Self, Geometry) -> Unit
 pub fn Renderer3D::frustum(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit

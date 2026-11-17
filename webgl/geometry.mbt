@@ -422,3 +422,9 @@ pub fn Geometry::has_stroke_transparency(self : Geometry) -> Bool {
   }
   false
 }
+
+///|
+/// Sets the cache id of the geometry.
+pub fn Geometry::set_gid(self : Geometry, gid : String) -> Unit {
+  self.gid = gid
+}

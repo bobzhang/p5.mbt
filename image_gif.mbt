@@ -401,7 +401,7 @@ pub fn P5::save_gif(
       return
     }
     self.redraw_once()
-    frames.push(self.surface.read_pixels(0, 0, w, h))
+    frames.push(self.read_canvas(0, 0, w, h))
     iterator += 1
     if note is Some(e) {
       e.html(

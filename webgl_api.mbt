@@ -80,6 +80,7 @@ fn P5::gl_style(self : P5) -> @webgl.Style {
   let st = self.state
   let erasing = st.erasing
   let fill : FixedArray[Double]? = match st.fill {
+    Some(_) if self.gl_fill_override is Some(o) && !erasing => Some(o)
     Some(c) =>
       Some(
         if erasing {
@@ -606,7 +607,10 @@ fn P5::gl_pt(
   extra[@webgl.extra_normal + 1] = ny
   extra[@webgl.extra_normal + 2] = nz
   if self.state.fill is Some(c) {
-    let a = rgba01(c)
+    let a = match self.gl_fill_override {
+      Some(o) => o
+      None => rgba01(c)
+    }
     for k in 0..<4 {
       extra[@webgl.extra_fill + k] = a[k]
     }
@@ -1030,4 +1034,89 @@ pub fn P5::create_framebuffer(
   )
   self.framebuffers.push(fb)
   Some(fb)
+}
+
+// ---- buildGeometry ----
+
+///|
+/// Draws with `f` into a new geometry instead of the canvas
+/// (`buildGeometry`): shapes and models drawn inside are merged, with
+/// transforms applied. Vertices keep the fill set inside `f`; others use
+/// the material color when the geometry is drawn.
+pub fn P5::build_geometry(self : P5, f : () -> Unit) -> @webgl.Geometry? {
+  guard self.gl_renderer("build_geometry") is Some(r) else { return None }
+  let prev_fill = self.state.fill
+  self.push()
+  r.begin_geometry()
+  self.state.fill = Some(Color::rgb(255, 255, 255))
+  self.gl_fill_override = Some([-1, -1, -1, -1])
+  f()
+  self.gl_fill_override = None
+  let g = r.end_geometry()
+  self.pop()
+  self.state.fill = prev_fill
+  Some(g)
+}
+
+// ---- models ----
+
+///|
+/// Loads an OBJ or STL model. The returned geometry fills in when the file
+/// has loaded (in `preload`, `setup` waits). `normalize` scales it to fit
+/// 200 units around the origin.
+pub fn P5::load_model(
+  self : P5,
+  path : String,
+  normalize~ : Bool = false,
+  flip_u~ : Bool = false,
+  flip_v~ : Bool = false,
+  on_load? : (@webgl.Geometry) -> Unit,
+) -> @webgl.Geometry {
+  let model = @webgl.Geometry::new()
+  model.set_gid("\{path}|\{normalize}")
+  let lower = path.to_lower()
+  let finish = (parsed : @webgl.Geometry) => {
+    if normalize {
+      ignore(parsed.normalize())
+    }
+    if flip_u {
+      parsed.flip_u()
+    }
+    if flip_v {
+      parsed.flip_v()
+    }
+    ignore(parsed.make_triangle_edges())
+    model.assign(parsed)
+    if on_load is Some(f) {
+      f(model)
+    }
+    self.end_load()
+  }
+  let failed = (msg : String) => {
+    warn(msg)
+    self.end_load()
+  }
+  self.begin_load()
+  if lower.has_suffix(".stl") {
+    @dom.fetch_bytes(path, bytes => finish(@webgl.parse_stl(bytes)), failed)
+  } else {
+    @dom.fetch_text(path, text => finish(@webgl.parse_obj(text)), failed)
+  }
+  model
+}
+
+///|
+/// A model from OBJ text (`createModel`).
+pub fn P5::create_model(
+  self : P5,
+  obj : String,
+  normalize~ : Bool = false,
+) -> @webgl.Geometry {
+  ignore(self)
+  let g = @webgl.parse_obj(obj)
+  if normalize {
+    ignore(g.normalize())
+  }
+  ignore(g.make_triangle_edges())
+  g
 }

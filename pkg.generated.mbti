@@ -445,6 +445,7 @@ pub fn P5::blend_mode(Self, BlendMode) -> Unit
 pub fn[C : ColorArg] P5::blue(Self, C) -> Double
 pub fn P5::box(Self, w? : Double, h? : Double, d? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
 pub fn[C : ColorArg] P5::brightness(Self, C) -> Double
+pub fn P5::build_geometry(Self, () -> Unit) -> @webgl.Geometry?
 pub fn P5::build_shape(Self, () -> Unit, draw? : Bool) -> ShapeCollection
 pub fn P5::camera(Self, eye? : (Double, Double, Double), center? : (Double, Double, Double), up? : (Double, Double, Double)) -> Unit
 pub fn P5::canvas(Self) -> @dom.Canvas?
@@ -475,6 +476,7 @@ pub fn P5::create_graphics(Self, Double, Double) -> Self
 pub fn P5::create_image(Self, Double, Double) -> Image
 pub fn P5::create_img(Self, String, alt? : String) -> Element
 pub fn P5::create_input(Self, value? : String, kind? : String) -> Element
+pub fn P5::create_model(Self, String, normalize? : Bool) -> @webgl.Geometry
 pub fn P5::create_p(Self, html? : String) -> Element
 pub fn P5::create_radio(Self, name? : String) -> Element
 pub fn P5::create_select(Self) -> Element
@@ -552,6 +554,7 @@ pub fn P5::load_bytes(Self, String, (Bytes) -> Unit) -> Unit
 pub fn P5::load_font(Self, String, family? : String, on_load? : (Font) -> Unit) -> Font
 pub fn P5::load_image(Self, String, on_load? : (Image) -> Unit) -> Image
 pub fn P5::load_json(Self, String, (@json.Json) -> Unit) -> Unit
+pub fn P5::load_model(Self, String, normalize? : Bool, flip_u? : Bool, flip_v? : Bool, on_load? : (@webgl.Geometry) -> Unit) -> @webgl.Geometry
 pub fn P5::load_pixels(Self) -> Unit
 pub fn P5::load_strings(Self, String, on_load? : (Array[String]) -> Unit) -> Array[String]
 pub fn P5::load_svg(Self, String, (ShapeCollection) -> Unit) -> Unit

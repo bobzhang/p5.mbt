@@ -485,7 +485,22 @@ fn P5::device_size(self : P5) -> (Int32, Int32) {
 /// pixels: the array is `pixel_density²` times larger than width×height).
 pub fn P5::load_pixels(self : P5) -> Unit {
   let (w, h) = self.device_size()
-  self.pixels = self.surface.read_pixels(0, 0, w, h)
+  self.pixels = self.read_canvas(0, 0, w, h)
+}
+
+///|
+/// Reads device pixels from the canvas (2D surface or WebGL buffer).
+fn P5::read_canvas(
+  self : P5,
+  x : Int32,
+  y : Int32,
+  w : Int32,
+  h : Int32,
+) -> FixedArray[Byte] {
+  match self.gl {
+    Some(r) => r.read_pixels(x, y, w, h)
+    None => self.surface.read_pixels(x, y, w, h)
+  }
 }
 
 ///|
@@ -493,7 +508,42 @@ pub fn P5::load_pixels(self : P5) -> Unit {
 pub fn P5::update_pixels(self : P5) -> Unit {
   let (w, h) = self.device_size()
   if self.pixels.length() == w * h * 4 {
-    self.surface.write_pixels(self.pixels, 0, 0, w, h)
+    match self.gl {
+      Some(r) => {
+        // p5 draws the pixels as an image over the cleared canvas
+        let c = @dom.create_canvas(
+          self.width,
+          self.height,
+          self.density,
+          "",
+          false,
+        )
+        CanvasSurface::new(c).write_pixels(self.pixels, 0, 0, w, h)
+        r.push()
+        r.reset_matrix()
+        r.clear(0, 0, 0, 0)
+        r.image(
+          {
+            elt: Some(@dom.canvas_as_image(c)),
+            fb: None,
+            width: self.width,
+            height: self.height,
+          },
+          0,
+          0,
+          self.width,
+          self.height,
+          -self.width / 2,
+          -self.height / 2,
+          self.width,
+          self.height,
+          { ..self.gl_style(), fill: Some([1, 1, 1, 1]), },
+        )
+        r.pop()
+        r.clear_depth()
+      }
+      None => self.surface.write_pixels(self.pixels, 0, 0, w, h)
+    }
   }
 }
 
@@ -506,7 +556,7 @@ pub fn P5::get(self : P5, x : Double, y : Double) -> Color {
   if xi < 0 || yi < 0 || xi >= w || yi >= h {
     return Color::rgb(0, 0, 0, alpha=0)
   }
-  color_from_bytes(self.surface.read_pixels(xi, yi, 1, 1), 0)
+  color_from_bytes(self.read_canvas(xi, yi, 1, 1), 0)
 }
 
 ///|

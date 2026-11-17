@@ -144,6 +144,7 @@ pub fn build_immediate(
   has_fill : Bool,
   has_stroke : Bool,
   simple_lines : Bool,
+  building~ : Bool = false,
 ) -> ShapeMode {
   g.vertices.clear()
   g.vertex_normals.clear()
@@ -206,10 +207,15 @@ pub fn build_immediate(
     for e in calculate_edges(mode, g.vertices, contour_indices) {
       g.edges.push(e)
     }
-    ignore(g.edges_to_vertices(simple_lines~))
+    if !building {
+      ignore(g.edges_to_vertices(simple_lines~))
+    }
   }
   match mode {
-    PathMode => if tessellate_into(g, contour_indices) { mode = TrianglesMode }
+    PathMode =>
+      if tessellate_into(g, contour_indices, building) {
+        mode = TrianglesMode
+      }
     QuadStripMode => mode = TriangleStripMode
     QuadsMode => mode = TrianglesMode
     _ => ()
@@ -218,7 +224,12 @@ pub fn build_immediate(
 }
 
 ///|
-fn tessellate_into(g : Geometry, contour_indices : Array[Int32]) -> Bool {
+fn tessellate_into(
+  g : Geometry,
+  contour_indices : Array[Int32],
+  building : Bool,
+) -> Bool {
+  let original = g.vertices.copy()
   let contours : Array[Array[FixedArray[Double]]] = []
   let starts = contour_indices.copy()
   for i, v in g.vertices {
@@ -269,6 +280,43 @@ fn tessellate_into(g : Geometry, contour_indices : Array[Int32]) -> Bool {
     g.vertices.push(Vec3::new(flat[j], flat[j + 1], flat[j + 2]))
     g.uvs.push(flat[j + 3])
     g.uvs.push(flat[j + 4])
+  }
+  if building {
+    // map edges to the tessellated vertices (exact match, else closest)
+    let remap : Map[Int32, Int32] = Map([])
+    let find = (orig : Int32) => {
+      match remap.get(orig) {
+        Some(i) => i
+        None => {
+          let o = original[orig]
+          let mut found = -1
+          for i, v in g.vertices {
+            if found < 0 && o.x == v.x && o.y == v.y && o.z == v.z {
+              found = i
+            }
+          }
+          if found < 0 {
+            let mut best = @double.infinity
+            found = 0
+            for i, v in g.vertices {
+              let dx = o.x - v.x
+              let dy = o.y - v.y
+              let dz = o.z - v.z
+              let d = dx * dx + dy * dy + dz * dz
+              if d < best {
+                best = d
+                found = i
+              }
+            }
+          }
+          remap[orig] = found
+          found
+        }
+      }
+    }
+    let edges = g.edges.map(e => (find(e.0), find(e.1)))
+    g.edges.clear()
+    g.edges.append(edges)
   }
   true
 }
