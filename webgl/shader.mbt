@@ -108,7 +108,7 @@ pub fn Shader::modify(
 
 ///|
 fn hook_name(key : String) -> String {
-  let parts = key.split(" ").map(s => s.to_string()).collect()
+  let parts = key.split(" ").map(s => s.to_owned()).collect()
   parts.last().unwrap_or(key)
 }
 
@@ -141,7 +141,7 @@ fn populate_hooks(
   let defines = StringBuilder()
   for h in hooks_list {
     let (key, body) = h
-    let parts = key.split(" ").map(s => s.to_string()).collect()
+    let parts = key.split(" ").map(s => s.to_owned()).collect()
     let typ = parts.get(0).unwrap_or("")
     let name = parts.get(1).unwrap_or("")
     if modified.contains(key) {
