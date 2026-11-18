@@ -201,7 +201,7 @@ pub fn hex(n : Int32, digits~ : Int32 = 8) -> String {
 ///|
 /// Parses a hexadecimal string (returns 0 when invalid).
 pub fn unhex(s : String) -> Int32 {
-  @string.parse_int(s, base=16) catch {
+  @string.parse_int(s, radix=16) catch {
     _ => 0
   }
 }
@@ -225,7 +225,7 @@ pub fn binary(n : Int32, digits~ : Int32 = 8) -> String {
 ///|
 /// Parses a binary string (returns 0 when invalid).
 pub fn unbinary(s : String) -> Int32 {
-  @string.parse_int(s, base=2) catch {
+  @string.parse_int(s, radix=2) catch {
     _ => 0
   }
 }

@@ -29,7 +29,7 @@ pub fn parse_obj(text : String) -> Geometry {
   let vns : Array[Vec3] = []
   let used : Map[String, Int32] = Map([])
   for line in text.split("\n") {
-    let tokens = obj_tokens(line.to_string())
+    let tokens = obj_tokens(line.to_owned())
     if tokens.length() == 0 {
       continue
     }
@@ -63,7 +63,7 @@ pub fn parse_obj(text : String) -> Geometry {
               None => {
                 let parts = vert
                   .split("/")
-                  .map(s => obj_index(s.to_string()))
+                  .map(s => obj_index(s.to_owned()))
                   .collect()
                 let idx = model.vertices.length()
                 guard at(vs, parts[0]) is Some(p) else { continue }
@@ -155,7 +155,7 @@ pub fn parse_stl(data : FixedArray[Byte]) -> Geometry {
     let parts = raw
       .trim()
       .split(" ")
-      .map(s => s.to_string())
+      .map(s => s.to_owned())
       .collect()
       .filter(p => p != "")
     if parts.is_empty() {

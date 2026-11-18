@@ -56,7 +56,7 @@ fn decode_entities(s : String) -> String {
           "apos" => Some('\'')
           _ =>
             if ent is ['#', 'x', .. hex] {
-              (@string.parse_int(hex.to_owned(), base=16) catch { _ => -1 })
+              (@string.parse_int(hex.to_owned(), radix=16) catch { _ => -1 })
               |> code_char
             } else if ent is ['#', .. dec] {
               (@string.parse_int(dec.to_owned()) catch { _ => -1 }) |> code_char

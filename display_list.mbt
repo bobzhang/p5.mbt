@@ -18,7 +18,7 @@ pub(all) enum DrawOp {
     String,
     HAlign,
     VAlign,
-    Matrix2D
+    Matrix2D,
   )
   DrawImage(
     @dom.ImageElement,
@@ -27,7 +27,7 @@ pub(all) enum DrawOp {
     (Double, Double, Double, Double)?,
     (Double, Double, Double, Double),
     (Double, Double, Double, Double),
-    Matrix2D
+    Matrix2D,
   )
   Clip(Matrix2D, Array[(@shape.Path, Matrix2D)])
   Save
