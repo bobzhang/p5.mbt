@@ -518,7 +518,7 @@ pub fn P5::update_pixels(self : P5) -> Unit {
           "",
           false,
         )
-        CanvasSurface::new(c).write_pixels(self.pixels, 0, 0, w, h)
+        Surface::write_pixels(CanvasSurface::new(c), self.pixels, 0, 0, w, h)
         r.push()
         r.reset_matrix()
         r.clear(0, 0, 0, 0)
