@@ -108,6 +108,8 @@ pub fn get_class(Element) -> String
 
 pub fn get_context(Canvas) -> Context2D
 
+pub fn get_context_p3(Canvas) -> Context2D
+
 pub fn get_context_property(Canvas, String) -> String
 
 pub fn get_html(Element) -> String

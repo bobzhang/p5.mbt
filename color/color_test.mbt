@@ -171,3 +171,32 @@ test "contrast" {
     ),
   )
 }
+
+///|
+test "display p3" {
+  let red = @color.Color::new([255, 0, 0], RGBP3, @color.default_maxes(RGBP3))
+  inspect(
+    red.to_css(),
+    content=(
+      #|color(display-p3 1 0 0)
+    ),
+  )
+  let (r, g, b, _) = red.to_srgb()
+  inspect(
+    (
+      @math.round(r, decimals=3),
+      @math.round(g, decimals=3),
+      @math.round(b, decimals=3),
+    ),
+    content=(
+      #|(1.093, -0.227, -0.15)
+    ),
+  )
+  let srgb_red = @color.Color::rgb(255, 0, 0).to_mode(RGBP3)
+  inspect(
+    srgb_red.to_css(),
+    content=(
+      #|color(display-p3 0.91749 0.20029 0.13856)
+    ),
+  )
+}

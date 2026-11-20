@@ -747,3 +747,38 @@ pub extern "js" fn mipmap_texture(
   #|  gl.bindTexture(gl.TEXTURE_2D, prev);
   #|  return t;
   #|}
+
+///|
+/// Starts drawing a clip mask into the stencil buffer (p5's `_applyClip`).
+pub extern "js" fn apply_clip(gl : GL) -> Unit =
+  #|(gl) => {
+  #|  gl.clearStencil(0);
+  #|  gl.clear(gl.STENCIL_BUFFER_BIT);
+  #|  gl.enable(gl.STENCIL_TEST);
+  #|  gl.stencilFunc(gl.ALWAYS, 1, 0xff);
+  #|  gl.stencilOp(gl.KEEP, gl.KEEP, gl.REPLACE);
+  #|  gl.disable(gl.DEPTH_TEST);
+  #|}
+
+///|
+/// Finishes the mask: later drawing passes only inside it, or only outside
+/// with `invert` (p5's `_unapplyClip`).
+pub extern "js" fn unapply_clip(gl : GL, invert : Bool) -> Unit =
+  #|(gl, invert) => {
+  #|  gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+  #|  gl.stencilFunc(invert ? gl.EQUAL : gl.NOTEQUAL, 0, 0xff);
+  #|  gl.enable(gl.DEPTH_TEST);
+  #|}
+
+///|
+/// Removes the clip (p5's `_clearClipBuffer`).
+pub extern "js" fn clear_clip_buffer(gl : GL) -> Unit =
+  #|(gl) => {
+  #|  gl.clearStencil(1);
+  #|  gl.clear(gl.STENCIL_BUFFER_BIT);
+  #|  gl.disable(gl.STENCIL_TEST);
+  #|}
+
+///|
+/// Turns the stencil test on or off.
+pub extern "js" fn set_stencil_test(gl : GL, on : Bool) -> Unit = "(gl, on) => { if (on) gl.enable(gl.STENCIL_TEST); else gl.disable(gl.STENCIL_TEST); }"

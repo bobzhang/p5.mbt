@@ -119,6 +119,8 @@ pub struct Renderer3D {
   priv diffused_lights : Array[(TexSource, Framebuffer)]
   priv specular_lights : Array[(TexSource, @gl.Texture)]
   priv mut image_light_shaders : (Shader, Shader)?
+  priv mut stencil_on : Bool
+  priv mut canvas_clipped : Bool
   /// Points per unit length when sampling curves (`curveDetail`, 1/4).
   mut curve_detail : Double
   /// Draw strokes as plain GL lines without caps and joins (`strokeMode(SIMPLE)`).
@@ -218,6 +220,8 @@ pub fn Renderer3D::new(
     diffused_lights: [],
     specular_lights: [],
     image_light_shaders: None,
+    stencil_on: false,
+    canvas_clipped: false,
     curve_detail: 0.25,
     simple_lines: false,
     instance_count: 1,
@@ -261,6 +265,8 @@ pub fn Renderer3D::update(self : Renderer3D) -> Unit {
   s.enable_lighting = false
   s.tint = [255, 255, 255, 255]
   @gl.reset_depth_stencil(self.gl)
+  self.stencil_on = false
+  self.apply_stencil_if_clipping()
 }
 
 ///|
@@ -1335,5 +1341,32 @@ pub fn Renderer3D::texture_filter(
 ) -> Unit {
   if src.elt is Some(e) {
     @gl.set_texture_filter(self.gl, e, downscale, upscale)
+  }
+}
+
+// ---- clipping ----
+
+///|
+/// Marks whether a clip applies to the current draw target (the canvas or
+/// the active framebuffer), turning the stencil test on or off.
+pub fn Renderer3D::set_clip_applied(self : Renderer3D, on : Bool) -> Unit {
+  match self.active_fbs.last() {
+    Some(fb) => fb.clipped = on
+    None => self.canvas_clipped = on
+  }
+  self.apply_stencil_if_clipping()
+}
+
+///|
+/// p5's `_applyStencilTestIfClipping`: the stencil test follows the clip
+/// state of the current draw target.
+pub fn Renderer3D::apply_stencil_if_clipping(self : Renderer3D) -> Unit {
+  let applied = match self.active_fbs.last() {
+    Some(fb) => fb.clipped
+    None => self.canvas_clipped
+  }
+  if applied != self.stencil_on {
+    @gl.set_stencil_test(self.gl, applied)
+    self.stencil_on = applied
   }
 }

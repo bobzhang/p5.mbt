@@ -22,6 +22,7 @@ pub struct Framebuffer {
   /// The camera used while drawing into the framebuffer.
   default_camera : Camera
   priv mut prev : Framebuffer?
+  priv mut clipped : Bool
 }
 
 ///|
@@ -129,6 +130,7 @@ pub fn Renderer3D::create_framebuffer(
     linear: options.linear,
     default_camera: fb_camera(width, height),
     prev: None,
+    clipped: false,
   }
   @gl.delete_fbo(fb.fbo)
   fb.fbo = fb.make_fbo()
@@ -215,6 +217,7 @@ pub fn Framebuffer::begin(self : Framebuffer) -> Unit {
   r.state.proj = self.default_camera.proj_matrix.copy()
   r.state.view = self.default_camera.camera_matrix.copy()
   r.reset_matrix()
+  r.apply_stencil_if_clipping()
 }
 
 ///|
@@ -237,6 +240,7 @@ pub fn Framebuffer::end(self : Framebuffer) -> Unit {
       )
     }
   }
+  r.apply_stencil_if_clipping()
 }
 
 ///|
@@ -271,4 +275,18 @@ pub fn Framebuffer::read_pixels(self : Framebuffer) -> FixedArray[Byte] {
 /// Deletes the framebuffer's GL resources.
 pub fn Framebuffer::remove(self : Framebuffer) -> Unit {
   @gl.delete_fbo(self.fbo)
+}
+
+///|
+/// Whether the framebuffer follows the canvas size (`autoSized()`).
+pub fn Framebuffer::auto_sized(self : Framebuffer) -> Bool {
+  self.auto_sized
+}
+
+///|
+/// Makes the framebuffer follow the canvas size, or keep its own
+/// (`autoSized(bool)`); following resizes it to the canvas right away.
+pub fn Framebuffer::set_auto_sized(self : Framebuffer, on : Bool) -> Unit {
+  self.auto_sized = on
+  self.canvas_resized()
 }

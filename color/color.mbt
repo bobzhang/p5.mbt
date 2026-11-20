@@ -68,7 +68,7 @@ pub fn Color::new(
   }
   let gray = fn(v : Double) -> FixedArray[Double] {
     match mode {
-      RGB => {
+      RGB | RGBP3 => {
         let (lo, hi) = maxes[2]
         let g = map_range(v, lo, hi, 0, 1, clamp)
         [g, g, g]
@@ -217,6 +217,13 @@ pub fn Color::to_css(self : Color) -> String {
       if self.mode is RGB {
         return hex_string(clamp01(r), clamp01(g), clamp01(b), clamp01(a))
       }
+      if self.mode is RGBP3 {
+        // keep the wide-gamut coordinates (colorjs serializes P3 this way)
+        let c = self.coords
+        let n = (v : Double) => @math.round(clamp01(v), decimals=5).to_string()
+        let base = "color(display-p3 \{n(c[0])} \{n(c[1])} \{n(c[2])}"
+        return if a < 1 { base + " / \{clamp01(a)})" } else { base + ")" }
+      }
       let base = "rgb(\{percent(r)} \{percent(g)} \{percent(b)}"
       if a < 1 {
         base + " / \{clamp01(a)})"
@@ -235,18 +242,27 @@ pub impl Show for Color with fn output(self, logger) {
 ///|
 /// Red channel mapped to `[0, max]` (sRGB).
 pub fn Color::red(self : Color, max~ : Double = 255) -> Double {
+  if self.mode is RGBP3 {
+    return self.coords[0] * max
+  }
   self.to_srgb().0 * max
 }
 
 ///|
 /// Green channel mapped to `[0, max]` (sRGB).
 pub fn Color::green(self : Color, max~ : Double = 255) -> Double {
+  if self.mode is RGBP3 {
+    return self.coords[1] * max
+  }
   self.to_srgb().1 * max
 }
 
 ///|
 /// Blue channel mapped to `[0, max]` (sRGB).
 pub fn Color::blue(self : Color, max~ : Double = 255) -> Double {
+  if self.mode is RGBP3 {
+    return self.coords[2] * max
+  }
   self.to_srgb().2 * max
 }
 
@@ -315,7 +331,7 @@ pub fn Color::set_alpha(self : Color, v : Double, max~ : Double = 255) -> Unit {
 ///|
 fn Color::set_srgb_channel(self : Color, i : Int32, v : Double) -> Unit {
   self.default_string = None
-  if self.mode is RGB {
+  if self.mode is (RGB | RGBP3) {
     self.coords[i] = v
   } else {
     let (r, g, b) = to_srgb(self.mode, self.coords)

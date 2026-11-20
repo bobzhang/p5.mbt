@@ -50,6 +50,45 @@ let xyz65_to_lin_srgb : FixedArray[Double] = [
 ]
 
 ///|
+let lin_p3_to_xyz65 : FixedArray[Double] = [
+  0.4865709486482162, 0.26566769316909306, 0.1982172852343625, 0.2289745640697488,
+  0.6917385218365064, 0.079286914093745, 0.0, 0.04511338185890264, 1.043944368900976,
+]
+
+///|
+let xyz65_to_lin_p3 : FixedArray[Double] = [
+  2.493496911941425, -0.9313836179191239, -0.40271078445071684, -0.8294889695615747,
+  1.7626640603183463, 0.023624685841943577, 0.03584583024378447, -0.07617238926804182,
+  0.9568845240076872,
+]
+
+///|
+/// Display P3 (gamma-encoded like sRGB) to sRGB.
+fn p3_to_srgb(r : Double, g : Double, b : Double) -> (Double, Double, Double) {
+  let (x, y, z) = mat3(
+    lin_p3_to_xyz65,
+    srgb_to_linear(r),
+    srgb_to_linear(g),
+    srgb_to_linear(b),
+  )
+  let (lr, lg, lb) = mat3(xyz65_to_lin_srgb, x, y, z)
+  (linear_to_srgb(lr), linear_to_srgb(lg), linear_to_srgb(lb))
+}
+
+///|
+/// sRGB to Display P3.
+fn p3_from_srgb(r : Double, g : Double, b : Double) -> (Double, Double, Double) {
+  let (x, y, z) = mat3(
+    lin_srgb_to_xyz65,
+    srgb_to_linear(r),
+    srgb_to_linear(g),
+    srgb_to_linear(b),
+  )
+  let (lr, lg, lb) = mat3(xyz65_to_lin_p3, x, y, z)
+  (linear_to_srgb(lr), linear_to_srgb(lg), linear_to_srgb(lb))
+}
+
+///|
 let d65_to_d50 : FixedArray[Double] = [
   1.0479298208405488, 0.022946793341019088, -0.05019222954313557, 0.029627815688159344,
   0.990434484573249, -0.01707382502938514, -0.009243058152591178, 0.015055144896577895,
@@ -302,6 +341,7 @@ fn to_srgb(
 ) -> (Double, Double, Double) {
   match mode {
     RGB => (c[0], c[1], c[2])
+    RGBP3 => p3_to_srgb(c[0], c[1], c[2])
     HSB => hsb_to_srgb(c[0], c[1], c[2])
     HSL => hsl_to_srgb(c[0], c[1], c[2])
     HWB => hwb_to_srgb(c[0], c[1], c[2])
@@ -328,6 +368,7 @@ fn from_srgb(
 ) -> (Double, Double, Double) {
   match mode {
     RGB => (r, g, b)
+    RGBP3 => p3_from_srgb(r, g, b)
     HSB => hsb_from_srgb(r, g, b)
     HSL => hsl_from_srgb(r, g, b)
     HWB => hwb_from_srgb(r, g, b)

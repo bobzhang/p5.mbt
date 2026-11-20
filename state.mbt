@@ -39,7 +39,7 @@ priv struct State {
 ///|
 fn default_maxes_map() -> Map[ColorMode, @color.ColorMaxes] {
   let m = Map([])
-  for mode in [ColorMode::RGB, HSB, HSL, HWB, LAB, LCH, OKLAB, OKLCH] {
+  for mode in [ColorMode::RGB, HSB, HSL, HWB, LAB, LCH, OKLAB, OKLCH, RGBP3] {
     m[mode] = @color.default_maxes(mode)
   }
   m

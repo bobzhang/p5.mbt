@@ -130,6 +130,7 @@ pub struct Framebuffer {
   default_camera : Camera
   // private fields
 }
+pub fn Framebuffer::auto_sized(Self) -> Bool
 pub fn Framebuffer::begin(Self) -> Unit
 pub fn Framebuffer::canvas_resized(Self) -> Unit
 pub fn Framebuffer::draw(Self, () -> Unit) -> Unit
@@ -138,6 +139,7 @@ pub fn Framebuffer::pixel_density(Self, Double) -> Unit
 pub fn Framebuffer::read_pixels(Self) -> FixedArray[Byte]
 pub fn Framebuffer::remove(Self) -> Unit
 pub fn Framebuffer::resize(Self, Double, Double) -> Unit
+pub fn Framebuffer::set_auto_sized(Self, Bool) -> Unit
 pub fn Framebuffer::source(Self) -> TexSource
 
 pub(all) struct FramebufferOptions {
@@ -283,6 +285,7 @@ pub struct Renderer3D {
 pub fn Renderer3D::ambient_light(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::ambient_material(Self, FixedArray[Double]) -> Unit
 pub fn Renderer3D::apply_matrix(Self, ArrayView[Double]) -> Unit
+pub fn Renderer3D::apply_stencil_if_clipping(Self) -> Unit
 pub fn Renderer3D::base_shader(Self, String) -> Shader
 pub fn Renderer3D::begin_geometry(Self) -> Unit
 pub fn Renderer3D::cached_geometry(Self, String, () -> Geometry) -> Geometry
@@ -327,6 +330,7 @@ pub fn Renderer3D::resize(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::rotate(Self, Double, Double, Double, Double) -> Unit
 pub fn Renderer3D::scale(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::set_camera(Self, Camera) -> Unit
+pub fn Renderer3D::set_clip_applied(Self, Bool) -> Unit
 pub fn Renderer3D::set_curve_detail(Self, Double) -> Unit
 pub fn Renderer3D::set_fill_shader(Self, Shader?) -> Unit
 pub fn Renderer3D::set_has_ambient(Self) -> Unit

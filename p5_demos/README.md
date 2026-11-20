@@ -18,6 +18,13 @@ package that imports `bobzhang/p5` and compiles to JavaScript.
 | [`boids`](boids/main.mbt) | flocking: separation, alignment, cohesion; the mouse attracts |
 | [`particles`](particles/main.mbt) | `text_to_points` words made of springy particles |
 | [`tree`](tree/main.mbt) | a recursive tree swaying in Perlin-noise wind |
+| [`chrome`](chrome/main.mbt) | image-based lighting and a 360° background (`image_light`, `panorama`) on metal spheres |
+| [`type3d`](type3d/main.mbt) | extruded 3D letters from font outlines (`text_to_model`) |
+| [`bumpy`](bumpy/main.mbt) | bump and normal maps (`bump_texture`, `normal_texture`) generated in graphics buffers |
+| [`swarm`](swarm/main.mbt) | GPU instancing: 8,000 boxes in one draw call (`instances`, `gl_InstanceID` in a shader hook) |
+| [`ribbons`](ribbons/main.mbt) | a custom per-vertex attribute (`vertex_property`) read by shader hooks |
+| [`crt`](crt/main.mbt) | a custom filter shader over a 2D sketch (`create_filter_shader`, `filter_shader`) |
+| [`accessible`](accessible/main.mbt) | screen-reader descriptions and generated outputs (`describe`, `text_output`, `grid_output`) |
 
 ## Running
 

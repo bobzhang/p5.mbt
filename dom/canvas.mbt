@@ -48,6 +48,12 @@ pub extern "js" fn get_context(c : Canvas) -> Context2D =
   #|(c) => c.getContext('2d', { willReadFrequently: false })
 
 ///|
+/// The 2D context of a canvas in the Display P3 color space (falls back to
+/// sRGB where the browser lacks it).
+pub extern "js" fn get_context_p3(c : Canvas) -> Context2D =
+  #|(c) => c.getContext('2d', { willReadFrequently: false, colorSpace: 'display-p3' })
+
+///|
 /// Sets the `id` attribute of a canvas.
 pub extern "js" fn set_canvas_id(c : Canvas, id : String) -> Unit = "(c, id) => { c.id = id; }"
 

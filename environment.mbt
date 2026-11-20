@@ -16,6 +16,30 @@ pub fn P5::create_canvas(
   if renderer is WebGL && self.gl is None {
     self.create_webgl_canvas(w, h)
   }
+  if renderer is P2DP3 && self.gl is None && self.canvas is Some(old) {
+    let c = @dom.replace_canvas(old, w, h, self.density)
+    @dom.detach_node(@dom.canvas_element(old))
+    self.canvas = Some(c)
+    self.surface = CanvasSurface::new_p3(c)
+    self.apply_defaults()
+    self.color_mode(RGBP3)
+    self.extras.p3 = true
+    if self.is_main {
+      self.install_canvas_events(c)
+    }
+  }
+}
+
+///|
+/// The renderer of the canvas (`rendererType`).
+pub fn P5::renderer_type(self : P5) -> RendererKind {
+  if self.gl is Some(_) {
+    WebGL
+  } else if self.extras.p3 {
+    P2DP3
+  } else {
+    P2D
+  }
 }
 
 ///|

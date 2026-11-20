@@ -23,6 +23,13 @@ priv struct Extras {
   vertex_props : Array[(String, FixedArray[Double])]
   /// WebGL context attributes (`set_attributes`).
   gl_attrs : GlAttrs
+  /// The canvas uses the Display P3 color space.
+  mut p3 : Bool
+  /// WEBGL clipping: inside `begin_clip`, the invert flag, and the push
+  /// depths whose `pop` removes a clip.
+  mut gl_clipping : Bool
+  mut gl_clip_invert : Bool
+  gl_clip_depths : Array[Int32]
 }
 
 ///|
@@ -62,5 +69,9 @@ fn Extras::new() -> Extras {
       per_pixel_lighting: true,
       version: 2,
     },
+    p3: false,
+    gl_clipping: false,
+    gl_clip_invert: false,
+    gl_clip_depths: [],
   }
 }

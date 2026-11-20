@@ -92,6 +92,12 @@ pub fn CanvasSurface::new(canvas : @dom.Canvas) -> CanvasSurface {
 }
 
 ///|
+/// Wraps a canvas element with a Display P3 2D context.
+pub fn CanvasSurface::new_p3(canvas : @dom.Canvas) -> CanvasSurface {
+  { canvas, ctx: @dom.get_context_p3(canvas), }
+}
+
+///|
 fn to_path2d(path : @shape.Path) -> @dom.Path2D {
   let p = @dom.path_new()
   for cmd in path {

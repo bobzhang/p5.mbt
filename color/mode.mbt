@@ -12,6 +12,9 @@ pub(all) enum ColorMode {
   LCH
   OKLAB
   OKLCH
+  /// RGB in the wider Display P3 gamut (p5's `RGBP3`); use with a
+  /// `P2DP3` canvas to show colors outside sRGB.
+  RGBP3
 }
 
 ///|
@@ -26,6 +29,7 @@ pub impl Show for ColorMode with fn output(self, logger) {
       LCH => "lch"
       OKLAB => "oklab"
       OKLCH => "oklch"
+      RGBP3 => "rgbp3"
     },
   )
 }
@@ -51,7 +55,7 @@ pub fn maxes(
 /// and `[360, 100, 100, 1]` for HSB.
 pub fn default_maxes(mode : ColorMode) -> ColorMaxes {
   match mode {
-    RGB => maxes(255, 255, 255, 255)
+    RGB | RGBP3 => maxes(255, 255, 255, 255)
     HSB | HSL | HWB => maxes(360, 100, 100, 1)
     LAB | OKLAB => [(0, 100), (-125, 125), (-125, 125), (0, 1)]
     LCH | OKLCH => maxes(100, 150, 360, 1)
@@ -62,7 +66,7 @@ pub fn default_maxes(mode : ColorMode) -> ColorMaxes {
 /// Native coordinate ranges of each space (what color.js uses internally).
 fn native_ranges(mode : ColorMode) -> ColorMaxes {
   match mode {
-    RGB => maxes(1, 1, 1, 1)
+    RGB | RGBP3 => maxes(1, 1, 1, 1)
     HSB | HSL | HWB => maxes(360, 100, 100, 1)
     LAB => [(0, 100), (-125, 125), (-125, 125), (0, 1)]
     LCH => maxes(100, 150, 360, 1)

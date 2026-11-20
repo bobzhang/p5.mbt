@@ -58,6 +58,7 @@ pub(all) enum ColorMode {
   LCH
   OKLAB
   OKLCH
+  RGBP3
 }
 pub impl Show for ColorMode
 

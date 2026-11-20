@@ -8,6 +8,9 @@ pub(all) enum RendererKind {
   P2D
   /// The WebGL renderer (3D).
   WebGL
+  /// The 2D renderer with a Display P3 canvas for wide-gamut color; the
+  /// color mode starts as `RGBP3`.
+  P2DP3
 }
 
 ///|

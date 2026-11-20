@@ -191,6 +191,7 @@ pub struct CanvasSurface {
   ctx : @dom.Context2D
 }
 pub fn CanvasSurface::new(@dom.Canvas) -> Self
+pub fn CanvasSurface::new_p3(@dom.Canvas) -> Self
 pub impl Surface for CanvasSurface
 
 #derive(Eq, @debug.Debug)
@@ -528,6 +529,7 @@ pub fn P5::create_p(Self, html? : String) -> Element
 pub fn P5::create_radio(Self, name? : String) -> Element
 pub fn P5::create_select(Self) -> Element
 pub fn P5::create_shader(Self, String, String) -> @webgl.Shader
+pub fn P5::create_shape(Self) -> ShapeCollection
 pub fn P5::create_slider(Self, Double, Double, value? : Double, step? : Double) -> Element
 pub fn P5::create_span(Self, html? : String) -> Element
 pub fn P5::create_vector(Self, Double, Double, z? : Double) -> @math.Vector
@@ -672,6 +674,7 @@ pub fn[C : ColorArg] P5::red(Self, C) -> Double
 pub fn P5::redraw(Self, n? : Int32) -> Unit
 pub fn P5::remove(Self) -> Unit
 pub fn P5::remove_elements(Self) -> Unit
+pub fn P5::renderer_type(Self) -> RendererKind
 pub fn P5::request_pointer_lock(Self) -> Bool
 pub fn P5::reset_matrix(Self) -> Unit
 pub fn P5::reset_shader(Self) -> Unit
@@ -783,6 +786,7 @@ pub impl Surface for Recorder
 pub(all) enum RendererKind {
   P2D
   WebGL
+  P2DP3
 }
 
 pub(all) struct SavedFrame {
@@ -801,7 +805,10 @@ pub(all) enum ShapeAlign {
 pub struct ShapeCollection {
   ops : Array[DrawOp]
   bounds : (Double, Double, Double, Double)
+  // private fields
 }
+pub fn ShapeCollection::begin(Self, P5, draw? : Bool) -> Unit
+pub fn ShapeCollection::end(Self) -> Unit
 
 pub(all) enum SplineProperty {
   Ends(@shape.SplineEnds)

@@ -114,11 +114,19 @@ pub fn P5::push(self : P5) -> Unit {
 /// Restores the style and transform saved by the last `push()` (and removes
 /// any clipping started since).
 pub fn P5::pop(self : P5) -> Unit {
+  if self.gl is Some(r) &&
+    self.extras.gl_clip_depths.last() is Some(d) &&
+    d == self.stack.length() {
+    @gl.clear_clip_buffer(r.gl)
+    ignore(self.extras.gl_clip_depths.pop())
+    r.set_clip_applied(false)
+  }
   match self.stack.pop() {
     Some(s) => {
       self.state = s
       if self.gl is Some(r) {
         r.pop()
+        r.apply_stencil_if_clipping()
       }
       self.surface.restore()
       self.surface.set_blend_mode(if s.erasing { Remove } else { s.blend_mode })
@@ -141,6 +149,26 @@ pub fn P5::with_push(self : P5, body : () -> Unit) -> Unit {
 /// painted but form the mask. With `invert=true` the mask is inverted. The
 /// clip lasts until the matching `pop()` (or the end of the frame).
 pub fn P5::begin_clip(self : P5, invert~ : Bool = false) -> Unit {
+  if self.gl is Some(r) {
+    if self.extras.gl_clipping {
+      abort(
+        "It looks like you're trying to clip while already in the middle of clipping. Did you forget to endClip()?",
+      )
+    }
+    self.extras.gl_clipping = true
+    self.extras.gl_clip_invert = invert
+    r.set_clip_applied(true)
+    @gl.apply_clip(r.gl)
+    self.push()
+    self.reset_shader()
+    if self.state.fill is Some(_) {
+      self.fill((0, 0, 0, 0))
+    }
+    if self.state.stroke is Some(_) {
+      self.stroke((0, 0, 0, 0))
+    }
+    return
+  }
   if self.clipping {
     abort(
       "It looks like you're trying to clip while already in the middle of clipping. Did you forget to endClip()?",
@@ -172,6 +200,18 @@ pub fn P5::begin_clip(self : P5, invert~ : Bool = false) -> Unit {
 ///|
 /// Finishes the clipping mask started by `begin_clip()`.
 pub fn P5::end_clip(self : P5) -> Unit {
+  if self.gl is Some(r) {
+    if !self.extras.gl_clipping {
+      abort(
+        "It looks like you've called endClip() without beginClip(). Did you forget to call beginClip() first?",
+      )
+    }
+    self.pop()
+    @gl.unapply_clip(r.gl, self.extras.gl_clip_invert)
+    self.extras.gl_clip_depths.push(self.stack.length())
+    self.extras.gl_clipping = false
+    return
+  }
   if !self.clipping {
     abort(
       "It looks like you've called endClip() without beginClip(). Did you forget to call beginClip() first?",

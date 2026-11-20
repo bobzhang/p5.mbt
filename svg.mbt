@@ -9,6 +9,8 @@ pub struct ShapeCollection {
   /// Coordinate bounds `(x, y, width, height)` used for alignment: the
   /// viewBox of an imported SVG, or the canvas of a recording.
   bounds : (Double, Double, Double, Double)
+  /// While recording with `begin`: the sketch and the surface it drew on.
+  priv mut recording : (P5, &Surface, DisplayList)?
 }
 
 ///|
@@ -42,7 +44,49 @@ pub fn P5::build_shape(
   body()
   self.pop()
   self.surface = real
-  { ops: rec.ops, bounds: (0, 0, self.width, self.height), }
+  { ops: rec.ops, bounds: (0, 0, self.width, self.height), recording: None, }
+}
+
+///|
+/// An empty shape collection to record into with `begin` / `end`
+/// (`createShape`).
+pub fn P5::create_shape(self : P5) -> ShapeCollection {
+  { ops: [], bounds: (0, 0, self.width, self.height), recording: None, }
+}
+
+///|
+/// Starts recording what the sketch `p` draws into this collection; with
+/// `draw` it is drawn on the canvas too. Stop with `end`.
+pub fn ShapeCollection::begin(
+  self : ShapeCollection,
+  p : P5,
+  draw~ : Bool = false,
+) -> Unit {
+  if self.recording is Some(_) {
+    return
+  }
+  let real = p.surface
+  let rec = DisplayList::new(
+    p.density,
+    real,
+    forward?=if draw { Some(real) } else { None },
+  )
+  p.surface = rec
+  p.push()
+  self.recording = Some((p, real, rec))
+}
+
+///|
+/// Stops recording (see `begin`); the commands are added to the collection.
+pub fn ShapeCollection::end(self : ShapeCollection) -> Unit {
+  guard self.recording is Some((p, real, rec)) else {
+    @dom.console_warn("end() called without a matching begin().")
+    return
+  }
+  p.pop()
+  p.surface = real
+  self.ops.append(rec.ops)
+  self.recording = None
 }
 
 ///|

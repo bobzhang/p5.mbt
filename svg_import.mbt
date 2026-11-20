@@ -742,9 +742,10 @@ pub fn create_svg(markup : String) -> ShapeCollection raise @io.XmlError {
     return {
       ops,
       bounds: (bounds.0 * w / bounds.2, bounds.1 * h / bounds.3, w, h),
+      recording: None,
     }
   }
-  { ops: imp.ops, bounds, }
+  { ops: imp.ops, bounds, recording: None, }
 }
 
 ///|
