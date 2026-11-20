@@ -236,20 +236,42 @@ pub fn Filter2D::pass(
   w : Double,
   h : Double,
   density : Double,
+  user? : Shader,
 ) -> @dom.ImageElement? {
-  let sh = match self.shaders.get(op) {
+  let sh = match user {
     Some(s) => s
     None =>
-      match filter_shader(@gl.version(self.gl) == 2, op) {
-        Some(s) => {
-          self.shaders[op] = s
-          s
-        }
-        None => return None
+      match self.shaders.get(op) {
+        Some(s) => s
+        None =>
+          match filter_shader(@gl.version(self.gl) == 2, op) {
+            Some(s) => {
+              self.shaders[op] = s
+              s
+            }
+            None => return None
+          }
       }
   }
   guard sh.init(self.gl) is Some(p) else { return None }
   @gl.use_program(p)
+  if user is Some(_) {
+    for name, v in sh.uniforms {
+      match v {
+        Floats(data) => @gl.set_uniform(p, name, data)
+        Tex(t) =>
+          match t.elt {
+            Some(e) =>
+              @gl.set_uniform_texture(
+                p,
+                name,
+                @gl.texture_for(self.gl, e, "clamp", "clamp", "linear"),
+              )
+            None => ()
+          }
+      }
+    }
+  }
   let param = match param {
     Some(v) => v
     None => filter_default_param(op).unwrap_or(@double.not_a_number)

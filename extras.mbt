@@ -18,6 +18,9 @@ priv struct Extras {
   mut debug_axes : (Double, Double, Double, Double)?
   /// Canvas text properties set with `text_property` (name, CSS value).
   text_props : Map[String, String]
+  /// Custom vertex properties of the shape being built: name and the value
+  /// the next vertices get (`vertex_property`).
+  vertex_props : Array[(String, FixedArray[Double])]
 }
 
 ///|
@@ -33,5 +36,6 @@ fn Extras::new() -> Extras {
     debug_grid: None,
     debug_axes: None,
     text_props: Map([]),
+    vertex_props: [],
   }
 }

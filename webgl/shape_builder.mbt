@@ -145,7 +145,12 @@ pub fn build_immediate(
   has_stroke : Bool,
   simple_lines : Bool,
   building~ : Bool = false,
+  user_layout~ : Array[(String, Int32)] = [],
 ) -> ShapeMode {
+  g.user_props.clear()
+  for l in user_layout {
+    g.user_props.push({ name: l.0, size: l.1, data: [], })
+  }
   g.vertices.clear()
   g.vertex_normals.clear()
   g.uvs.clear()
@@ -171,7 +176,8 @@ pub fn build_immediate(
             (g.vertex_colors, 4),
             (g.vertex_stroke_colors, 4),
             (g.uvs, 2),
-          ] {
+          ] +
+          g.user_props.map(u => (u.data, u.size)) {
           let len = arr.length()
           let a = arr[len - 3 * stride:len - 2 * stride].to_owned()
           let b = arr[len - stride:len].to_owned()
@@ -189,6 +195,13 @@ pub fn build_immediate(
       )
       g.uvs.push(ex(p, extra_u))
       g.uvs.push(ex(p, extra_u + 1))
+      let mut off = extra_size
+      for u in g.user_props {
+        for k in 0..<u.size {
+          u.data.push(ex(p, off + k))
+        }
+        off += u.size
+      }
       for k in 0..<4 {
         g.vertex_colors.push(if has_fill { ex(p, extra_fill + k) } else { 0 })
       }
@@ -230,6 +243,10 @@ fn tessellate_into(
   building : Bool,
 ) -> Bool {
   let original = g.vertices.copy()
+  let mut stride = 12
+  for u in g.user_props {
+    stride += u.size
+  }
   let contours : Array[Array[FixedArray[Double]]] = []
   let starts = contour_indices.copy()
   for i, v in g.vertices {
@@ -238,7 +255,8 @@ fn tessellate_into(
       contours.push([])
     }
     let n = g.vertex_normals[i]
-    contours[contours.length() - 1].push([
+    let row = FixedArray::make(stride, 0.0)
+    let base : FixedArray[Double] = [
       v.x,
       v.y,
       v.z,
@@ -251,7 +269,18 @@ fn tessellate_into(
       n.x,
       n.y,
       n.z,
-    ])
+    ]
+    for k in 0..<12 {
+      row[k] = base[k]
+    }
+    let mut off = 12
+    for u in g.user_props {
+      for k in 0..<u.size {
+        row[off + k] = u.data[i * u.size + k]
+      }
+      off += u.size
+    }
+    contours[contours.length() - 1].push(row)
   }
   // snap nearly identical consecutive coordinates, like p5
   for c in contours {
@@ -264,7 +293,7 @@ fn tessellate_into(
       }
     }
   }
-  let flat = libtess_triangulate(contours, 12)
+  let flat = libtess_triangulate(contours, stride)
   if flat.is_empty() {
     return false
   }
@@ -272,7 +301,17 @@ fn tessellate_into(
   g.vertex_normals.clear()
   g.uvs.clear()
   g.vertex_colors.clear()
-  for j = 0; j + 12 <= flat.length(); j = j + 12 {
+  for u in g.user_props {
+    u.data.clear()
+  }
+  for j = 0; j + stride <= flat.length(); j = j + stride {
+    let mut off = j + 12
+    for u in g.user_props {
+      for k in 0..<u.size {
+        u.data.push(flat[off + k])
+      }
+      off += u.size
+    }
     for k in 5..<9 {
       g.vertex_colors.push(flat[j + k])
     }

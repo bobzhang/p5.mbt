@@ -949,7 +949,28 @@ fn Renderer3D::draw_fills(
     g.uvs.length(),
     dirty,
   )
-  self.prepare(b, p, "aTangent", "tangent", 4, () => [], 0, dirty)
+  self.prepare(
+    b,
+    p,
+    "aTangent",
+    "tangent",
+    4,
+    () => floats(g.vertex_tangents),
+    g.vertex_tangents.length(),
+    dirty,
+  )
+  for u in g.user_props {
+    self.prepare(
+      b,
+      p,
+      u.name,
+      "user:" + u.name,
+      u.size,
+      () => floats(u.data),
+      u.data.length(),
+      dirty,
+    )
+  }
   @gl.disable_other_attribs(p)
   self.apply_color_blend(style, fill[3], g.has_fill_transparency())
   match b.index {
@@ -1109,6 +1130,7 @@ pub fn Renderer3D::draw_shape(
   contours : Array[Array[@shape.Pt]],
   style : Style,
   count~ : Int32 = 1,
+  user_layout~ : Array[(String, Int32)] = [],
 ) -> Unit {
   if contours.is_empty() {
     return
@@ -1123,6 +1145,7 @@ pub fn Renderer3D::draw_shape(
     style.stroke is Some(_),
     self.simple_lines,
     building~,
+    user_layout~,
   )
   if building {
     self.builder_add(g, immediate_faces(g, mode, style.fill is Some(_)), style)
@@ -1267,4 +1290,18 @@ pub fn Renderer3D::set_simple_lines(self : Renderer3D, on : Bool) -> Unit {
 /// Sets how many instances each primitive draws.
 pub fn Renderer3D::set_instance_count(self : Renderer3D, n : Int32) -> Unit {
   self.instance_count = n
+}
+
+///|
+/// Sets how a texture is sampled when drawn smaller and larger:
+/// "nearest" (blocky) or "linear" (smooth, the default).
+pub fn Renderer3D::texture_filter(
+  self : Renderer3D,
+  src : TexSource,
+  downscale : String,
+  upscale : String,
+) -> Unit {
+  if src.elt is Some(e) {
+    @gl.set_texture_filter(self.gl, e, downscale, upscale)
+  }
 }

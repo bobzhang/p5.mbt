@@ -31,7 +31,21 @@ pub struct Geometry {
   line_tangents_out : Array[Double]
   line_sides : Array[Double]
   line_vertex_colors : Array[Double]
+  /// Per-vertex surface tangents for normal maps: `(x, y, z, handedness)`
+  /// per vertex (see `compute_tangents`).
+  vertex_tangents : Array[Double]
+  /// Custom per-vertex attributes, uploaded under their names
+  /// (`vertex_property`).
+  user_props : Array[VertexProperty]
   priv mut dirty : Bool
+}
+
+///|
+/// A custom per-vertex attribute: `size` numbers per vertex in `data`.
+pub struct VertexProperty {
+  name : String
+  size : Int32
+  data : Array[Double]
 }
 
 ///|
@@ -57,6 +71,8 @@ pub fn Geometry::new(detail_x~ : Int32 = 1, detail_y~ : Int32 = 1) -> Geometry {
     line_tangents_out: [],
     line_sides: [],
     line_vertex_colors: [],
+    vertex_tangents: [],
+    user_props: [],
     dirty: true,
   }
 }

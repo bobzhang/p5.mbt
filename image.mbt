@@ -757,6 +757,7 @@ fn P5::filter_webgl_2d(
   c : @dom.Canvas,
   op : String,
   param : Double?,
+  user? : @webgl.Shader,
 ) -> Unit {
   let fr = match self.filter2d {
     Some(f) => f
@@ -798,7 +799,8 @@ fn P5::filter_webgl_2d(
     if fr.pass(op, param, (0, 1), src, w, h, self.density) is Some(out) {
       draw_back(out)
     }
-  } else if fr.pass(op, param, (0, 0), src, w, h, self.density) is Some(out) {
+  } else if fr.pass(op, param, (0, 0), src, w, h, self.density, user?)
+    is Some(out) {
     draw_back(out)
   }
   self.surface.set_blend_mode(

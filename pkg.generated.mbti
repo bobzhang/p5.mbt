@@ -503,6 +503,7 @@ pub fn P5::create_color_picker(Self, value? : String) -> Element
 pub fn P5::create_div(Self, html? : String) -> Element
 pub fn P5::create_element(Self, String, content? : String) -> Element
 pub fn P5::create_file_input(Self, (File) -> Unit, multiple? : Bool) -> Element
+pub fn P5::create_filter_shader(Self, String) -> @webgl.Shader
 pub fn P5::create_framebuffer(Self, width? : Double, height? : Double, density? : Double, antialias? : Int32, depth? : Bool, stencil? : Bool, depth_float? : Bool, linear? : Bool) -> @webgl.Framebuffer?
 pub fn P5::create_graphics(Self, Double, Double) -> Self
 pub fn P5::create_image(Self, Double, Double) -> Image
@@ -543,6 +544,7 @@ pub fn P5::erase(Self, strength_fill? : Double, strength_stroke? : Double) -> Un
 pub fn P5::exit_pointer_lock(Self) -> Unit
 pub fn[C : ColorArg] P5::fill(Self, C) -> Unit
 pub fn P5::filter(Self, Filter, use_webgl? : Bool) -> Unit
+pub fn P5::filter_shader(Self, @webgl.Shader) -> Unit
 pub fn P5::font_ascent(Self) -> Double
 pub fn P5::font_bounds(Self, String, Double, Double, max_width? : Double, max_height? : Double) -> Bounds
 pub fn P5::font_descent(Self) -> Double
@@ -595,11 +597,13 @@ pub fn P5::lights(Self) -> Unit
 pub fn P5::line(Self, Double, Double, Double, Double, z1? : Double, z2? : Double) -> Unit
 pub fn P5::line_perspective(Self, Bool) -> Unit
 pub fn P5::load_bytes(Self, String, (Bytes) -> Unit) -> Unit
+pub fn P5::load_filter_shader(Self, String, on_load? : (@webgl.Shader) -> Unit) -> @webgl.Shader
 pub fn P5::load_font(Self, String, family? : String, on_load? : (Font) -> Unit) -> Font
 pub fn P5::load_image(Self, String, on_load? : (Image) -> Unit) -> Image
 pub fn P5::load_json(Self, String, (@json.Json) -> Unit) -> Unit
 pub fn P5::load_model(Self, String, normalize? : Bool, flip_u? : Bool, flip_v? : Bool, on_load? : (@webgl.Geometry) -> Unit) -> @webgl.Geometry
 pub fn P5::load_pixels(Self) -> Unit
+pub fn P5::load_shader(Self, String, String, on_load? : (@webgl.Shader) -> Unit) -> @webgl.Shader
 pub fn P5::load_strings(Self, String, on_load? : (Array[String]) -> Unit) -> Array[String]
 pub fn P5::load_svg(Self, String, (ShapeCollection) -> Unit) -> Unit
 pub fn P5::load_table(Self, String, (@io.Table) -> Unit, header? : Bool, separator? : Char) -> Unit
@@ -725,6 +729,7 @@ pub fn P5::text_weight(Self, Double) -> Unit
 pub fn P5::text_width(Self, String) -> Double
 pub fn P5::text_wrap(Self, TextWrap) -> Unit
 pub fn[I : ImageSource] P5::texture(Self, I) -> Unit
+pub fn[I : ImageSource] P5::texture_interpolation(Self, I, TextureFilter, upscale? : TextureFilter) -> Unit
 pub fn P5::texture_mode(Self, TextureMode) -> Unit
 pub fn P5::texture_wrap(Self, TextureWrap, y? : TextureWrap) -> Unit
 pub fn[C : ColorArg] P5::tint(Self, C) -> Unit
@@ -733,6 +738,7 @@ pub fn P5::translate(Self, Double, Double, z? : Double) -> Unit
 pub fn P5::triangle(Self, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::update_pixels(Self) -> Unit
 pub fn P5::vertex(Self, Double, Double, z? : Double, u? : Double, v? : Double) -> Unit
+pub fn P5::vertex_property(Self, String, ArrayView[Double]) -> Unit
 pub fn P5::webgl_version(Self) -> String
 pub fn P5::with_push(Self, () -> Unit) -> Unit
 pub fn P5::world_to_screen(Self, Double, Double) -> (Double, Double)
@@ -834,6 +840,12 @@ pub(all) enum TextStyle {
 pub(all) enum TextWrap {
   Word
   Char
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum TextureFilter {
+  Nearest
+  Linear
 }
 
 pub(all) enum TextureMode {

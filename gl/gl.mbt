@@ -401,8 +401,9 @@ pub extern "js" fn texture_for(
   #|  if (!gl.__p5mbtTextures) gl.__p5mbtTextures = new Map();
   #|  let t = gl.__p5mbtTextures.get(src);
   #|  const prev = gl.getParameter(gl.TEXTURE_BINDING_2D);
-  #|  const fresh = !t;
+  #|  let fresh = !t;
   #|  if (fresh) { t = gl.createTexture(); gl.__p5mbtTextures.set(src, t); }
+  #|  else if (t.__fresh) { t.__fresh = false; fresh = true; t.__keepFilter = true; }
   #|  gl.bindTexture(gl.TEXTURE_2D, t);
   #|  const isVideo = typeof HTMLVideoElement !== 'undefined' && src instanceof HTMLVideoElement;
   #|  const w = isVideo ? src.videoWidth : src.width, h = isVideo ? src.videoHeight : src.height;
@@ -417,8 +418,10 @@ pub extern "js" fn texture_for(
   #|  if (fresh) {
   #|    const wrap = m => m === 'repeat' ? gl.REPEAT : m === 'mirror' ? gl.MIRRORED_REPEAT : gl.CLAMP_TO_EDGE;
   #|    const f = filter === 'nearest' ? gl.NEAREST : gl.LINEAR;
-  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, f);
-  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, f);
+  #|    if (!t.__keepFilter) {
+  #|      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, f);
+  #|      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, f);
+  #|    }
   #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap(ws));
   #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap(wt));
   #|  }
@@ -690,4 +693,32 @@ pub extern "js" fn data_texture(
   #|  }
   #|  gl.bindTexture(gl.TEXTURE_2D, prev);
   #|  return t;
+  #|}
+
+///|
+/// Sets the minification and magnification filters ("nearest" or
+/// "linear") of the texture made for an image element.
+pub extern "js" fn set_texture_filter(
+  gl : GL,
+  source : @dom.ImageElement,
+  min : String,
+  mag : String,
+) -> Unit =
+  #|(gl, src, min, mag) => {
+  #|  if (!gl.__p5mbtTextures) gl.__p5mbtTextures = new Map();
+  #|  let t = gl.__p5mbtTextures.get(src);
+  #|  const prev = gl.getParameter(gl.TEXTURE_BINDING_2D);
+  #|  if (!t) {
+  #|    t = gl.createTexture(); gl.__p5mbtTextures.set(src, t);
+  #|    gl.bindTexture(gl.TEXTURE_2D, t);
+  #|    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  #|    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  #|    t.__fresh = true;
+  #|  }
+  #|  gl.bindTexture(gl.TEXTURE_2D, t);
+  #|  const f = m => m === 'nearest' ? gl.NEAREST : gl.LINEAR;
+  #|  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, f(min));
+  #|  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, f(mag));
+  #|  gl.bindTexture(gl.TEXTURE_2D, prev);
   #|}

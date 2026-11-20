@@ -603,7 +603,18 @@ fn P5::gl_pt(
   u : Double,
   v : Double,
 ) -> @shape.Pt {
-  let extra = FixedArray::make(@webgl.extra_size, 0.0)
+  let mut user = 0
+  for vp in self.extras.vertex_props {
+    user += vp.1.length()
+  }
+  let extra = FixedArray::make(@webgl.extra_size + user, 0.0)
+  let mut off = @webgl.extra_size
+  for vp in self.extras.vertex_props {
+    for k in 0..<vp.1.length() {
+      extra[off + k] = vp.1[k]
+    }
+    off += vp.1.length()
+  }
   extra[@webgl.extra_u] = u
   extra[@webgl.extra_u + 1] = v
   let (nx, ny, nz) = self.gl_normal

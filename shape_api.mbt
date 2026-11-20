@@ -43,6 +43,7 @@ fn P5::draw_shape(
       shape.to_vertices(curve_detail=r.curve_detail),
       style,
       count=count.unwrap_or(r.instance_count),
+      user_layout=self.extras.vertex_props.map(vp => (vp.0, vp.1.length())),
     )
     return
   }
@@ -424,6 +425,7 @@ pub fn P5::curve(
 pub fn P5::begin_shape(self : P5, kind~ : ShapeKind = Path) -> Unit {
   let s = self.shape
   s.reset()
+  self.extras.vertex_props.clear()
   s.set_bezier_order(self.state.bezier_order)
   s.set_spline_ends(self.state.spline_ends)
   s.set_spline_tightness(self.state.spline_tightness)

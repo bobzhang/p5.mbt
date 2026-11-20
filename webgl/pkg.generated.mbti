@@ -15,7 +15,7 @@ pub fn arc_geometry(Double, Double, String, Int32) -> Geometry
 
 pub fn box_geometry(Int32, Int32) -> Geometry
 
-pub fn build_immediate(Geometry, @shape.ShapeKind, Array[Array[@shape.Pt]], Bool, Bool, Bool, building? : Bool) -> ShapeMode
+pub fn build_immediate(Geometry, @shape.ShapeKind, Array[Array[@shape.Pt]], Bool, Bool, Bool, building? : Bool, user_layout? : Array[(String, Int32)]) -> ShapeMode
 
 pub fn cone_geometry(Int32, Int32, Bool) -> Geometry
 
@@ -34,6 +34,8 @@ pub let extra_stroke : Int32
 pub let extra_u : Int32
 
 pub fn filter_default_param(String) -> Double?
+
+pub fn filter_vertex_source(String) -> String
 
 pub fn js_string(Double) -> String
 
@@ -56,6 +58,14 @@ pub fn triangle_geometry() -> Geometry
 // Errors
 
 // Types and methods
+#derive(@debug.Debug)
+pub struct BoundingBox {
+  min : Vec3
+  max : Vec3
+  size : Vec3
+  offset : Vec3
+}
+
 pub struct Camera {
   mut width : Double
   mut height : Double
@@ -110,7 +120,7 @@ pub struct Filter2D {
   // private fields
 }
 pub fn Filter2D::new(Double, Double) -> Self
-pub fn Filter2D::pass(Self, String, Double?, (Double, Double), @dom.ImageElement, Double, Double, Double) -> @dom.ImageElement?
+pub fn Filter2D::pass(Self, String, Double?, (Double, Double), @dom.ImageElement, Double, Double, Double, user? : Shader) -> @dom.ImageElement?
 
 pub struct Framebuffer {
   mut width : Double
@@ -201,21 +211,36 @@ pub struct Geometry {
   line_tangents_out : Array[Double]
   line_sides : Array[Double]
   line_vertex_colors : Array[Double]
+  vertex_tangents : Array[Double]
+  user_props : Array[VertexProperty]
   // private fields
 }
 pub fn Geometry::assign(Self, Self) -> Unit
+pub fn Geometry::average_normals(Self) -> Self
+pub fn Geometry::average_pole_normals(Self) -> Self
+pub fn Geometry::calculate_bounding_box(Self) -> BoundingBox
+pub fn Geometry::clear_colors(Self) -> Self
 pub fn Geometry::compute_faces(Self) -> Self
 pub fn Geometry::compute_normals(Self, mode? : NormalMode, round_to_precision? : Int32) -> Self
+pub fn Geometry::compute_tangents(Self) -> Self
 pub fn Geometry::edges_to_vertices(Self, simple_lines? : Bool) -> Self
 pub fn Geometry::flip_u(Self) -> Unit
 pub fn Geometry::flip_v(Self) -> Unit
+pub fn Geometry::get_vertex_property(Self, String) -> VertexProperty?
 pub fn Geometry::has_fill_transparency(Self) -> Bool
 pub fn Geometry::has_stroke_transparency(Self) -> Bool
+pub fn Geometry::make_edges_from_faces(Self) -> Self
 pub fn Geometry::make_triangle_edges(Self) -> Self
 pub fn Geometry::mark_dirty(Self) -> Unit
 pub fn Geometry::new(detail_x? : Int32, detail_y? : Int32) -> Self
 pub fn Geometry::normalize(Self) -> Self
+pub fn Geometry::save_obj(Self, filename? : String) -> Unit
+pub fn Geometry::save_stl(Self, filename? : String, binary? : Bool) -> Unit
 pub fn Geometry::set_gid(Self, String) -> Unit
+pub fn Geometry::to_obj(Self) -> String
+pub fn Geometry::to_stl(Self, name? : String) -> String
+pub fn Geometry::to_stl_binary(Self) -> FixedArray[Byte]
+pub fn Geometry::vertex_property(Self, String, ArrayView[Double], size? : Int32) -> Unit
 
 pub(all) enum NormalMode {
   KeepConnections
@@ -263,7 +288,7 @@ pub fn Renderer3D::current_camera(Self) -> Camera
 pub fn Renderer3D::directional_light(Self, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn Renderer3D::draw_geometry(Self, Geometry, Style, mode? : DrawMode, count? : Int32, skip_fill? : Bool) -> Unit
 pub fn Renderer3D::draw_scaled(Self, Geometry, Double, Double, Double, Style) -> Unit
-pub fn Renderer3D::draw_shape(Self, @shape.ShapeKind, Array[Array[@shape.Pt]], Style, count? : Int32) -> Unit
+pub fn Renderer3D::draw_shape(Self, @shape.ShapeKind, Array[Array[@shape.Pt]], Style, count? : Int32, user_layout? : Array[(String, Int32)]) -> Unit
 pub fn Renderer3D::emissive_material(Self, FixedArray[Double]) -> Unit
 pub fn Renderer3D::end_geometry(Self) -> Geometry
 pub fn Renderer3D::filter(Self, String, Double?, Style, Shader?) -> Unit
@@ -307,6 +332,7 @@ pub fn Renderer3D::specular_material(Self, FixedArray[Double]) -> Unit
 pub fn Renderer3D::spot_light(Self, Double, Double, Double, (Double, Double, Double), (Double, Double, Double), angle? : Double, concentration? : Double) -> Unit
 pub fn Renderer3D::sync_camera(Self) -> Unit
 pub fn Renderer3D::texture(Self, TexSource) -> Unit
+pub fn Renderer3D::texture_filter(Self, TexSource, String, String) -> Unit
 pub fn Renderer3D::texture_mode(Self, Bool) -> Unit
 pub fn Renderer3D::texture_wrap(Self, String, String) -> Unit
 pub fn Renderer3D::translate(Self, Double, Double, Double) -> Unit
@@ -314,16 +340,20 @@ pub fn Renderer3D::update(Self) -> Unit
 pub fn Renderer3D::use_normal_material(Self) -> Unit
 
 pub struct Shader {
-  vert : String
-  frag : String
+  mut vert : String
+  mut frag : String
   vertex_hooks : Array[(String, String)]
   fragment_hooks : Array[(String, String)]
   modified : Array[String]
   // private fields
 }
+pub fn Shader::copy(Self) -> Self
+pub fn Shader::filter(String) -> Self
 pub fn Shader::frag_src(Self) -> String
+pub fn Shader::inspect_hooks(Self) -> String
 pub fn Shader::modify(Self, vertex? : Array[(String, String)], fragment? : Array[(String, String)]) -> Self
 pub fn Shader::new(String, String) -> Self
+pub fn Shader::set_sources(Self, String, String) -> Unit
 pub fn Shader::set_uniform(Self, String, UniformValue) -> Unit
 pub fn Shader::vert_src(Self) -> String
 
@@ -368,6 +398,12 @@ pub struct Vec3 {
 }
 pub fn Vec3::copy(Self) -> Self
 pub fn Vec3::new(Double, Double, Double) -> Self
+
+pub struct VertexProperty {
+  name : String
+  size : Int32
+  data : Array[Double]
+}
 
 // Type aliases
 

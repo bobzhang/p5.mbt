@@ -4,8 +4,8 @@
 ///|
 /// A shader program: vertex and fragment sources with hooks.
 pub struct Shader {
-  vert : String
-  frag : String
+  mut vert : String
+  mut frag : String
   /// `(\"type name\", body)` pairs filling `HOOK_name` in the vertex shader.
   vertex_hooks : Array[(String, String)]
   fragment_hooks : Array[(String, String)]
@@ -34,6 +34,83 @@ pub fn Shader::set_uniform(
   value : UniformValue,
 ) -> Unit {
   self.uniforms[name] = value
+}
+
+///|
+/// Replaces the sources (the program is rebuilt on next use); used when a
+/// shader's files finish loading.
+pub fn Shader::set_sources(self : Shader, vert : String, frag : String) -> Unit {
+  self.vert = vert
+  self.frag = frag
+  self.program = None
+}
+
+///|
+/// A copy with the same sources, hooks and uniforms that compiles its own
+/// program, e.g. for use on another WebGL context (`copyToContext`).
+pub fn Shader::copy(self : Shader) -> Shader {
+  {
+    ..self,
+    program: None,
+    uniforms: Map::from_array(self.uniforms.to_array()),
+  }
+}
+
+///|
+/// A description of the hooks this shader has, with their current bodies
+/// (`inspectHooks` prints the same information).
+pub fn Shader::inspect_hooks(self : Shader) -> String {
+  let sb = StringBuilder()
+  sb.write_string("==== Vertex shader hooks: ====\n")
+  for h in self.vertex_hooks {
+    sb.write_string(h.0 + h.1 + "\n")
+  }
+  sb.write_string("\n==== Fragment shader hooks: ====\n")
+  for h in self.fragment_hooks {
+    sb.write_string(h.0 + h.1 + "\n")
+  }
+  sb.to_string()
+}
+
+///|
+/// p5's default vertex shader for filter shaders (`createFilterShader`),
+/// GLSL ES 3.00 when the fragment shader is.
+pub fn filter_vertex_source(frag : String) -> String {
+  if frag.contains("#version 300 es") {
+    (
+      #|#version 300 es
+      #|uniform mat4 uModelViewMatrix;
+      #|uniform mat4 uProjectionMatrix;
+      #|in vec3 aPosition;
+      #|in vec2 aTexCoord;
+      #|out vec2 vTexCoord;
+      #|void main() {
+      #|  vTexCoord = aTexCoord;
+      #|  vec4 positionVec4 = vec4(aPosition, 1.0);
+      #|  gl_Position = uProjectionMatrix * uModelViewMatrix * positionVec4;
+      #|}
+    )
+  } else {
+    (
+      #|uniform mat4 uModelViewMatrix;
+      #|uniform mat4 uProjectionMatrix;
+      #|attribute vec3 aPosition;
+      #|attribute vec2 aTexCoord;
+      #|varying vec2 vTexCoord;
+      #|void main() {
+      #|  vTexCoord = aTexCoord;
+      #|  vec4 positionVec4 = vec4(aPosition, 1.0);
+      #|  gl_Position = uProjectionMatrix * uModelViewMatrix * positionVec4;
+      #|}
+    )
+  }
+}
+
+///|
+/// A filter shader from a fragment shader that reads `tex0` at `vTexCoord`
+/// (`createFilterShader`). It also receives `texelSize` and `canvasSize`.
+pub fn Shader::filter(frag : String) -> Shader {
+  Shader::new(filter_vertex_source(frag), frag)
 }
 
 ///|

@@ -180,3 +180,121 @@ fn P5::draw_debug_mode(self : P5) -> Unit {
     self.pop()
   }
 }
+
+///|
+/// Sets a custom per-vertex value for the vertices added after it in the
+/// current shape (`vertexProperty`). Shaders read it as an attribute named
+/// `name` with as many components as `data` has. Call it before the
+/// shape's first vertex so every vertex gets a value.
+pub fn P5::vertex_property(
+  self : P5,
+  name : String,
+  data : ArrayView[Double],
+) -> Unit {
+  let value = FixedArray::from_array(data.to_array())
+  match self.extras.vertex_props.search_by(vp => vp.0 == name) {
+    Some(i) => self.extras.vertex_props[i] = (name, value)
+    None => self.extras.vertex_props.push((name, value))
+  }
+}
+
+///|
+/// Creates a filter shader from a fragment shader alone
+/// (`createFilterShader`): it reads the canvas from `tex0` at `vTexCoord`
+/// and also gets `texelSize` and `canvasSize`. Apply it with
+/// `filter_shader`.
+pub fn P5::create_filter_shader(self : P5, frag : String) -> @webgl.Shader {
+  ignore(self)
+  @webgl.Shader::filter(frag)
+}
+
+///|
+/// Runs a filter shader over the canvas (`filter(shader)`), in 2D or WEBGL.
+pub fn P5::filter_shader(self : P5, s : @webgl.Shader) -> Unit {
+  if self.gl is Some(r) {
+    r.filter("", None, self.gl_style(), Some(s))
+    return
+  }
+  if self.canvas is Some(c) {
+    self.filter_webgl_2d(c, "", None, user=s)
+  }
+}
+
+///|
+/// Loads a vertex and a fragment shader file (`loadShader`). The shader is
+/// returned right away and gets its sources when the files arrive; in
+/// `preload`, `setup` waits for them.
+pub fn P5::load_shader(
+  self : P5,
+  vert_url : String,
+  frag_url : String,
+  on_load? : (@webgl.Shader) -> Unit,
+) -> @webgl.Shader {
+  let s = @webgl.Shader::new("", "")
+  let vert = Ref(None)
+  let frag = Ref(None)
+  let finish = () => {
+    if vert.val is Some(v) && frag.val is Some(f) {
+      s.set_sources(v, f)
+      if on_load is Some(cb) {
+        cb(s)
+      }
+    }
+  }
+  self.load_text(vert_url, on_load=t => {
+    vert.val = Some(t)
+    finish()
+  })
+  self.load_text(frag_url, on_load=t => {
+    frag.val = Some(t)
+    finish()
+  })
+  s
+}
+
+///|
+/// Loads a filter shader's fragment source (`loadFilterShader` with GLSL).
+pub fn P5::load_filter_shader(
+  self : P5,
+  frag_url : String,
+  on_load? : (@webgl.Shader) -> Unit,
+) -> @webgl.Shader {
+  let s = @webgl.Shader::new("", "")
+  self.load_text(frag_url, on_load=t => {
+    s.set_sources(@webgl.filter_vertex_source(t), t)
+    if on_load is Some(cb) {
+      cb(s)
+    }
+  })
+  s
+}
+
+///|
+/// How a texture is sampled (p5's `NEAREST` and `LINEAR`).
+#derive(Eq, Debug)
+pub(all) enum TextureFilter {
+  Nearest
+  Linear
+}
+
+///|
+/// Sets how an image is sampled as a texture when drawn smaller
+/// (`downscale`) and larger (`upscale`): `Nearest` keeps pixels crisp,
+/// `Linear` (default) smooths them (p5.Texture's `setInterpolation`).
+pub fn[I : ImageSource] P5::texture_interpolation(
+  self : P5,
+  img : I,
+  downscale : TextureFilter,
+  upscale? : TextureFilter,
+) -> Unit {
+  guard self.gl_renderer("setInterpolation") is Some(r) else { return }
+  guard tex_source(img) is Some(src) else { return }
+  let name = (f : TextureFilter) => {
+    if f is Nearest {
+      "nearest"
+    } else {
+      "linear"
+    }
+  }
+  r.texture_filter(src, name(downscale), name(upscale.unwrap_or(downscale)))
+}

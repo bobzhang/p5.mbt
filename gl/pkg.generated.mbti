@@ -86,6 +86,8 @@ pub fn set_all_wrap(GL, String, String) -> Unit
 
 pub fn set_blending(GL, Bool) -> Unit
 
+pub fn set_texture_filter(GL, @dom.ImageElement, String, String) -> Unit
+
 pub fn set_uniform(Program, String, FixedArray[Double]) -> Unit
 
 pub fn set_uniform_floats(Program, String, FixedArray[Float]) -> Unit
