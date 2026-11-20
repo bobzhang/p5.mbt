@@ -95,6 +95,7 @@ pub fn Camera::ortho(Self, left? : Double, right? : Double, bottom? : Double, to
 pub fn Camera::pan(Self, Double) -> Unit
 pub fn Camera::perspective(Self, fovy? : Double, aspect? : Double, near? : Double, far? : Double) -> Unit
 pub fn Camera::resize(Self, Double, Double) -> Unit
+pub fn Camera::roll(Self, Double) -> Unit
 pub fn Camera::set_position(Self, Double, Double, Double) -> Unit
 pub fn Camera::tilt(Self, Double) -> Unit
 pub fn Camera::zoom_projection(Self, Double) -> Unit
@@ -221,6 +222,18 @@ pub(all) enum NormalMode {
   Smooth
 }
 
+#derive(@debug.Debug)
+pub struct Quat {
+  w : Double
+  vec : Vec3
+}
+pub fn Quat::conjugate(Self) -> Self
+pub fn Quat::from_axis_angle(Double, Double, Double, Double) -> Self
+pub fn Quat::multiply(Self, Self) -> Self
+pub fn Quat::new(Double, Double, Double, Double) -> Self
+pub fn Quat::rotate_by(Self, Self) -> Vec3
+pub fn Quat::rotate_vector(Self, Vec3) -> Vec3
+
 pub struct Renderer3D {
   gl : @gl.GL
   mut width : Double
@@ -231,7 +244,8 @@ pub struct Renderer3D {
   canvas : @dom.ImageElement
   antialias : Bool
   mut curve_detail : Double
-  simple_lines : Bool
+  mut simple_lines : Bool
+  mut instance_count : Int32
   // private fields
 }
 pub fn Renderer3D::ambient_light(Self, Double, Double, Double) -> Unit
@@ -282,7 +296,9 @@ pub fn Renderer3D::set_camera(Self, Camera) -> Unit
 pub fn Renderer3D::set_curve_detail(Self, Double) -> Unit
 pub fn Renderer3D::set_fill_shader(Self, Shader?) -> Unit
 pub fn Renderer3D::set_image_shader(Self, Shader?) -> Unit
+pub fn Renderer3D::set_instance_count(Self, Int32) -> Unit
 pub fn Renderer3D::set_model_matrix(Self, @math.Matrix) -> Unit
+pub fn Renderer3D::set_simple_lines(Self, Bool) -> Unit
 pub fn Renderer3D::set_stroke_shader(Self, Shader?) -> Unit
 pub fn Renderer3D::set_tint(Self, FixedArray[Double]) -> Unit
 pub fn Renderer3D::shininess(Self, Double) -> Unit

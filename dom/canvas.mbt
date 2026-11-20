@@ -13,6 +13,7 @@ pub extern "js" fn create_canvas(
   #|  const c = document.createElement('canvas');
   #|  c.width = Math.round(w * d); c.height = Math.round(h * d);
   #|  c.style.width = w + 'px'; c.style.height = h + 'px';
+  #|  if (!c.id) { globalThis.__p5mbtSketchCount = globalThis.__p5mbtSketchCount || 0; c.id = 'defaultCanvas' + globalThis.__p5mbtSketchCount++; }
   #|  c.classList.add('p5Canvas');
   #|  if (!visible) { c.style.display = 'none'; return c; }
   #|  let host = parent ? document.getElementById(parent) : null;

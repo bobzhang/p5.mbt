@@ -1,0 +1,62 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5/a11y"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn color_name(FixedArray[Double]) -> String
+
+pub fn description_text(String) -> String
+
+pub fn element_id(String) -> String
+
+pub fn element_name(String) -> String
+
+pub fn grid_cell(Double, Double, Double, Double) -> (Int32, Int32)
+
+pub fn middle(String, Array[Double]) -> (Double, Double)
+
+pub fn position_name(Double, Double, Double, Double) -> String
+
+pub fn round_int(Double) -> Int32
+
+pub fn shape_area(String, Array[Double], arc_mode? : String) -> Double
+
+// Errors
+
+// Types and methods
+#derive(Eq, @debug.Debug)
+pub(all) struct Entry {
+  color : String
+  pos : String
+  loc_x : Int32
+  loc_y : Int32
+  area : Int32?
+  length : Int32?
+}
+
+pub struct Ingredients {
+  mut shapes : Map[String, Array[Entry]]
+  mut background : String
+  mut fill : String
+  mut stroke : String
+  // private fields
+}
+pub fn Ingredients::add(Self, String, Entry) -> Unit
+pub fn Ingredients::background(Self, FixedArray[Double]) -> Unit
+pub fn Ingredients::changed(Self) -> Bool
+pub fn Ingredients::count(Self) -> Int32
+pub fn Ingredients::fill_color(Self, FixedArray[Double]) -> Unit
+pub fn Ingredients::grid_map(Self, String) -> String
+pub fn Ingredients::grid_summary_and_details(Self, String, String, String) -> (String, String)
+pub fn Ingredients::new() -> Self
+pub fn Ingredients::stroke_color(Self, FixedArray[Double]) -> Unit
+pub fn Ingredients::text_details(Self, String) -> String
+pub fn Ingredients::text_list(Self, String) -> String
+pub fn Ingredients::text_summary(Self, String, String) -> String
+
+// Type aliases
+
+// Traits

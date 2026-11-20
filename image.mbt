@@ -400,13 +400,82 @@ pub fn[I : ImageSource] P5::image(
   y : Double,
   w? : Double,
   h? : Double,
+  fit? : ImageFit,
+  x_align? : HAlign,
+  y_align? : VAlign,
 ) -> Unit {
   let size = match img.image_source() {
     Some((_, _, _, lw, lh)) => Some((lw, lh))
     None => img.gl_source().map(s => (s.width, s.height))
   }
   guard size is Some((lw, lh)) else { return }
-  self.image_region(img, x, y, w.unwrap_or(lw), h.unwrap_or(lh), 0, 0, lw, lh)
+  self.image_region(
+    img,
+    x,
+    y,
+    w.unwrap_or(lw),
+    h.unwrap_or(lh),
+    0,
+    0,
+    lw,
+    lh,
+    fit?,
+    x_align?,
+    y_align?,
+  )
+}
+
+///|
+/// How `image()` fits an image into a destination of another aspect ratio
+/// (p5's `CONTAIN` and `COVER`).
+#derive(Eq, Debug)
+pub(all) enum ImageFit {
+  /// Scale the image down to fit entirely inside, keeping its proportions.
+  Contain
+  /// Crop the image so it fills the destination, keeping its proportions.
+  Cover
+}
+
+///|
+/// p5's `_imageFit`: adjusts the source (cover) or destination (contain)
+/// rectangle.
+fn image_fit(
+  fit : ImageFit,
+  x_align : HAlign,
+  y_align : VAlign,
+  d : (Double, Double, Double, Double),
+  s : (Double, Double, Double, Double),
+) -> ((Double, Double, Double, Double), (Double, Double, Double, Double)) {
+  let (dx, dy, dw, dh) = d
+  let (sx, sy, sw, sh) = s
+  let shift_x = (room : Double) => {
+    match x_align {
+      HCenter => room / 2
+      Right => room
+      _ => 0.0
+    }
+  }
+  let shift_y = (room : Double) => {
+    match y_align {
+      VCenter => room / 2
+      Bottom => room
+      _ => 0.0
+    }
+  }
+  match fit {
+    Cover => {
+      let r = (dw / sw).max(dh / sh)
+      let aw = dw / r
+      let ah = dh / r
+      (d, (sx + shift_x(sw - aw), sy + shift_y(sh - ah), aw, ah))
+    }
+    Contain => {
+      let r = (sw / dw).max(sh / dh)
+      let aw = sw / r
+      let ah = sh / r
+      ((dx + shift_x(dw - aw), dy + shift_y(dh - ah), aw, ah), s)
+    }
+  }
 }
 
 ///|
@@ -424,7 +493,16 @@ pub fn[I : ImageSource] P5::image_region(
   sy : Double,
   sw : Double,
   sh : Double,
+  fit? : ImageFit,
+  x_align~ : HAlign = HCenter,
+  y_align~ : VAlign = VCenter,
 ) -> Unit {
+  let fitted = (x : Double, y : Double, w : Double, h : Double) => {
+    match fit {
+      Some(f) => image_fit(f, x_align, y_align, (x, y, w, h), (sx, sy, sw, sh))
+      None => ((x, y, w, h), (sx, sy, sw, sh))
+    }
+  }
   img.advance(
     if self.recording is Some(_) || !self.is_main {
       self.last_real_frame_time
@@ -436,6 +514,7 @@ pub fn[I : ImageSource] P5::image_region(
     guard img.gl_source() is Some(src) else { return }
     let (x, y, w, h) = @shape.mode_adjust(dx, dy, dw, dh, self.state.image_mode)
     let (w, h) = if self.state.image_mode is Corner { (dw, dh) } else { (w, h) }
+    let ((x, y, w, h), (sx, sy, sw, sh)) = fitted(x, y, w, h)
     let s = match img.image_source() {
       Some((_, pw, _, lw, _)) => pw.to_double() / lw
       None => 1.0
@@ -447,6 +526,7 @@ pub fn[I : ImageSource] P5::image_region(
   guard img.image_source() is Some((elt, pw, ph, lw, _)) else { return }
   let (x, y, w, h) = @shape.mode_adjust(dx, dy, dw, dh, self.state.image_mode)
   let (w, h) = if self.state.image_mode is Corner { (dw, dh) } else { (w, h) }
+  let ((x, y, w, h), (sx, sy, sw, sh)) = fitted(x, y, w, h)
   let s = pw.to_double() / lw
   let tint = self.state.tint.map(c => c.rgba())
   self.sync_transform()

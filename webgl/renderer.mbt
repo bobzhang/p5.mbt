@@ -107,7 +107,10 @@ pub struct Renderer3D {
   priv mut user_sampler : Bool
   /// Points per unit length when sampling curves (`curveDetail`, 1/4).
   mut curve_detail : Double
-  simple_lines : Bool
+  /// Draw strokes as plain GL lines without caps and joins (`strokeMode(SIMPLE)`).
+  mut simple_lines : Bool
+  /// Instances drawn per primitive while `instances()` runs.
+  mut instance_count : Int32
 }
 
 ///|
@@ -193,6 +196,7 @@ pub fn Renderer3D::new(
     user_sampler: false,
     curve_detail: 0.25,
     simple_lines: false,
+    instance_count: 1,
   }
 }
 
@@ -1062,7 +1066,7 @@ pub fn Renderer3D::draw_scaled(
 ) -> Unit {
   let original = self.state.model
   self.state.model = original.copy().scale(sx, sy, sz)
-  self.draw_geometry(g, style)
+  self.draw_geometry(g, style, count=self.instance_count)
   self.state.model = original
 }
 
@@ -1251,4 +1255,16 @@ pub fn Renderer3D::on_shader(self : Renderer3D) -> Unit {
 /// One of p5's default shaders: "color", "normal", "light" or "line".
 pub fn Renderer3D::base_shader(self : Renderer3D, kind : String) -> Shader {
   self.shader(kind)
+}
+
+///|
+/// Plain GL lines (true) or full strokes with caps and joins.
+pub fn Renderer3D::set_simple_lines(self : Renderer3D, on : Bool) -> Unit {
+  self.simple_lines = on
+}
+
+///|
+/// Sets how many instances each primitive draws.
+pub fn Renderer3D::set_instance_count(self : Renderer3D, n : Int32) -> Unit {
+  self.instance_count = n
 }

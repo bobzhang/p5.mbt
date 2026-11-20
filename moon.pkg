@@ -10,6 +10,7 @@ import {
   "bobzhang/p5/font",
   "bobzhang/p5/webgl",
   "bobzhang/p5/gl",
+  "bobzhang/p5/a11y",
   "moonbitlang/core/string",
   "moonbitlang/core/json",
   "moonbitlang/core/double",

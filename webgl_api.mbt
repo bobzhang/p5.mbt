@@ -283,8 +283,9 @@ pub fn P5::torus(
 
 ///|
 /// Draws a geometry (`model()`).
-pub fn P5::model(self : P5, g : @webgl.Geometry, count~ : Int32 = 1) -> Unit {
+pub fn P5::model(self : P5, g : @webgl.Geometry, count? : Int32) -> Unit {
   guard self.gl_renderer("model") is Some(r) else { return }
+  let count = count.unwrap_or(r.instance_count)
   if g.vertices.length() > 0 {
     if !r.has_geometry(g.gid) {
       ignore(g.edges_to_vertices(simple_lines=r.simple_lines))

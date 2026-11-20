@@ -29,7 +29,12 @@ fn P5::stroke_css(self : P5) -> String? {
 
 ///|
 /// Paints (or adds to the clip path) a finished shape.
-fn P5::draw_shape(self : P5, shape : Shape, fill~ : Bool = true) -> Unit {
+fn P5::draw_shape(
+  self : P5,
+  shape : Shape,
+  fill~ : Bool = true,
+  count? : Int32,
+) -> Unit {
   if self.gl is Some(r) && !self.clipping {
     let style = self.gl_style()
     let style = if fill { style } else { { ..style, fill: None, } }
@@ -37,6 +42,7 @@ fn P5::draw_shape(self : P5, shape : Shape, fill~ : Bool = true) -> Unit {
       shape.first_contour_kind(),
       shape.to_vertices(curve_detail=r.curve_detail),
       style,
+      count=count.unwrap_or(r.instance_count),
     )
     return
   }
@@ -102,6 +108,7 @@ fn P5::from_radians(self : P5, a : Double) -> Double {
 ///|
 /// Draws a point. Its size is the stroke weight; it uses the stroke color.
 pub fn P5::point(self : P5, x : Double, y : Double, z~ : Double = 0) -> Unit {
+  self.accs_output("point", [x, y])
   if self.state.stroke is None && !self.clipping {
     return
   }
@@ -134,6 +141,7 @@ pub fn P5::line(
   z1~ : Double = 0,
   z2~ : Double = 0,
 ) -> Unit {
+  self.accs_output("line", [x1, y1, x2, y2])
   if self.state.stroke is None && !self.clipping {
     return
   }
@@ -167,6 +175,7 @@ pub fn P5::rect(
 ) -> Unit {
   let (rx, ry, rw, rh) = @shape.mode_adjust(x, y, w, h, self.state.rect_mode)
   let (rw, rh) = if self.state.rect_mode is Corner { (w, h) } else { (rw, rh) }
+  self.accs_output("rectangle", [rx, ry, rw, rh])
   let radii = match tl {
     None => None
     Some(tl) => {
@@ -215,6 +224,7 @@ pub fn P5::ellipse(
 ) -> Unit {
   let h = h.unwrap_or(w)
   let (ex, ey, ew, eh) = @shape.mode_adjust(x, y, w, h, self.state.ellipse_mode)
+  self.accs_output("ellipse", [ex, ey, ew, eh])
   if self.gl is Some(_) {
     if self.state.fill is Some(_) || self.state.stroke is Some(_) {
       self.gl_arc(ex, ey, ew, eh, 0, @math.TWO_PI, "open", 25)
@@ -253,6 +263,19 @@ pub fn P5::arc(
   let stop = self.to_radians(stop)
   let (ax, ay, aw, ah) = @shape.mode_adjust(x, y, w, h, self.state.ellipse_mode)
   let angles = @shape.normalize_arc_angles(start, stop, aw, ah)
+  if !angles.same_point {
+    let m = match mode {
+      Some(Pie) => "pie"
+      Some(Chord) => "chord"
+      Some(Open) => "open"
+      None => ""
+    }
+    self.accs_output(
+      "arc",
+      [ax, ay, aw, ah, angles.start, angles.stop],
+      arc_mode=m,
+    )
+  }
   if self.gl is Some(_) {
     if self.state.fill is None && self.state.stroke is None {
       return
@@ -291,6 +314,7 @@ pub fn P5::triangle(
   x3 : Double,
   y3 : Double,
 ) -> Unit {
+  self.accs_output("triangle", [x1, y1, x2, y2, x3, y3])
   if self.gl is Some(_) {
     if self.state.fill is Some(_) || self.state.stroke is Some(_) {
       self.gl_triangle(x1, y1, x2, y2, x3, y3)
@@ -316,6 +340,7 @@ pub fn P5::quad(
   x4 : Double,
   y4 : Double,
 ) -> Unit {
+  self.accs_output("quadrilateral", [x1, y1, x2, y2, x3, y3, x4, y4])
   if self.gl is Some(_) {
     if self.state.fill is Some(_) || self.state.stroke is Some(_) {
       self.gl_quad((x1, y1, 0), (x2, y2, 0), (x3, y3, 0), (x4, y4, 0), 2, 2)
@@ -507,10 +532,15 @@ pub fn P5::end_contour(self : P5, mode~ : CloseMode = Open) -> Unit {
 }
 
 ///|
-/// Finishes the current shape and draws it.
-pub fn P5::end_shape(self : P5, mode~ : CloseMode = Open) -> Unit {
+/// Finishes the current shape and draws it. In WEBGL, `count` draws that
+/// many instances (see `instances`).
+pub fn P5::end_shape(
+  self : P5,
+  mode~ : CloseMode = Open,
+  count? : Int32,
+) -> Unit {
   self.shape.end_shape(mode~)
-  self.draw_shape(self.shape)
+  self.draw_shape(self.shape, count?)
 }
 
 ///|

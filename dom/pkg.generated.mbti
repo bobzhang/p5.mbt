@@ -10,6 +10,8 @@ pub fn append_child(Element, Element) -> Unit
 
 pub fn apply_mask(Canvas, ImageElement) -> Unit
 
+pub fn audio_context_destination() -> AudioNode
+
 pub fn blit(Canvas, ImageElement, Double, Double) -> Unit
 
 pub fn canvas_as_image(Canvas) -> ImageElement
@@ -18,6 +20,8 @@ pub fn canvas_element(Canvas) -> Element
 
 pub fn canvas_height(Canvas) -> Int32
 
+pub fn canvas_id(Canvas) -> String
+
 pub fn canvas_width(Canvas) -> Int32
 
 pub fn center_element(Element, String) -> Unit
@@ -25,6 +29,8 @@ pub fn center_element(Element, String) -> Unit
 pub fn clear_rect(Context2D, Double, Double, Double, Double) -> Unit
 
 pub fn clip_path(Context2D, Path2D) -> Unit
+
+pub fn console_error(String) -> Unit
 
 pub fn console_log(String) -> Unit
 
@@ -40,7 +46,15 @@ pub fn create_element(String, String, String) -> Element
 
 pub fn create_media(String, FixedArray[String], String, (Int32, Int32) -> Unit, () -> Unit) -> Element
 
+pub fn create_output(Canvas, String, String) -> Unit
+
 pub fn date_part(Int32) -> Int32
+
+pub fn describe_element_html(Canvas, String, String, String) -> Unit
+
+pub fn describe_html(Canvas, String, String) -> Unit
+
+pub fn detach_node(Element) -> Unit
 
 pub fn device_pixel_ratio() -> Double
 
@@ -94,6 +108,8 @@ pub fn get_class(Element) -> String
 
 pub fn get_context(Canvas) -> Context2D
 
+pub fn get_context_property(Canvas, String) -> String
+
 pub fn get_html(Element) -> String
 
 pub fn get_image_data(Context2D, Int32, Int32, Int32, Int32) -> ImageData
@@ -136,11 +152,23 @@ pub fn load_font_data(FixedArray[Byte], String, (String) -> Unit, (String) -> Un
 
 pub fn load_image(String, (ImageElement, Int32, Int32) -> Unit, (String) -> Unit) -> Unit
 
+pub fn location_href() -> String
+
+pub fn location_pathname() -> String
+
+pub fn location_search() -> String
+
 pub fn make_draggable(Element, Element) -> Unit
 
 pub fn math_random() -> Double
 
 pub fn measure_text(Context2D, String) -> FixedArray[Double]
+
+pub fn media_connect(Element, AudioNode?) -> Bool
+
+pub fn media_connect_js(Element, AudioNode, Bool) -> Bool
+
+pub fn media_disconnect(Element) -> Bool
 
 pub fn media_get_number(Element, String) -> Double
 
@@ -159,6 +187,8 @@ pub fn media_set_controls(Element, Bool) -> Unit
 pub fn media_set_loop(Element, Bool) -> Unit
 
 pub fn media_set_number(Element, String, Double) -> Unit
+
+pub fn media_src(Element) -> String
 
 pub fn media_stop(Element) -> Unit
 
@@ -256,7 +286,11 @@ pub fn set_checked(Element, Bool) -> Unit
 
 pub fn set_composite(Context2D, String) -> Unit
 
+pub fn set_context_property(Canvas, String, String) -> Unit
+
 pub fn set_cursor(Canvas, String) -> Unit
+
+pub fn set_description_lang(Canvas, String) -> Unit
 
 pub fn set_element_size(Element, Double, Double) -> Unit
 
@@ -271,6 +305,10 @@ pub fn set_html(Element, String) -> Unit
 pub fn set_image_smoothing(Context2D, Bool) -> Unit
 
 pub fn set_line_dash(Context2D, FixedArray[Double]) -> Unit
+
+pub fn set_media_src(Element, String) -> Unit
+
+pub fn set_output_part(Canvas, String, String, String) -> Unit
 
 pub fn set_parent(Element, String) -> Unit
 
@@ -319,6 +357,9 @@ pub fn window_width() -> Double
 // Errors
 
 // Types and methods
+#external
+pub type AudioNode
+
 #external
 pub type Canvas
 

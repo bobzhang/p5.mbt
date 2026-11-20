@@ -268,3 +268,97 @@ pub extern "js" fn add_option(
 ///|
 /// The canvas as an element.
 pub extern "js" fn canvas_element(c : Canvas) -> Element = "(c) => c"
+
+///|
+/// A Web Audio `AudioNode` (or anything with an `input` node, like
+/// p5.sound objects).
+#external
+pub type AudioNode
+
+///|
+/// The source URL of a media element (p5's `MediaElement.src` getter).
+pub extern "js" fn media_src(e : Element) -> String =
+  #|(e) => {
+  #|  const first = e.children[0] ? e.children[0].src : undefined;
+  #|  const own = e.src === window.location.href ? '' : e.src;
+  #|  return (first === window.location.href || first === undefined ? own : first) || '';
+  #|}
+
+///|
+/// Replaces the sources of a media element.
+pub extern "js" fn set_media_src(e : Element, src : String) -> Unit =
+  #|(e, src) => {
+  #|  while (e.children.length) e.removeChild(e.children[0]);
+  #|  const s = document.createElement('source'); s.src = src; e.appendChild(s);
+  #|  e.src = src;
+  #|}
+
+///|
+/// Routes a media element through Web Audio (`MediaElement.connect`): the
+/// first call also connects it to the context's destination. Without a
+/// node, it connects to the destination only. Returns false when there is
+/// no audio context to use.
+pub extern "js" fn media_connect_js(
+  e : Element,
+  node : AudioNode,
+  has_node : Bool,
+) -> Bool =
+  #|(e, node0, hasNode) => {
+  #|  const node = hasNode ? node0 : null;
+  #|  let ctx = node ? node.context || (node.input && node.input.context) : null;
+  #|  if (!ctx) ctx = globalThis.__p5mbtAudioContext || (globalThis.__p5mbtAudioContext = new (window.AudioContext || window.webkitAudioContext)());
+  #|  if (!ctx) return false;
+  #|  if (!e.__p5mbtAudioSource) {
+  #|    e.__p5mbtAudioSource = ctx.createMediaElementSource(e);
+  #|    e.__p5mbtAudioSource.connect(ctx.destination);
+  #|  }
+  #|  if (node) e.__p5mbtAudioSource.connect(node.input || node);
+  #|  else e.__p5mbtAudioSource.connect(ctx.destination);
+  #|  return true;
+  #|}
+
+///|
+/// Connects to `node`, or only to the output without one.
+pub fn media_connect(e : Element, node : AudioNode?) -> Bool {
+  match node {
+    Some(n) => media_connect_js(e, n, true)
+    None => media_connect_js(e, audio_context_destination(), false)
+  }
+}
+
+///|
+/// Disconnects a media element's Web Audio routing; false if it was never
+/// connected.
+pub extern "js" fn media_disconnect(e : Element) -> Bool =
+  #|(e) => { if (!e.__p5mbtAudioSource) return false; e.__p5mbtAudioSource.disconnect(); return true; }
+
+///|
+/// The audio context media elements are routed through (created on first
+/// use).
+pub extern "js" fn audio_context_destination() -> AudioNode =
+  #|() => {
+  #|  const ctx = globalThis.__p5mbtAudioContext || (globalThis.__p5mbtAudioContext = new (window.AudioContext || window.webkitAudioContext)());
+  #|  return ctx.destination;
+  #|}
+
+///|
+/// Sets a property of a canvas's 2D context, e.g. `letterSpacing`.
+pub extern "js" fn set_context_property(
+  c : Canvas,
+  name : String,
+  value : String,
+) -> Unit =
+  #|(c, name, value) => {
+  #|  const ctx = c.getContext('2d'); if (!ctx) return;
+  #|  if (name in ctx) ctx[name] = value; else if (name in c.style) c.style[name] = value;
+  #|}
+
+///|
+/// Reads a property of a canvas's 2D context (or of its style).
+pub extern "js" fn get_context_property(c : Canvas, name : String) -> String =
+  #|(c, name) => {
+  #|  const ctx = c.getContext('2d');
+  #|  if (ctx && name in ctx) return String(ctx[name]);
+  #|  if (name in c.style) return String(c.style[name]);
+  #|  return '';
+  #|}

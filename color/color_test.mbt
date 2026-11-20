@@ -140,3 +140,34 @@ test "contrast" {
   let white = @color.Color::rgb(255, 255, 255)
   inspect(black.contrast_ratio(white), content="21")
 }
+
+///|
+test "contrast" {
+  let black = @color.Color::rgb(0, 0, 0)
+  let white = @color.Color::rgb(255, 255, 255)
+  let gray = @color.Color::rgb(136, 136, 136)
+  inspect(
+    white.contrast_apca(black),
+    content=(
+      #|106.04067321268862
+    ),
+  )
+  inspect(
+    black.contrast_apca(white),
+    content=(
+      #|-107.88473318309848
+    ),
+  )
+  inspect(
+    white.contrast(gray),
+    content=(
+      #|false
+    ),
+  )
+  inspect(
+    white.contrast(black, method=Apca),
+    content=(
+      #|true
+    ),
+  )
+}

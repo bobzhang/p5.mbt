@@ -193,6 +193,19 @@ pub struct CanvasSurface {
 pub fn CanvasSurface::new(@dom.Canvas) -> Self
 pub impl Surface for CanvasSurface
 
+#derive(Eq, @debug.Debug)
+pub(all) enum DebugMode {
+  Grid
+  Axes
+  GridAndAxes
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum DescriptionDisplay {
+  Fallback
+  Label
+}
+
 pub struct DisplayList {
   ops : Array[DrawOp]
   // private fields
@@ -342,6 +355,12 @@ pub fn Image::set_frame(Self, Int32) -> Unit
 pub fn Image::update_pixels(Self) -> Unit
 pub impl ImageSource for Image
 
+#derive(Eq, @debug.Debug)
+pub(all) enum ImageFit {
+  Contain
+  Cover
+}
+
 pub struct MediaElement {
   element : Element
   mut width : Double
@@ -352,6 +371,8 @@ pub struct MediaElement {
 pub fn MediaElement::add_cue(Self, Double, () -> Unit) -> Int32
 pub fn MediaElement::autoplay(Self, Bool) -> Unit
 pub fn MediaElement::clear_cues(Self) -> Unit
+pub fn MediaElement::connect(Self, node? : @dom.AudioNode) -> Unit
+pub fn MediaElement::disconnect(Self) -> Unit
 pub fn MediaElement::duration(Self) -> Double
 pub fn MediaElement::get(Self, Double, Double) -> @color.Color
 pub fn MediaElement::get_speed(Self) -> Double
@@ -366,11 +387,13 @@ pub fn MediaElement::pause(Self) -> Unit
 pub fn MediaElement::play(Self) -> Unit
 pub fn MediaElement::position(Self, Double, Double) -> Unit
 pub fn MediaElement::remove_cue(Self, Int32) -> Unit
+pub fn MediaElement::set_src(Self, String) -> Unit
 pub fn MediaElement::set_time(Self, Double) -> Unit
 pub fn MediaElement::show(Self) -> Unit
 pub fn MediaElement::show_controls(Self) -> Unit
 pub fn MediaElement::size(Self, Double, Double) -> Unit
 pub fn MediaElement::speed(Self, Double) -> Unit
+pub fn MediaElement::src(Self) -> String
 pub fn MediaElement::stop(Self) -> Unit
 pub fn MediaElement::time(Self) -> Double
 pub fn MediaElement::volume(Self, Double) -> Unit
@@ -501,17 +524,21 @@ pub fn P5::curve_detail(Self, Double) -> Unit
 pub fn P5::curve_tightness(Self, Double) -> Unit
 pub fn P5::curve_vertex(Self, Double, Double) -> Unit
 pub fn P5::cylinder(Self, r? : Double, h? : Double, detail_x? : Int32, detail_y? : Int32, bottom_cap? : Bool, top_cap? : Bool) -> Unit
+pub fn P5::debug_mode(Self, mode? : DebugMode, grid_size? : Double, grid_divisions? : Int32, grid_offset? : (Double, Double, Double), axes_size? : Double, axes_offset? : (Double, Double, Double)) -> Unit
+pub fn P5::describe(Self, String, display? : DescriptionDisplay, lang? : String) -> Unit
+pub fn P5::describe_element(Self, String, String, display? : DescriptionDisplay, lang? : String) -> Unit
 pub fn[C : ColorArg] P5::directional_light(Self, C, Double, Double, Double) -> Unit
 pub fn P5::display_density(Self) -> Double
 pub fn P5::display_height(Self) -> Double
 pub fn P5::display_width(Self) -> Double
+pub fn P5::drawing_context(Self) -> @dom.Context2D?
 pub fn P5::ellipse(Self, Double, Double, Double, h? : Double) -> Unit
 pub fn P5::ellipse_mode(Self, @shape.ShapeMode) -> Unit
 pub fn P5::ellipsoid(Self, rx? : Double, ry? : Double, rz? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
 pub fn[C : ColorArg] P5::emissive_material(Self, C) -> Unit
 pub fn P5::end_clip(Self) -> Unit
 pub fn P5::end_contour(Self, mode? : @shape.CloseMode) -> Unit
-pub fn P5::end_shape(Self, mode? : @shape.CloseMode) -> Unit
+pub fn P5::end_shape(Self, mode? : @shape.CloseMode, count? : Int32) -> Unit
 pub fn P5::erase(Self, strength_fill? : Double, strength_stroke? : Double) -> Unit
 pub fn P5::exit_pointer_lock(Self) -> Unit
 pub fn[C : ColorArg] P5::fill(Self, C) -> Unit
@@ -533,21 +560,29 @@ pub fn P5::get_matrix(Self) -> @math.Matrix2D
 pub fn P5::get_pixel_density(Self) -> Double
 pub fn P5::get_region(Self, Double, Double, Double, Double) -> Image
 pub fn P5::get_stroke(Self) -> @color.Color?
+pub fn P5::get_stroke_mode(Self) -> StrokeMode
 pub fn P5::get_svg(Self, ShapeCollection, width? : Double, height? : Double) -> String
 pub fn P5::get_target_frame_rate(Self) -> Double
 pub fn P5::get_text_leading(Self) -> Double
+pub fn P5::get_text_properties(Self) -> Map[String, String]
+pub fn P5::get_text_property(Self, String) -> String?
 pub fn P5::get_text_size(Self) -> Double
 pub fn P5::get_text_weight(Self) -> String
+pub fn P5::get_url(Self) -> String
+pub fn P5::get_url_params(Self) -> Map[String, String]
+pub fn P5::get_url_path(Self) -> Array[String]
 pub fn[C : ColorArg] P5::green(Self, C) -> Double
+pub fn P5::grid_output(Self, display? : DescriptionDisplay) -> Unit
 pub fn P5::headless(&Surface, Double, Double, pixel_density? : Double, seed? : Double) -> Self
 pub fn P5::http_do(Self, String, http_method? : String, body? : String, content_type? : String, on_response~ : (String) -> Unit, on_error? : (String) -> Unit) -> Unit
 pub fn P5::http_get(Self, String, (String) -> Unit, on_error? : (String) -> Unit) -> Unit
 pub fn P5::http_post(Self, String, String, (String) -> Unit, on_error? : (String) -> Unit, content_type? : String) -> Unit
 pub fn[C : ColorArg] P5::hue(Self, C) -> Double
-pub fn[I : ImageSource] P5::image(Self, I, Double, Double, w? : Double, h? : Double) -> Unit
+pub fn[I : ImageSource] P5::image(Self, I, Double, Double, w? : Double, h? : Double, fit? : ImageFit, x_align? : HAlign, y_align? : VAlign) -> Unit
 pub fn P5::image_mode(Self, @shape.ShapeMode) -> Unit
-pub fn[I : ImageSource] P5::image_region(Self, I, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
+pub fn[I : ImageSource] P5::image_region(Self, I, Double, Double, Double, Double, Double, Double, Double, Double, fit? : ImageFit, x_align? : HAlign, y_align? : VAlign) -> Unit
 pub fn P5::image_shader(Self, @webgl.Shader) -> Unit
+pub fn P5::instances(Self, Int32, () -> Unit) -> Unit
 pub fn P5::is_fullscreen(Self) -> Bool
 pub fn P5::is_looping(Self) -> Bool
 pub fn P5::is_recording(Self) -> Bool
@@ -574,7 +609,9 @@ pub fn P5::loop_(Self) -> Unit
 pub fn P5::metalness(Self, Double) -> Unit
 pub fn P5::millis(Self) -> Double
 pub fn P5::model(Self, @webgl.Geometry, count? : Int32) -> Unit
+pub fn P5::no_canvas(Self) -> Unit
 pub fn P5::no_cursor(Self) -> Unit
+pub fn P5::no_debug_mode(Self) -> Unit
 pub fn P5::no_erase(Self) -> Unit
 pub fn P5::no_fill(Self) -> Unit
 pub fn P5::no_lights(Self) -> Unit
@@ -619,6 +656,7 @@ pub fn P5::reset_matrix(Self) -> Unit
 pub fn P5::reset_shader(Self) -> Unit
 pub fn P5::resize_canvas(Self, Double, Double) -> Unit
 pub fn P5::rng(Self) -> @math.Random
+pub fn P5::roll(Self, Double) -> Unit
 pub fn P5::rotate(Self, Double) -> Unit
 pub fn P5::rotate_axis(Self, Double, Double, Double, Double) -> Unit
 pub fn P5::rotate_x(Self, Double) -> Unit
@@ -653,6 +691,8 @@ pub fn P5::sphere(Self, r? : Double, detail_x? : Int32, detail_y? : Int32) -> Un
 pub fn P5::spline(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::spline_ends(Self, @shape.SplineEnds) -> Unit
 pub fn P5::spline_point(Self, Double, Double, Double, Double, Double) -> Double
+pub fn P5::spline_properties(Self) -> (@shape.SplineEnds, Double)
+pub fn P5::spline_property(Self, SplineProperty) -> Unit
 pub fn P5::spline_tangent(Self, Double, Double, Double, Double, Double) -> Double
 pub fn P5::spline_tightness(Self, Double) -> Unit
 pub fn P5::spline_vertex(Self, Double, Double, z? : Double, u? : Double, v? : Double) -> Unit
@@ -661,6 +701,7 @@ pub fn P5::square(Self, Double, Double, Double, tl? : Double, tr? : Double, br? 
 pub fn[C : ColorArg] P5::stroke(Self, C) -> Unit
 pub fn P5::stroke_cap(Self, StrokeCap) -> Unit
 pub fn P5::stroke_join(Self, StrokeJoin) -> Unit
+pub fn P5::stroke_mode(Self, StrokeMode) -> Unit
 pub fn P5::stroke_shader(Self, @webgl.Shader) -> Unit
 pub fn P5::stroke_weight(Self, Double) -> Unit
 pub fn P5::surface(Self) -> &Surface
@@ -674,6 +715,9 @@ pub fn P5::text_direction(Self, String) -> Unit
 pub fn P5::text_font(Self, String, size? : Double) -> Unit
 pub fn P5::text_font_face(Self, Font, size? : Double) -> Unit
 pub fn P5::text_leading(Self, Double) -> Unit
+pub fn P5::text_output(Self, display? : DescriptionDisplay) -> Unit
+pub fn P5::text_properties(Self, ArrayView[(String, String)]) -> Unit
+pub fn P5::text_property(Self, String, String) -> Unit
 pub fn P5::text_size(Self, Double) -> Unit
 pub fn P5::text_style(Self, TextStyle) -> Unit
 pub fn P5::text_variant(Self, String) -> Unit
@@ -689,6 +733,7 @@ pub fn P5::translate(Self, Double, Double, z? : Double) -> Unit
 pub fn P5::triangle(Self, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::update_pixels(Self) -> Unit
 pub fn P5::vertex(Self, Double, Double, z? : Double, u? : Double, v? : Double) -> Unit
+pub fn P5::webgl_version(Self) -> String
 pub fn P5::with_push(Self, () -> Unit) -> Unit
 pub fn P5::world_to_screen(Self, Double, Double) -> (Double, Double)
 pub impl ImageSource for P5
@@ -732,6 +777,11 @@ pub struct ShapeCollection {
   bounds : (Double, Double, Double, Double)
 }
 
+pub(all) enum SplineProperty {
+  Ends(@shape.SplineEnds)
+  Tightness(Double)
+}
+
 #derive(Eq, @debug.Debug)
 pub(all) enum StrokeCap {
   Round
@@ -744,6 +794,12 @@ pub(all) enum StrokeJoin {
   Miter
   Bevel
   RoundJoin
+}
+
+#derive(Eq, @debug.Debug)
+pub(all) enum StrokeMode {
+  Simple
+  Full
 }
 
 #derive(@debug.Debug)

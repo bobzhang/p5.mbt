@@ -21,7 +21,10 @@ pub struct Color {
 pub fn Color::alpha(Self, max? : Double) -> Double
 pub fn Color::blue(Self, max? : Double) -> Double
 pub fn Color::brightness(Self, max? : Double) -> Double
+pub fn Color::contrast(Self, Self, method? : ContrastMethod) -> Bool
+pub fn Color::contrast_apca(Self, Self) -> Double
 pub fn Color::contrast_ratio(Self, Self) -> Double
+pub fn Color::contrast_report(Self, Self) -> ContrastReport
 pub fn Color::coords(Self) -> (Double, Double, Double)
 pub fn Color::from_native(ColorMode, Double, Double, Double, alpha? : Double) -> Self
 pub fn Color::green(Self, max? : Double) -> Double
@@ -57,6 +60,21 @@ pub(all) enum ColorMode {
   OKLCH
 }
 pub impl Show for ColorMode
+
+#derive(Eq, @debug.Debug)
+pub(all) enum ContrastMethod {
+  Wcag21
+  Apca
+}
+
+#derive(@debug.Debug)
+pub(all) struct ContrastReport {
+  wcag21 : Double
+  wcag21_passed_minimum : Bool
+  wcag21_passed_aaa : Bool
+  apca : Double
+  apca_passed_minimum : Bool
+}
 
 // Type aliases
 pub type ColorMaxes = FixedArray[(Double, Double)]

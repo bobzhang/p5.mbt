@@ -54,6 +54,10 @@ pub extern "js" fn console_log(s : String) -> Unit = "(s) => console.log(s)"
 pub extern "js" fn console_warn(s : String) -> Unit = "(s) => console.warn(s)"
 
 ///|
+/// `console.error`.
+pub extern "js" fn console_error(s : String) -> Unit = "(s) => console.error(s)"
+
+///|
 /// Sets `document.title`.
 pub extern "js" fn set_title(s : String) -> Unit = "(s) => { document.title = s; }"
 
@@ -98,3 +102,19 @@ pub extern "js" fn number_to_string(n : Double) -> String = "(n) => String(n)"
 ///|
 /// JavaScript `n.toFixed(digits)`.
 pub extern "js" fn number_to_fixed(n : Double, digits : Int32) -> String = "(n, d) => n.toFixed(Math.max(0, Math.min(100, d)))"
+
+///|
+/// `location.href`.
+pub extern "js" fn location_href() -> String = "() => location.href"
+
+///|
+/// `location.pathname`.
+pub extern "js" fn location_pathname() -> String = "() => location.pathname"
+
+///|
+/// `location.search`.
+pub extern "js" fn location_search() -> String = "() => location.search"
+
+///|
+/// Removes an element from its parent, if it has one.
+pub extern "js" fn detach_node(e : Element) -> Unit = "(e) => { if (e && e.parentNode) e.parentNode.removeChild(e); }"

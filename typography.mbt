@@ -104,6 +104,7 @@ fn P5::apply_text_style(self : P5, baseline? : VAlign) -> Unit {
     baseline.unwrap_or(self.state.text_baseline),
     self.state.text_direction,
   )
+  self.apply_text_props()
 }
 
 ///|

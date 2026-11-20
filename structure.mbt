@@ -151,6 +151,7 @@ fn P5::end_load(self : P5) -> Unit {
 fn P5::start(self : P5) -> Unit {
   self.millis_start = @dom.now()
   (self.callbacks.setup)(self)
+  self.update_accs_outputs()
   let now = @dom.now()
   self.last_target_frame_time = now
   self.last_real_frame_time = now
@@ -227,6 +228,8 @@ fn P5::redraw_frame(self : P5, draw : (P5) -> Unit) -> Unit {
   self.surface.save()
   draw(self)
   self.in_draw = false
+  self.update_accs_outputs()
+  self.draw_debug_mode()
   // Undo unbalanced push() calls.
   while !self.stack.is_empty() {
     self.pop()

@@ -218,6 +218,9 @@ pub fn P5::lerp_color(self : P5, c1 : Color, c2 : Color, amt : Double) -> Color 
 /// Sets the fill color.
 pub fn[C : ColorArg] P5::fill(self : P5, c : C) -> Unit {
   self.state.fill = Some(c.to_color(self))
+  if self.state.fill is Some(col) {
+    self.accs_color("fill", col)
+  }
   self.state.fill_set = true
   if self.gl is Some(r) {
     r.on_fill()
@@ -236,6 +239,9 @@ pub fn P5::no_fill(self : P5) -> Unit {
 pub fn[C : ColorArg] P5::stroke(self : P5, c : C) -> Unit {
   self.state.stroke = Some(c.to_color(self))
   self.state.stroke_set = true
+  if self.state.stroke is Some(col) {
+    self.accs_color("stroke", col)
+  }
 }
 
 ///|
@@ -260,6 +266,7 @@ pub fn P5::get_stroke(self : P5) -> Color? {
 /// Fills the whole canvas with a color (ignores the current transform).
 pub fn[C : ColorArg] P5::background(self : P5, c : C) -> Unit {
   let color = c.to_color(self)
+  self.accs_color("background", color)
   if self.gl is Some(r) {
     let (red, g, b, a) = color.to_srgb()
     r.clear(red, g, b, a)

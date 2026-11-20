@@ -181,6 +181,7 @@ pub struct P5 {
   priv mut radio_counter : Int32
   priv mut pending_svg : String?
   priv mut container : String
+  priv extras : Extras
 }
 
 ///|
@@ -299,6 +300,7 @@ fn P5::make(
     radio_counter: 0,
     pending_svg: None,
     container: "",
+    extras: Extras::new(),
   }
 }
 

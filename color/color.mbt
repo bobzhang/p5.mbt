@@ -437,3 +437,94 @@ pub fn Color::contrast_ratio(self : Color, other : Color) -> Double {
   let (hi, lo) = if l1 > l2 { (l1, l2) } else { (l2, l1) }
   (hi + 0.05) / (lo + 0.05)
 }
+
+///|
+/// APCA lightness contrast (Lc) of text in `other` on a background of this
+/// color, as colorjs.io's `contrastAPCA` computes it: positive for dark text
+/// on a light background, negative for light text on a dark one.
+pub fn Color::contrast_apca(self : Color, other : Color) -> Double {
+  let linearize = (v : Double) => {
+    let sign = if v < 0 { -1.0 } else { 1.0 }
+    sign * @cmath.pow(v.abs(), 2.4)
+  }
+  let lum = (c : Color) => {
+    let (r, g, b, _) = c.to_srgb()
+    linearize(r) * 0.2126729 +
+    linearize(g) * 0.7151522 +
+    linearize(b) * 0.0721750
+  }
+  let fclamp = (y : Double) => {
+    if y >= 0.022 {
+      y
+    } else {
+      y + @cmath.pow(0.022 - y, 1.414)
+    }
+  }
+  let y_txt = fclamp(lum(other))
+  let y_bg = fclamp(lum(self))
+  let c = if (y_bg - y_txt).abs() < 0.0005 {
+    0.0
+  } else if y_bg > y_txt {
+    (@cmath.pow(y_bg, 0.56) - @cmath.pow(y_txt, 0.57)) * 1.14
+  } else {
+    (@cmath.pow(y_bg, 0.65) - @cmath.pow(y_txt, 0.62)) * 1.14
+  }
+  let sapc = if c.abs() < 0.1 {
+    0.0
+  } else if c > 0 {
+    c - 0.027
+  } else {
+    c + 0.027
+  }
+  sapc * 100
+}
+
+///|
+/// A contrast measure for `Color::contrast`.
+#derive(Eq, Debug)
+pub(all) enum ContrastMethod {
+  /// WCAG 2.1 contrast ratio; passes at 4.5 or more.
+  Wcag21
+  /// APCA lightness contrast; passes at |Lc| of 75 or more.
+  Apca
+}
+
+///|
+/// Whether text in `other` on this color is readable by the given measure
+/// (p5's `color.contrast(other, method)`).
+pub fn Color::contrast(
+  self : Color,
+  other : Color,
+  method~ : ContrastMethod = Wcag21,
+) -> Bool {
+  match method {
+    Wcag21 => self.contrast_ratio(other) >= 4.5
+    Apca => self.contrast_apca(other).abs() >= 75
+  }
+}
+
+///|
+/// Both contrast measures and whether they pass (p5's
+/// `color.contrast(other, 'all')`).
+#derive(Debug)
+pub(all) struct ContrastReport {
+  wcag21 : Double
+  wcag21_passed_minimum : Bool
+  wcag21_passed_aaa : Bool
+  apca : Double
+  apca_passed_minimum : Bool
+}
+
+///|
+/// Every contrast measure between this color (background) and `other`.
+pub fn Color::contrast_report(self : Color, other : Color) -> ContrastReport {
+  let w = self.contrast_ratio(other)
+  let a = self.contrast_apca(other)
+  {
+    wcag21: w,
+    wcag21_passed_minimum: w >= 4.5,
+    wcag21_passed_aaa: w >= 7,
+    apca: a,
+    apca_passed_minimum: a.abs() >= 75,
+  }
+}
