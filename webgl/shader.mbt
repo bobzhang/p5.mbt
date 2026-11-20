@@ -11,6 +11,12 @@ pub struct Shader {
   fragment_hooks : Array[(String, String)]
   /// Hook keys replaced by `modify` (they get `AUGMENTED_HOOK_` defines).
   modified : Array[String]
+  /// GLSL added before the hooks of both stages (uniforms, helpers).
+  declarations : String
+  /// GLSL added before the vertex hooks only.
+  vertex_declarations : String
+  /// GLSL added before the fragment hooks only.
+  fragment_declarations : String
   priv mut program : @gl.Program?
   priv mut kind : String
   priv raw : Bool
@@ -122,6 +128,9 @@ pub fn Shader::new(vert : String, frag : String) -> Shader {
     vertex_hooks: [],
     fragment_hooks: [],
     modified: [],
+    declarations: "",
+    vertex_declarations: "",
+    fragment_declarations: "",
     program: None,
     kind: "",
     uniforms: Map([]),
@@ -148,10 +157,16 @@ fn Shader::with_hooks(
 ///|
 /// A copy whose hooks are replaced by `vertex`/`fragment` entries (keys as
 /// `"type name"`), like `shader.modify({...})` with string hooks.
+/// `declarations` (both stages), `vertex_declarations` and
+/// `fragment_declarations` add GLSL such as uniforms and helper functions
+/// before the hooks.
 pub fn Shader::modify(
   self : Shader,
   vertex~ : Array[(String, String)] = [],
   fragment~ : Array[(String, String)] = [],
+  declarations~ : String = "",
+  vertex_declarations~ : String = "",
+  fragment_declarations~ : String = "",
 ) -> Shader {
   let replace = (
     hooks : Array[(String, String)],
@@ -177,6 +192,17 @@ pub fn Shader::modify(
     vertex_hooks: replace(self.vertex_hooks, vertex),
     fragment_hooks: replace(self.fragment_hooks, fragment),
     modified,
+    declarations: self.declarations + "\n" + declarations,
+    vertex_declarations: if vertex_declarations == "" {
+      self.vertex_declarations
+    } else {
+      self.vertex_declarations + "\n" + vertex_declarations
+    },
+    fragment_declarations: if fragment_declarations == "" {
+      self.fragment_declarations
+    } else {
+      self.fragment_declarations + "\n" + fragment_declarations
+    },
     program: None,
     kind: "",
     uniforms: Map([]),
@@ -203,6 +229,7 @@ fn populate_hooks(
   src : String,
   hooks_list : Array[(String, String)],
   modified : Array[String],
+  declarations~ : String = "",
 ) -> String {
   let main = "void main"
   guard src.find(main) is Some(at) else { return src }
@@ -215,6 +242,9 @@ fn populate_hooks(
     None => rest
   }
   let hooks = StringBuilder()
+  if declarations.trim_space().length() > 0 {
+    hooks.write_string(declarations + "\n")
+  }
   let defines = StringBuilder()
   for h in hooks_list {
     let (key, body) = h
@@ -241,7 +271,12 @@ pub fn Shader::vert_src(self : Shader) -> String {
   if self.raw {
     return self.vert
   }
-  populate_hooks(self.vert, self.vertex_hooks, self.modified)
+  populate_hooks(
+    self.vert,
+    self.vertex_hooks,
+    self.modified,
+    declarations=self.declarations + "\n" + self.vertex_declarations,
+  )
 }
 
 ///|
@@ -250,7 +285,12 @@ pub fn Shader::frag_src(self : Shader) -> String {
   if self.raw {
     return self.frag
   }
-  populate_hooks(self.frag, self.fragment_hooks, self.modified)
+  populate_hooks(
+    self.frag,
+    self.fragment_hooks,
+    self.modified,
+    declarations=self.declarations + "\n" + self.fragment_declarations,
+  )
 }
 
 ///|

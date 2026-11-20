@@ -357,13 +357,16 @@ pub struct Shader {
   vertex_hooks : Array[(String, String)]
   fragment_hooks : Array[(String, String)]
   modified : Array[String]
+  declarations : String
+  vertex_declarations : String
+  fragment_declarations : String
   // private fields
 }
 pub fn Shader::copy(Self) -> Self
 pub fn Shader::filter(String) -> Self
 pub fn Shader::frag_src(Self) -> String
 pub fn Shader::inspect_hooks(Self) -> String
-pub fn Shader::modify(Self, vertex? : Array[(String, String)], fragment? : Array[(String, String)]) -> Self
+pub fn Shader::modify(Self, vertex? : Array[(String, String)], fragment? : Array[(String, String)], declarations? : String, vertex_declarations? : String, fragment_declarations? : String) -> Self
 pub fn Shader::new(String, String) -> Self
 pub fn Shader::set_sources(Self, String, String) -> Unit
 pub fn Shader::set_uniform(Self, String, UniformValue) -> Unit

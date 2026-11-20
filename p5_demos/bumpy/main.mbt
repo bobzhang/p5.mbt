@@ -43,7 +43,16 @@ fn paint_tiles(g : @p5.P5) -> Unit {
       let y = j.to_double() * cell
       // left, right, top, bottom bevels tilt the normal toward each edge
       g.fill((40, 128, 220))
-      g.quad(x, y, x + bevel, y + bevel, x + bevel, y + cell - bevel, x, y + cell)
+      g.quad(
+        x,
+        y,
+        x + bevel,
+        y + bevel,
+        x + bevel,
+        y + cell - bevel,
+        x,
+        y + cell,
+      )
       g.fill((216, 128, 220))
       g.quad(
         x + cell,
@@ -56,7 +65,16 @@ fn paint_tiles(g : @p5.P5) -> Unit {
         y + bevel,
       )
       g.fill((128, 216, 220))
-      g.quad(x, y, x + cell, y, x + cell - bevel, y + bevel, x + bevel, y + bevel)
+      g.quad(
+        x,
+        y,
+        x + cell,
+        y,
+        x + cell - bevel,
+        y + bevel,
+        x + bevel,
+        y + bevel,
+      )
       g.fill((128, 40, 220))
       g.quad(
         x,

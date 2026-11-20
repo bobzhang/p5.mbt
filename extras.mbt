@@ -35,7 +35,7 @@ priv struct GlAttrs {
   mut premultiplied_alpha : Bool
   mut preserve_drawing_buffer : Bool
   mut per_pixel_lighting : Bool
-  mut version : Int
+  mut version : Int32
 }
 
 ///|

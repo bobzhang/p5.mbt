@@ -50,7 +50,12 @@ fn P5::create_webgl_canvas(self : P5, w : Double, h : Double) -> Unit {
 }
 
 ///|
-fn P5::init_gl_context(self : P5, c : @dom.Canvas, w : Double, h : Double) -> Unit {
+fn P5::init_gl_context(
+  self : P5,
+  c : @dom.Canvas,
+  w : Double,
+  h : Double,
+) -> Unit {
   let a = self.extras.gl_attrs
   let gl = @gl.create_context(
     c,

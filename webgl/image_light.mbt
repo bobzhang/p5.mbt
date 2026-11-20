@@ -63,7 +63,10 @@ fn Renderer3D::draw_light_plane(
 ///|
 /// The blurred light coming from each direction of an environment image
 /// (p5's `makeDiffusedTexture`), cached per image.
-fn Renderer3D::diffused_light(self : Renderer3D, input : TexSource) -> Framebuffer {
+fn Renderer3D::diffused_light(
+  self : Renderer3D,
+  input : TexSource,
+) -> Framebuffer {
   for e in self.diffused_lights {
     if same_source(e.0, input) {
       return e.1
@@ -90,7 +93,10 @@ fn Renderer3D::diffused_light(self : Renderer3D, input : TexSource) -> Framebuff
 ///|
 /// Reflections of an environment image at increasing roughness, one mip
 /// level each (p5's `makeSpecularTexture`), cached per image.
-fn Renderer3D::specular_light(self : Renderer3D, input : TexSource) -> @gl.Texture {
+fn Renderer3D::specular_light(
+  self : Renderer3D,
+  input : TexSource,
+) -> @gl.Texture {
   for e in self.specular_lights {
     if same_source(e.0, input) {
       return e.1
@@ -109,7 +115,7 @@ fn Renderer3D::specular_light(self : Renderer3D, input : TexSource) -> @gl.Textu
     self.antialias,
   )
   let levels : Array[FixedArray[Byte]] = []
-  let sizes : Array[Int] = []
+  let sizes : Array[Int32] = []
   let mut w = size
   while w >= 1 {
     let wd = w.to_double()
@@ -243,10 +249,14 @@ fn Renderer3D::set_texture_map_uniforms(
   }
   let bind = (has : String, sampler : String, t : TexSource?) => {
     @gl.set_uniform(p, has, bool_u(t is Some(_)))
-    @gl.set_uniform_texture(p, sampler, match t {
-      Some(src) => self.gl_texture(src)
-      None => empty
-    })
+    @gl.set_uniform_texture(
+      p,
+      sampler,
+      match t {
+        Some(src) => self.gl_texture(src)
+        None => empty
+      },
+    )
   }
   bind("uHasSpecularTex", "uSpecularSampler", s.specular_tex)
   bind("uHasAmbientTex", "uAmbientSampler", s.ambient_tex)
@@ -307,7 +317,7 @@ pub fn Renderer3D::panorama(
   }
   let m3 = @math.Matrix::new(3).inverse_transpose4x4(self.state.view)
   let inv = @math.Matrix::new(3).invert_from(m3).unwrap_or(m3)
-  let m = (i : Int) => inv.get(i)
+  let m = (i : Int32) => inv.get(i)
   let cam = self.state.camera
   sh.set_uniform("uFovY", Floats([cam.camera_fov]))
   sh.set_uniform("uAspect", Floats([cam.aspect_ratio]))

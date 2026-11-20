@@ -435,9 +435,9 @@ pub fn Font::text_to_model(
     let r = (d : Double) => (d * 1000000 + 0.5).floor()
     "\{r(v.x)}-\{r(v.y)}-\{r(v.z)}"
   }
-  let index : Map[String, Int] = Map([])
+  let index : Map[String, Int32] = Map([])
   let verts : Array[@webgl.Vec3] = []
-  let remap : Array[Int] = []
+  let remap : Array[Int32] = []
   for v in geom.vertices {
     let k = key(v)
     match index.get(k) {
@@ -451,7 +451,7 @@ pub fn Font::text_to_model(
   }
   let faces = geom.faces.map(f => (remap[f.0], remap[f.1], remap[f.2]))
   // edges used by one face only are the outline
-  let seen : Map[String, Array[(Int, Int)]] = Map([])
+  let seen : Map[String, Array[(Int32, Int32)]] = Map([])
   for f in faces {
     for e in [(f.0, f.1), (f.1, f.2), (f.2, f.0)] {
       let (a, b) = e
@@ -539,7 +539,7 @@ pub(all) enum GlAttribute {
   /// Per-pixel lighting (default on).
   PerPixelLighting(Bool)
   /// 2 for WebGL 2 when available (default), 1 for WebGL 1.
-  Version(Int)
+  Version(Int32)
 }
 
 ///|
@@ -551,10 +551,26 @@ pub fn P5::set_attributes(self : P5, attrs : ArrayView[GlAttribute]) -> Unit {
   let mut changed = false
   for attr in attrs {
     match attr {
-      Alpha(v) => if a.alpha != v { a.alpha = v; changed = true }
-      Depth(v) => if a.depth != v { a.depth = v; changed = true }
-      Stencil(v) => if a.stencil != v { a.stencil = v; changed = true }
-      Antialias(v) => if a.antialias != v { a.antialias = v; changed = true }
+      Alpha(v) =>
+        if a.alpha != v {
+          a.alpha = v
+          changed = true
+        }
+      Depth(v) =>
+        if a.depth != v {
+          a.depth = v
+          changed = true
+        }
+      Stencil(v) =>
+        if a.stencil != v {
+          a.stencil = v
+          changed = true
+        }
+      Antialias(v) =>
+        if a.antialias != v {
+          a.antialias = v
+          changed = true
+        }
       PremultipliedAlpha(v) =>
         if a.premultiplied_alpha != v {
           a.premultiplied_alpha = v
@@ -566,7 +582,11 @@ pub fn P5::set_attributes(self : P5, attrs : ArrayView[GlAttribute]) -> Unit {
           changed = true
         }
       PerPixelLighting(v) => a.per_pixel_lighting = v
-      Version(v) => if a.version != v { a.version = v; changed = true }
+      Version(v) =>
+        if a.version != v {
+          a.version = v
+          changed = true
+        }
     }
   }
   if !changed {

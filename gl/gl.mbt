@@ -731,7 +731,7 @@ pub extern "js" fn set_texture_filter(
 pub extern "js" fn mipmap_texture(
   gl : GL,
   levels : FixedArray[FixedArray[Byte]],
-  sizes : FixedArray[Int],
+  sizes : FixedArray[Int32],
 ) -> Texture =
   #|(gl, levels, sizes) => {
   #|  const t = gl.createTexture();

@@ -18,7 +18,11 @@ fn paint_sky(g : @p5.P5) -> Unit {
         @p5.pow(t / 0.5, 1.8),
       )
     } else {
-      g.lerp_color(g.color((70, 60, 70)), g.color((20, 18, 26)), (t - 0.5) / 0.5)
+      g.lerp_color(
+        g.color((70, 60, 70)),
+        g.color((20, 18, 26)),
+        (t - 0.5) / 0.5,
+      )
     }
     g.fill(c)
     g.rect(0, y.to_double(), w, 1)
@@ -35,7 +39,7 @@ fn paint_sky(g : @p5.P5) -> Unit {
   g.fill((60, 70, 90))
   g.begin_shape()
   g.vertex(0, h * 0.5)
-  for i in 0..=64 {
+  for i in 0..<=64 {
     let x = i.to_double() / 64 * w
     g.vertex(x, h * 0.5 - 18 - 30 * g.noise(i.to_double() * 0.25))
   }

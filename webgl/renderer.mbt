@@ -70,7 +70,7 @@ pub struct GLState {
   /// How strongly the normal map tilts normals.
   mut normal_scale : Double
   /// 0: the normal map holds normals; 1: it is a height (bump) map.
-  mut normal_map_mode : Int
+  mut normal_map_mode : Int32
 }
 
 ///|
