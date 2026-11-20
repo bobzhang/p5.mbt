@@ -1,29 +1,100 @@
 name: MoonBit
+
 on:
   push:
-    branches: [main, master]
+    branches: [main]
+    tags: ["v*"]
   pull_request:
+  workflow_dispatch:
+  schedule:
+    # Nightly, so toolchain changes (the pre-release channel) show up before a release.
+    - cron: "17 3 * * *"
+
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
+    name: check (${{ matrix.moonbit }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         moonbit: [latest, pre-release]
     steps:
       - uses: actions/checkout@v5
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - run: npm install --prefix .repos/p5.js --no-audit --no-fund --ignore-scripts libtess@1.2.2
-      - name: Install MoonBit
+
+      # The libtess port is tested against libtess.js, looked up where a
+      # p5.js checkout would keep it.
+      - name: Install libtess.js reference
+        run: npm install --prefix .repos/p5.js --no-audit --no-fund --ignore-scripts libtess@1.2.2
+
+      - name: Install MoonBit (${{ matrix.moonbit }})
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- "${{ matrix.moonbit }}"
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
       - run: moon version --all
       - run: moon update
-      - run: moon check --target js
-      - run: moon fmt --check
-      - run: moon test --target js
+
+      # The repository is a moon.work workspace (the library and p5_demos),
+      # so each command below covers both modules.
+      - name: Type check
+        run: moon check --target js
+
+      - name: Formatting
+        run: moon fmt --check
+
+      - name: Public interfaces are up to date
+        run: |
+          moon info --target js
+          git diff --exit-code -- '*.mbti' || {
+            echo "::error::pkg.generated.mbti is stale; run 'moon info --target js' and commit the result"
+            exit 1
+          }
+
+      - name: Tests
+        run: moon test --target js
+
+      - name: Build examples and demos
+        run: |
+          moon build --target js --release
+          # every page's script must exist
+          missing=0
+          for page in examples/*/index.html p5_demos/*/index.html parity/index.html; do
+            for src in $(grep -o 'src="[^"]*_build/[^"]*\.js"' "$page" | sed 's/^src="//; s/"$//'); do
+              file=$(realpath -m "$(dirname "$page")/$src")
+              if [ ! -f "$file" ]; then
+                echo "::error file=$page::missing $src"
+                missing=1
+              fi
+            done
+          done
+          exit $missing
+
+  package:
+    name: package dry run
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: check
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- latest
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+      - run: moon update
+      - name: Package bobzhang/p5
+        run: moon package --list
+      - name: Package bobzhang/p5_demos
+        working-directory: p5_demos
+        run: moon package --list

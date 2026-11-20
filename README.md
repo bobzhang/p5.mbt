@@ -1,5 +1,7 @@
 # p5.mbt
 
+[![MoonBit](https://github.com/bobzhang/p5.mbt/actions/workflows/check.yml/badge.svg)](https://github.com/bobzhang/p5.mbt/actions/workflows/check.yml)
+
 A port of [p5.js](https://p5js.org) to [MoonBit](https://www.moonbitlang.com),
 running on MoonBit's JavaScript backend and drawing on an HTML canvas.
 
@@ -78,12 +80,12 @@ Then open <http://localhost:8765/examples/>. The examples are:
 | [`input`](examples/input/main.mbt) | keyboard, mouse, wheel, `clip`, `erase` |
 | [`data`](examples/data/main.mbt) | `load_json`, `load_strings`, CSV tables, XML |
 | [`dom`](examples/dom/main.mbt) | video as pixels, radio buttons, file input, dropping files |
-| [`orrery`](examples/orrery/main.mbt) | WEBGL: lights, emissive/specular materials, generated textures, font-shader labels, `orbit_control` |
-| [`terrain`](examples/terrain/main.mbt) | WEBGL: noise terrain from triangle strips, fog added to p5's material shader with a hook |
-| [`feedback`](examples/feedback/main.mbt) | WEBGL: framebuffer feedback trails |
-| [`particles`](examples/particles/main.mbt) | `text_to_points`: words made of springy particles |
-| [`history`](examples/history/main.mbt) | *A Short History of Computation*, a 104-second film made entirely with p5.mbt |
-| [`asia`](examples/asia/main.mbt) | *Five Thousand Years of Asia*, a two-minute WEBGL film: 13 chapters from the Indus cities to the Shinkansen, with lit 3D scenes and CJK captions |
+
+More elaborate demos — WEBGL scenes, shaders, flocking, two short films —
+live in the [`p5_demos`](p5_demos/) module of this repository (published as
+[`bobzhang/p5_demos`](https://mooncakes.io/docs/bobzhang/p5_demos)). The
+repository is a `moon.work` workspace, so the same build compiles both; open
+<http://localhost:8765/p5_demos/> for the gallery.
 
 ### Recording a sketch to video
 
@@ -97,8 +99,8 @@ moon build --target js --release
 python3 tools/record.py --out history.mp4
 ```
 
-Then open <http://localhost:8766/examples/history/?record> (or
-`examples/asia/?record`). The films' pages also accept `?t=SECONDS&still` to
+Then open <http://localhost:8766/p5_demos/history/?record> (or
+`p5_demos/asia/?record`). The films' pages also accept `?t=SECONDS&still` to
 inspect a single moment.
 
 ## From p5.js to MoonBit

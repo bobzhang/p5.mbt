@@ -1,0 +1,12 @@
+# Files left out of the bobzhang/p5 package (replaces .gitignore for packaging)
+_build/
+target/
+.mooncakes/
+.repos/
+.moonagent/
+node_modules/
+*.log
+.DS_Store
+*.mp4
+# p5_demos is its own module, bobzhang/p5_demos
+p5_demos/

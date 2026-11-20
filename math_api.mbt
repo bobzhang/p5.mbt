@@ -167,3 +167,27 @@ pub fn P5::random2d(self : P5) -> Vector {
 pub fn P5::random3d(self : P5) -> Vector {
   Vector::random3d(self.rng)
 }
+
+///|
+/// `e` raised to `x` (p5's `exp`).
+pub fn exp(x : Double) -> Double {
+  @cmath.exp(x)
+}
+
+///|
+/// `base` raised to `exponent` (p5's `pow`).
+pub fn pow(base : Double, exponent : Double) -> Double {
+  @cmath.pow(base, exponent)
+}
+
+///|
+/// Natural logarithm (p5's `log`).
+pub fn log(x : Double) -> Double {
+  @cmath.ln(x)
+}
+
+///|
+/// Square root (p5's `sqrt`).
+pub fn sqrt(x : Double) -> Double {
+  x.sqrt()
+}

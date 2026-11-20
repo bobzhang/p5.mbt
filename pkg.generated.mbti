@@ -48,6 +48,8 @@ pub fn dist(Double, Double, Double, Double) -> Double
 
 pub fn dist3(Double, Double, Double, Double, Double, Double) -> Double
 
+pub fn exp(Double) -> Double
+
 pub fn fract(Double) -> Double
 
 pub fn get_item(String) -> String?
@@ -69,6 +71,8 @@ pub fn hour() -> Int32
 pub fn js_rem(Double, Double) -> Double
 
 pub fn lerp(Double, Double, Double) -> Double
+
+pub fn log(Double) -> Double
 
 pub fn mag(Double, Double) -> Double
 
@@ -97,6 +101,8 @@ pub fn palette_lerp(ArrayView[(@color.Color, Double)], Double) -> @color.Color
 pub fn parse_float(String) -> Double
 
 pub fn parse_svg_path(String) -> Array[@shape.PathCmd]
+
+pub fn pow(Double, Double) -> Double
 
 pub fn print(String) -> Unit
 
@@ -133,6 +139,8 @@ pub fn spline_tangent(Double, Double, Double, Double, Double, tightness? : Doubl
 pub fn split_tokens(String, delims? : String) -> Array[String]
 
 pub fn sq(Double) -> Double
+
+pub fn sqrt(Double) -> Double
 
 pub fn[T : Storable] store_item(String, T) -> Unit
 

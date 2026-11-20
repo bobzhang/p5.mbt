@@ -4,7 +4,7 @@
 Usage:
     python3 tools/record.py --out film.mp4 [--port 8766] [--fps 60] [--crf 18]
 
-Then open http://localhost:8766/examples/<sketch>/?record in a browser. Each
+Then open http://localhost:8766/p5_demos/<sketch>/?record in a browser. Each
 frame arrives as a PNG (POST /frame?frame=N) and is piped straight into
 ffmpeg, so nothing is written to disk except the final video. The sketch
 posts /frame/done after the last frame, which finishes the encode.
