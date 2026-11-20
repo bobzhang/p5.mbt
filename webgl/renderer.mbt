@@ -60,6 +60,17 @@ pub struct GLState {
   mut texture_mode_normal : Bool
   mut wrap_x : String
   mut wrap_y : String
+  /// The image lighting the scene from all directions (`imageLight`).
+  mut image_light : TexSource?
+  /// Texture maps of the material: specular, ambient, shininess, normal.
+  mut specular_tex : TexSource?
+  mut ambient_tex : TexSource?
+  mut shininess_tex : TexSource?
+  mut normal_tex : TexSource?
+  /// How strongly the normal map tilts normals.
+  mut normal_scale : Double
+  /// 0: the normal map holds normals; 1: it is a height (bump) map.
+  mut normal_map_mode : Int
 }
 
 ///|
@@ -105,6 +116,9 @@ pub struct Renderer3D {
   /// Whether the context is antialiased (framebuffer default).
   antialias : Bool
   priv mut user_sampler : Bool
+  priv diffused_lights : Array[(TexSource, Framebuffer)]
+  priv specular_lights : Array[(TexSource, @gl.Texture)]
+  priv mut image_light_shaders : (Shader, Shader)?
   /// Points per unit length when sampling curves (`curveDetail`, 1/4).
   mut curve_detail : Double
   /// Draw strokes as plain GL lines without caps and joins (`strokeMode(SIMPLE)`).
@@ -155,6 +169,13 @@ fn default_state(cam : Camera) -> GLState {
     texture_mode_normal: false,
     wrap_x: "clamp",
     wrap_y: "clamp",
+    image_light: None,
+    specular_tex: None,
+    ambient_tex: None,
+    shininess_tex: None,
+    normal_tex: None,
+    normal_scale: 1,
+    normal_map_mode: 0,
   }
 }
 
@@ -194,6 +215,9 @@ pub fn Renderer3D::new(
     canvas,
     antialias,
     user_sampler: false,
+    diffused_lights: [],
+    specular_lights: [],
+    image_light_shaders: None,
     curve_detail: 0.25,
     simple_lines: false,
     instance_count: 1,
@@ -759,9 +783,8 @@ fn Renderer3D::set_fill_uniforms(
   @gl.set_uniform(p, "uEmissive", bool_u(s.use_emissive))
   @gl.set_uniform(p, "uShininess", [s.shininess])
   @gl.set_uniform(p, "uMetallic", [s.metalness])
-  @gl.set_uniform(p, "uUseImageLight", bool_u(false))
-  @gl.set_uniform_texture(p, "environmentMapDiffused", empty)
-  @gl.set_uniform_texture(p, "environmentMapSpecular", empty)
+  self.set_image_light_uniforms(p, empty)
+  self.set_texture_map_uniforms(p, empty)
   @gl.set_uniform(p, "uUseLighting", bool_u(s.enable_lighting))
   @gl.set_uniform(p, "uPointLightCount", [
     s.point_diffuse.length().to_double() / 3,
@@ -848,7 +871,7 @@ fn Renderer3D::fill_shader_for(self : Renderer3D) -> Shader {
       if s.normal_material {
         self.shader("normal")
       } else if s.enable_lighting || s.tex is Some(_) {
-        self.shader("light")
+        self.shader(if s.has_texture_map() { "light_maps" } else { "light" })
       } else {
         self.shader("color")
       }
@@ -900,6 +923,15 @@ fn Renderer3D::draw_fills(
 ) -> Unit {
   let g = b.geometry
   let use_vertex_color = g.vertex_colors.length() > 0
+  let mut dirty = dirty
+  if self.state.normal_tex is Some(_) &&
+    g.vertex_tangents.is_empty() &&
+    g.uvs.length() > 0 &&
+    g.vertex_normals.length() > 0 {
+    ignore(g.compute_tangents())
+    g.dirty = false
+    dirty = true
+  }
   let sh = self.fill_shader_for()
   sh.kind = "fill"
   guard sh.init(self.gl) is Some(p) else { return }

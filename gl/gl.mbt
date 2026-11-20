@@ -35,10 +35,11 @@ pub extern "js" fn create_context(
   antialias : Bool,
   premultiplied_alpha : Bool,
   preserve_drawing_buffer : Bool,
+  version~ : Int32 = 2,
 ) -> GL =
-  #|(canvas, alpha, depth, stencil, antialias, premultipliedAlpha, preserveDrawingBuffer) => {
+  #|(canvas, alpha, depth, stencil, antialias, premultipliedAlpha, preserveDrawingBuffer, version) => {
   #|  const attrs = { alpha, depth, stencil, antialias, premultipliedAlpha, preserveDrawingBuffer };
-  #|  let gl = canvas.getContext('webgl2', attrs);
+  #|  let gl = version !== 1 ? canvas.getContext('webgl2', attrs) : null;
   #|  if (gl) gl.__p5mbtVersion = 2;
   #|  else { gl = canvas.getContext('webgl', attrs); if (gl) gl.__p5mbtVersion = 1; }
   #|  if (!gl) throw new Error('Error creating webgl context');
@@ -721,4 +722,28 @@ pub extern "js" fn set_texture_filter(
   #|  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, f(min));
   #|  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, f(mag));
   #|  gl.bindTexture(gl.TEXTURE_2D, prev);
+  #|}
+
+///|
+/// A mipmapped texture from RGBA levels (top row first), each `sizes[i]`
+/// pixels square, with trilinear filtering (p5's
+/// `createMipmapTextureHandle`).
+pub extern "js" fn mipmap_texture(
+  gl : GL,
+  levels : FixedArray[FixedArray[Byte]],
+  sizes : FixedArray[Int],
+) -> Texture =
+  #|(gl, levels, sizes) => {
+  #|  const t = gl.createTexture();
+  #|  const prev = gl.getParameter(gl.TEXTURE_BINDING_2D);
+  #|  gl.bindTexture(gl.TEXTURE_2D, t);
+  #|  for (let i = 0; i < levels.length; i++) {
+  #|    gl.texImage2D(gl.TEXTURE_2D, i, gl.RGBA, sizes[i], sizes[i], 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(levels[i].buffer || levels[i]));
+  #|  }
+  #|  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  #|  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+  #|  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  #|  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  #|  gl.bindTexture(gl.TEXTURE_2D, prev);
+  #|  return t;
   #|}

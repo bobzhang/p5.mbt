@@ -193,6 +193,13 @@ pub struct GLState {
   mut texture_mode_normal : Bool
   mut wrap_x : String
   mut wrap_y : String
+  mut image_light : TexSource?
+  mut specular_tex : TexSource?
+  mut ambient_tex : TexSource?
+  mut shininess_tex : TexSource?
+  mut normal_tex : TexSource?
+  mut normal_scale : Double
+  mut normal_map_mode : Int32
 }
 
 pub struct Geometry {
@@ -297,6 +304,7 @@ pub fn Renderer3D::frustum(Self, left? : Double, right? : Double, bottom? : Doub
 pub fn Renderer3D::geometry(Self, String) -> Geometry?
 pub fn Renderer3D::has_geometry(Self, String) -> Bool
 pub fn Renderer3D::image(Self, TexSource, Double, Double, Double, Double, Double, Double, Double, Double, Style) -> Unit
+pub fn Renderer3D::image_light(Self, TexSource) -> Unit
 pub fn Renderer3D::light_falloff(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::lights(Self) -> Unit
 pub fn Renderer3D::line_perspective(Self, Bool) -> Unit
@@ -307,6 +315,7 @@ pub fn Renderer3D::no_lights(Self) -> Unit
 pub fn Renderer3D::on_fill(Self) -> Unit
 pub fn Renderer3D::on_shader(Self) -> Unit
 pub fn Renderer3D::ortho(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
+pub fn Renderer3D::panorama(Self, TexSource, Style) -> Unit
 pub fn Renderer3D::perspective(Self, fovy? : Double, aspect? : Double, near? : Double, far? : Double) -> Unit
 pub fn Renderer3D::point_light(Self, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn Renderer3D::pop(Self) -> Unit
@@ -320,6 +329,7 @@ pub fn Renderer3D::scale(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::set_camera(Self, Camera) -> Unit
 pub fn Renderer3D::set_curve_detail(Self, Double) -> Unit
 pub fn Renderer3D::set_fill_shader(Self, Shader?) -> Unit
+pub fn Renderer3D::set_has_ambient(Self) -> Unit
 pub fn Renderer3D::set_image_shader(Self, Shader?) -> Unit
 pub fn Renderer3D::set_instance_count(Self, Int32) -> Unit
 pub fn Renderer3D::set_model_matrix(Self, @math.Matrix) -> Unit
@@ -333,11 +343,13 @@ pub fn Renderer3D::spot_light(Self, Double, Double, Double, (Double, Double, Dou
 pub fn Renderer3D::sync_camera(Self) -> Unit
 pub fn Renderer3D::texture(Self, TexSource) -> Unit
 pub fn Renderer3D::texture_filter(Self, TexSource, String, String) -> Unit
+pub fn Renderer3D::texture_map(Self, TextureMap, TexSource?, scale? : Double) -> Unit
 pub fn Renderer3D::texture_mode(Self, Bool) -> Unit
 pub fn Renderer3D::texture_wrap(Self, String, String) -> Unit
 pub fn Renderer3D::translate(Self, Double, Double, Double) -> Unit
 pub fn Renderer3D::update(Self) -> Unit
 pub fn Renderer3D::use_normal_material(Self) -> Unit
+pub fn Renderer3D::use_specular_material(Self) -> Unit
 
 pub struct Shader {
   mut vert : String
@@ -383,6 +395,14 @@ pub(all) struct TexSource {
   fb : Framebuffer?
   width : Double
   height : Double
+}
+
+pub(all) enum TextureMap {
+  SpecularMap
+  AmbientMap
+  ShininessMap
+  NormalMap
+  BumpMap
 }
 
 pub(all) enum UniformValue {

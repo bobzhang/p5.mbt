@@ -32,7 +32,7 @@ pub fn context_canvas(GL) -> @dom.ImageElement
 
 pub fn create_buffer(GL) -> Buffer
 
-pub fn create_context(@dom.Canvas, Bool, Bool, Bool, Bool, Bool, Bool) -> GL
+pub fn create_context(@dom.Canvas, Bool, Bool, Bool, Bool, Bool, Bool, version? : Int32) -> GL
 
 pub fn create_fbo(GL, Int32, Int32, Int32, Bool, Bool, Bool, Bool, Bool, String, String) -> FBO
 
@@ -77,6 +77,8 @@ pub fn has_uniform(Program, String) -> Bool
 pub fn index_buffer_data(GL, Buffer, FixedArray[Int32], Bool) -> Unit
 
 pub fn max_texture_size(GL) -> Int32
+
+pub fn mipmap_texture(GL, FixedArray[FixedArray[Byte]], FixedArray[Int32]) -> Texture
 
 pub fn read_pixels(GL, Int32, Int32, Int32, Int32) -> FixedArray[Byte]
 

@@ -46,20 +46,27 @@ fn P5::create_webgl_canvas(self : P5, w : Double, h : Double) -> Unit {
     return
   }
   let c = @dom.replace_canvas(old, w, h, self.density)
+  self.init_gl_context(c, w, h)
+}
+
+///|
+fn P5::init_gl_context(self : P5, c : @dom.Canvas, w : Double, h : Double) -> Unit {
+  let a = self.extras.gl_attrs
   let gl = @gl.create_context(
     c,
-    true,
-    true,
-    true,
-    @gl.default_antialias(),
-    true,
-    true,
+    a.alpha,
+    a.depth,
+    a.stencil,
+    a.antialias,
+    a.premultiplied_alpha,
+    a.preserve_drawing_buffer,
+    version=a.version,
   )
   self.gl = Some(
     @webgl.Renderer3D::new(
       gl,
       @dom.canvas_as_image(c),
-      @gl.default_antialias(),
+      a.antialias,
       w,
       h,
       self.density,

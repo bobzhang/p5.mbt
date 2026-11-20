@@ -129,6 +129,7 @@ pub fn Renderer3D::light_falloff(
 ///|
 pub fn Renderer3D::no_lights(self : Renderer3D) -> Unit {
   let s = self.state
+  s.image_light = None
   s.enable_lighting = false
   s.ambient_light_colors = []
   s.specular_colors = [1, 1, 1]

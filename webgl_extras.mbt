@@ -298,3 +298,282 @@ pub fn[I : ImageSource] P5::texture_interpolation(
   }
   r.texture_filter(src, name(downscale), name(upscale.unwrap_or(downscale)))
 }
+
+// ---- image lighting and texture maps ----
+
+///|
+/// Lights the scene with an image of its surroundings (`imageLight`); an
+/// equirectangular 360° photo works best. Shiny materials reflect it. Like
+/// other lights, call it every frame.
+pub fn[I : ImageSource] P5::image_light(self : P5, img : I) -> Unit {
+  guard self.gl_renderer("imageLight") is Some(r) else { return }
+  guard tex_source(img) is Some(src) else { return }
+  r.image_light(src)
+}
+
+///|
+/// Draws a 360° equirectangular image as the background, as seen through
+/// the camera (`panorama`). Call it at the start of `draw`.
+pub fn[I : ImageSource] P5::panorama(self : P5, img : I) -> Unit {
+  guard self.gl_renderer("panorama") is Some(r) else { return }
+  guard tex_source(img) is Some(src) else { return }
+  r.panorama(src, self.gl_style())
+}
+
+///|
+fn[I : ImageSource] P5::set_texture_map(
+  self : P5,
+  which : @webgl.TextureMap,
+  img : I?,
+  scale~ : Double = 1,
+  what : String,
+) -> Unit {
+  guard self.gl_renderer(what) is Some(r) else { return }
+  let src = match img {
+    Some(i) => tex_source(i)
+    None => None
+  }
+  r.texture_map(which, src, scale~)
+}
+
+///|
+/// Uses an image to scale the specular color across the surface
+/// (`specularTexture`); also turns on the specular material. `None` clears.
+pub fn[I : ImageSource] P5::specular_texture(self : P5, img : I?) -> Unit {
+  self.set_texture_map(SpecularMap, img, "specularTexture")
+  if img is Some(_) && self.gl is Some(r) {
+    r.use_specular_material()
+  }
+}
+
+///|
+/// Uses an image as the ambient color across the surface
+/// (`ambientTexture`). `None` clears.
+pub fn[I : ImageSource] P5::ambient_texture(self : P5, img : I?) -> Unit {
+  self.set_texture_map(AmbientMap, img, "ambientTexture")
+  if img is Some(_) && self.gl is Some(r) {
+    r.set_has_ambient()
+  }
+}
+
+///|
+/// Scales shininess across the surface by an image's red channel
+/// (`shininessTexture`). `None` clears.
+pub fn[I : ImageSource] P5::shininess_texture(self : P5, img : I?) -> Unit {
+  self.set_texture_map(ShininessMap, img, "shininessTexture")
+}
+
+///|
+/// Tilts the surface normals with a tangent-space normal map (the bluish
+/// kind), `scale` setting its strength (`normalTexture`). `None` clears.
+pub fn[I : ImageSource] P5::normal_texture(
+  self : P5,
+  img : I?,
+  scale~ : Double = 1,
+) -> Unit {
+  self.set_texture_map(NormalMap, img, scale~, "normalTexture")
+}
+
+///|
+/// Tilts the surface normals using an image's brightness as height
+/// (`bumpTexture`). `None` clears.
+pub fn[I : ImageSource] P5::bump_texture(
+  self : P5,
+  img : I?,
+  scale~ : Double = 1,
+) -> Unit {
+  self.set_texture_map(BumpMap, img, scale~, "bumpTexture")
+}
+
+// ---- 3D text ----
+
+///|
+/// The outline of `s` as a flat 3D model, or, with `extrude`, a solid one
+/// that thick (`font.textToModel`). Needs a WEBGL sketch. Points are
+/// sampled like `text_to_contours`.
+pub fn Font::text_to_model(
+  self : Font,
+  s : String,
+  x : Double,
+  y : Double,
+  max_width? : Double,
+  max_height? : Double,
+  extrude~ : Double = 0,
+  sample_factor~ : Double = 0.1,
+  simplify_threshold~ : Double = 0,
+) -> @webgl.Geometry {
+  let p = self.sketch
+  let contours = self.text_to_contours(
+    s,
+    x,
+    y,
+    max_width?,
+    max_height?,
+    sample_factor~,
+    simplify_threshold~,
+  )
+  if contours.is_empty() {
+    return @webgl.Geometry::new()
+  }
+  let built = p.build_geometry(() => {
+    p.begin_shape()
+    for c in contours {
+      p.begin_contour()
+      for pt in c {
+        p.vertex(pt.x, pt.y)
+      }
+      p.end_contour(mode=Close)
+    }
+    p.end_shape(mode=Close)
+  })
+  guard built is Some(geom) else { return @webgl.Geometry::new() }
+  if extrude == 0 {
+    return geom
+  }
+  // merge vertices that coincide (to 6 decimals)
+  let key = (v : @webgl.Vec3) => {
+    let r = (d : Double) => (d * 1000000 + 0.5).floor()
+    "\{r(v.x)}-\{r(v.y)}-\{r(v.z)}"
+  }
+  let index : Map[String, Int] = Map([])
+  let verts : Array[@webgl.Vec3] = []
+  let remap : Array[Int] = []
+  for v in geom.vertices {
+    let k = key(v)
+    match index.get(k) {
+      Some(i) => remap.push(i)
+      None => {
+        index[k] = verts.length()
+        remap.push(verts.length())
+        verts.push(v.copy())
+      }
+    }
+  }
+  let faces = geom.faces.map(f => (remap[f.0], remap[f.1], remap[f.2]))
+  // edges used by one face only are the outline
+  let seen : Map[String, Array[(Int, Int)]] = Map([])
+  for f in faces {
+    for e in [(f.0, f.1), (f.1, f.2), (f.2, f.0)] {
+      let (a, b) = e
+      let id = "\{a.min(b)}-\{a.max(b)}"
+      match seen.get(id) {
+        Some(list) => list.push(e)
+        None => seen[id] = [e]
+      }
+    }
+  }
+  let out = @webgl.Geometry::new()
+  let half = extrude * 0.5
+  for _, list in seen {
+    guard list.length() == 1 else { continue }
+    let (a, b) = list[0]
+    let va = verts[a]
+    let vb = verts[b]
+    let ex = vb.x - va.x
+    let ey = vb.y - va.y
+    let ez = vb.z - va.z
+    // |edge × (0, 0, extrude)|
+    let cx = ey * extrude
+    let cy = -ex * extrude
+    let cross = (cx * cx + cy * cy).sqrt()
+    let dist = (ex * ex + ey * ey + ez * ez).sqrt()
+    if cross < 0.0001 || dist < 0.0001 {
+      continue
+    }
+    let fa = out.vertices.length()
+    out.vertices.push(@webgl.Vec3::new(va.x, va.y, va.z + half))
+    let fb = out.vertices.length()
+    out.vertices.push(@webgl.Vec3::new(vb.x, vb.y, vb.z + half))
+    let ba = out.vertices.length()
+    out.vertices.push(@webgl.Vec3::new(va.x, va.y, va.z - half))
+    let bb = out.vertices.length()
+    out.vertices.push(@webgl.Vec3::new(vb.x, vb.y, vb.z - half))
+    out.faces.push((fa, ba, bb))
+    out.faces.push((fa, bb, fb))
+    out.edges.push((fa, fb))
+    out.edges.push((ba, bb))
+    out.edges.push((fa, ba))
+    out.edges.push((fb, bb))
+  }
+  let front = out.vertices.length()
+  for v in verts {
+    out.vertices.push(@webgl.Vec3::new(v.x, v.y, v.z + half))
+  }
+  for f in faces {
+    let m = (f.0 + front, f.1 + front, f.2 + front)
+    out.faces.push(m)
+    out.edges.push((m.0, m.1))
+    out.edges.push((m.1, m.2))
+    out.edges.push((m.2, m.0))
+  }
+  let back = out.vertices.length()
+  for v in verts {
+    out.vertices.push(@webgl.Vec3::new(v.x, v.y, v.z - half))
+  }
+  for f in faces {
+    let m = (f.2 + back, f.1 + back, f.0 + back)
+    out.faces.push(m)
+    out.edges.push((m.0, m.1))
+    out.edges.push((m.1, m.2))
+    out.edges.push((m.2, m.0))
+  }
+  out.compute_normals()
+}
+
+// ---- context attributes ----
+
+///|
+/// A WebGL context setting for `set_attributes`.
+pub(all) enum GlAttribute {
+  /// A transparent canvas background (default on).
+  Alpha(Bool)
+  /// A depth buffer (default on).
+  Depth(Bool)
+  /// A stencil buffer (default on).
+  Stencil(Bool)
+  /// Antialiased edges (default on only in Safari, like p5).
+  Antialias(Bool)
+  PremultipliedAlpha(Bool)
+  /// Keep the canvas between frames (default on).
+  PreserveDrawingBuffer(Bool)
+  /// Per-pixel lighting (default on).
+  PerPixelLighting(Bool)
+  /// 2 for WebGL 2 when available (default), 1 for WebGL 1.
+  Version(Int)
+}
+
+///|
+/// Changes WebGL context attributes (`setAttributes`). Call it in `setup`
+/// right after `create_canvas`: the context is recreated, so GPU resources
+/// made before are lost.
+pub fn P5::set_attributes(self : P5, attrs : ArrayView[GlAttribute]) -> Unit {
+  let a = self.extras.gl_attrs
+  let mut changed = false
+  for attr in attrs {
+    match attr {
+      Alpha(v) => if a.alpha != v { a.alpha = v; changed = true }
+      Depth(v) => if a.depth != v { a.depth = v; changed = true }
+      Stencil(v) => if a.stencil != v { a.stencil = v; changed = true }
+      Antialias(v) => if a.antialias != v { a.antialias = v; changed = true }
+      PremultipliedAlpha(v) =>
+        if a.premultiplied_alpha != v {
+          a.premultiplied_alpha = v
+          changed = true
+        }
+      PreserveDrawingBuffer(v) =>
+        if a.preserve_drawing_buffer != v {
+          a.preserve_drawing_buffer = v
+          changed = true
+        }
+      PerPixelLighting(v) => a.per_pixel_lighting = v
+      Version(v) => if a.version != v { a.version = v; changed = true }
+    }
+  }
+  if !changed {
+    return
+  }
+  guard self.gl_canvas is Some(old) else { return }
+  let c = @dom.replace_canvas(old, self.width, self.height, self.density)
+  @dom.detach_node(@dom.canvas_element(old))
+  self.init_gl_context(c, self.width, self.height)
+}

@@ -21,6 +21,21 @@ priv struct Extras {
   /// Custom vertex properties of the shape being built: name and the value
   /// the next vertices get (`vertex_property`).
   vertex_props : Array[(String, FixedArray[Double])]
+  /// WebGL context attributes (`set_attributes`).
+  gl_attrs : GlAttrs
+}
+
+///|
+/// p5's `_glAttributes`.
+priv struct GlAttrs {
+  mut alpha : Bool
+  mut depth : Bool
+  mut stencil : Bool
+  mut antialias : Bool
+  mut premultiplied_alpha : Bool
+  mut preserve_drawing_buffer : Bool
+  mut per_pixel_lighting : Bool
+  mut version : Int
 }
 
 ///|
@@ -37,5 +52,15 @@ fn Extras::new() -> Extras {
     debug_axes: None,
     text_props: Map([]),
     vertex_props: [],
+    gl_attrs: {
+      alpha: true,
+      depth: true,
+      stencil: true,
+      antialias: @gl.default_antialias(),
+      premultiplied_alpha: true,
+      preserve_drawing_buffer: true,
+      per_pixel_lighting: true,
+      version: 2,
+    },
   }
 }

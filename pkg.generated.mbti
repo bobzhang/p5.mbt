@@ -315,8 +315,20 @@ pub struct Font {
   // private fields
 }
 pub fn Font::text_to_contours(Self, String, Double, Double, max_width? : Double, max_height? : Double, sample_factor? : Double, simplify_threshold? : Double) -> Array[Array[TextPoint]]
+pub fn Font::text_to_model(Self, String, Double, Double, max_width? : Double, max_height? : Double, extrude? : Double, sample_factor? : Double, simplify_threshold? : Double) -> @webgl.Geometry
 pub fn Font::text_to_paths(Self, String, Double, Double, max_width? : Double, max_height? : Double) -> Array[@shape.PathCmd]
 pub fn Font::text_to_points(Self, String, Double, Double, max_width? : Double, max_height? : Double, sample_factor? : Double, simplify_threshold? : Double) -> Array[TextPoint]
+
+pub(all) enum GlAttribute {
+  Alpha(Bool)
+  Depth(Bool)
+  Stencil(Bool)
+  Antialias(Bool)
+  PremultipliedAlpha(Bool)
+  PreserveDrawingBuffer(Bool)
+  PerPixelLighting(Bool)
+  Version(Int32)
+}
 
 #derive(Eq, @debug.Debug)
 pub(all) enum HAlign {
@@ -452,6 +464,7 @@ pub fn P5::acos(Self, Double) -> Double
 pub fn[C : ColorArg] P5::alpha(Self, C) -> Double
 pub fn[C : ColorArg] P5::ambient_light(Self, C) -> Unit
 pub fn[C : ColorArg] P5::ambient_material(Self, C) -> Unit
+pub fn[I : ImageSource] P5::ambient_texture(Self, I?) -> Unit
 pub fn P5::angle_mode(Self, AngleMode) -> Unit
 pub fn P5::apply_matrix(Self, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::apply_matrix4(Self, ArrayView[Double]) -> Unit
@@ -478,6 +491,7 @@ pub fn P5::box(Self, w? : Double, h? : Double, d? : Double, detail_x? : Int32, d
 pub fn[C : ColorArg] P5::brightness(Self, C) -> Double
 pub fn P5::build_geometry(Self, () -> Unit) -> @webgl.Geometry?
 pub fn P5::build_shape(Self, () -> Unit, draw? : Bool) -> ShapeCollection
+pub fn[I : ImageSource] P5::bump_texture(Self, I?, scale? : Double) -> Unit
 pub fn P5::camera(Self, eye? : (Double, Double, Double), center? : (Double, Double, Double), up? : (Double, Double, Double)) -> Unit
 pub fn P5::canvas(Self) -> @dom.Canvas?
 pub fn P5::canvas_element(Self) -> Element?
@@ -581,6 +595,7 @@ pub fn P5::http_get(Self, String, (String) -> Unit, on_error? : (String) -> Unit
 pub fn P5::http_post(Self, String, String, (String) -> Unit, on_error? : (String) -> Unit, content_type? : String) -> Unit
 pub fn[C : ColorArg] P5::hue(Self, C) -> Double
 pub fn[I : ImageSource] P5::image(Self, I, Double, Double, w? : Double, h? : Double, fit? : ImageFit, x_align? : HAlign, y_align? : VAlign) -> Unit
+pub fn[I : ImageSource] P5::image_light(Self, I) -> Unit
 pub fn P5::image_mode(Self, @shape.ShapeMode) -> Unit
 pub fn[I : ImageSource] P5::image_region(Self, I, Double, Double, Double, Double, Double, Double, Double, Double, fit? : ImageFit, x_align? : HAlign, y_align? : VAlign) -> Unit
 pub fn P5::image_shader(Self, @webgl.Shader) -> Unit
@@ -628,8 +643,10 @@ pub fn P5::noise_detail(Self, Int32, falloff? : Double) -> Unit
 pub fn P5::noise_seed(Self, Double) -> Unit
 pub fn P5::normal(Self, Double, Double, Double) -> Unit
 pub fn P5::normal_material(Self) -> Unit
+pub fn[I : ImageSource] P5::normal_texture(Self, I?, scale? : Double) -> Unit
 pub fn P5::orbit_control(Self, sensitivity_x? : Double, sensitivity_y? : Double, sensitivity_z? : Double) -> Unit
 pub fn P5::ortho(Self, left? : Double, right? : Double, bottom? : Double, top? : Double, near? : Double, far? : Double) -> Unit
+pub fn[I : ImageSource] P5::panorama(Self, I) -> Unit
 pub fn P5::perspective(Self, fovy? : Double, aspect? : Double, near? : Double, far? : Double) -> Unit
 pub fn P5::pixel_density(Self, Double) -> Unit
 pub fn P5::plane(Self, w? : Double, h? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
@@ -675,6 +692,7 @@ pub fn P5::save_svg_frame(Self, filename? : String) -> Unit
 pub fn P5::scale(Self, Double, y? : Double, z? : Double) -> Unit
 pub fn P5::screen_to_world(Self, Double, Double) -> (Double, Double)
 pub fn[C : ColorArg] P5::set(Self, Double, Double, C) -> Unit
+pub fn P5::set_attributes(Self, ArrayView[GlAttribute]) -> Unit
 pub fn P5::set_camera(Self, @webgl.Camera) -> Unit
 pub fn P5::set_draw(Self, (Self) -> Unit) -> Unit
 pub fn P5::set_move_threshold(Self, Double) -> Unit
@@ -686,11 +704,13 @@ pub fn P5::shape(Self, ShapeCollection, x? : Double, y? : Double, scale? : Doubl
 pub fn P5::shear_x(Self, Double) -> Unit
 pub fn P5::shear_y(Self, Double) -> Unit
 pub fn P5::shininess(Self, Double) -> Unit
+pub fn[I : ImageSource] P5::shininess_texture(Self, I?) -> Unit
 pub fn[T] P5::shuffle(Self, ArrayView[T]) -> Array[T]
 pub fn P5::sin(Self, Double) -> Double
 pub fn P5::smooth(Self) -> Unit
 pub fn[C : ColorArg] P5::specular_color(Self, C) -> Unit
 pub fn[C : ColorArg] P5::specular_material(Self, C) -> Unit
+pub fn[I : ImageSource] P5::specular_texture(Self, I?) -> Unit
 pub fn P5::sphere(Self, r? : Double, detail_x? : Int32, detail_y? : Int32) -> Unit
 pub fn P5::spline(Self, Double, Double, Double, Double, Double, Double, Double, Double) -> Unit
 pub fn P5::spline_ends(Self, @shape.SplineEnds) -> Unit
