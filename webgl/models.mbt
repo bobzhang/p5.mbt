@@ -1,4 +1,4 @@
-// Model loading (src/webgl/loading.js): OBJ (without MTL materials) and
+// Model loading (src/webgl/loading.js): OBJ (with MTL materials) and
 // STL (ASCII and binary), plus Geometry.normalize/flipU/flipV.
 
 ///|
@@ -22,8 +22,17 @@ fn[T] at(arr : Array[T], i : Int32) -> T? {
 
 ///|
 /// Parses an OBJ file (vertices, texture coordinates, normals, faces).
-pub fn parse_obj(text : String) -> Geometry {
+/// With `materials` (from the MTL files it names), faces get their
+/// material's diffuse color, and a model using several materials is split
+/// into parts.
+pub fn parse_obj(
+  text : String,
+  materials~ : Map[String, Material] = Map([]),
+) -> Geometry {
   let model = Geometry::new()
+  let mut current : String? = None
+  let face_materials : Array[String?] = []
+  let mut colored = false
   let vs : Array[Vec3] = []
   let vts : Array[(Double, Double)] = []
   let vns : Array[Vec3] = []
@@ -34,6 +43,7 @@ pub fn parse_obj(text : String) -> Geometry {
       continue
     }
     match tokens[0] {
+      "usemtl" => current = tokens.get(1)
       "v" | "vn" => {
         let v = Vec3::new(
           js_parse_float(tokens.get(1).unwrap_or("")),
@@ -58,7 +68,11 @@ pub fn parse_obj(text : String) -> Geometry {
           let face : Array[Int32] = []
           for ti in [1, tri - 1, tri] {
             let vert = tokens[ti]
-            match used.get(vert) {
+            let key = match current {
+              Some(m) => vert + "|" + m
+              None => vert + "|"
+            }
+            match used.get(key) {
               Some(i) => face.push(i)
               None => {
                 let parts = vert
@@ -77,8 +91,15 @@ pub fn parse_obj(text : String) -> Geometry {
                   Some(n) => model.vertex_normals.push(n.copy())
                   None => model.vertex_normals.push(Vec3::new(0, 0, 0))
                 }
-                used[vert] = idx
+                used[key] = idx
                 face.push(idx)
+                match current.bind(m => materials.get(m)).bind(m => m.diffuse) {
+                  Some((r, g, b)) => {
+                    colored = true
+                    model.vertex_colors.append([r, g, b, 1])
+                  }
+                  None => model.vertex_colors.append([-1, -1, -1, -1])
+                }
               }
             }
           }
@@ -87,6 +108,7 @@ pub fn parse_obj(text : String) -> Geometry {
             face[0] != face[2] &&
             face[1] != face[2] {
             model.faces.push((face[0], face[1], face[2]))
+            face_materials.push(current)
           }
         }
       _ => ()
@@ -95,6 +117,16 @@ pub fn parse_obj(text : String) -> Geometry {
   if model.vertex_normals.is_empty() {
     ignore(model.compute_normals())
   }
+  if !colored {
+    model.vertex_colors.clear()
+  }
+  let needs_tangents = materials
+    .values()
+    .any(m => m.normal_texture is Some(_) || m.bump_texture is Some(_))
+  if needs_tangents {
+    ignore(model.compute_tangents())
+  }
+  build_material_parts(model, face_materials, materials)
   model
 }
 
@@ -297,5 +329,10 @@ pub fn Geometry::assign(self : Geometry, other : Geometry) -> Unit {
   self.edges.append(other.edges)
   self.vertex_colors.clear()
   self.vertex_colors.append(other.vertex_colors)
+  self.vertex_tangents.clear()
+  self.vertex_tangents.append(other.vertex_tangents)
+  self.parts.clear()
+  self.parts.append(other.parts)
+  self.part_state = other.part_state
   self.dirty = true
 }

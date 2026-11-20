@@ -191,7 +191,7 @@ pub fn P5::vertex_property(
   name : String,
   data : ArrayView[Double],
 ) -> Unit {
-  let value = FixedArray::from_array(data.to_array())
+  let value = FixedArray::from_array(data.to_owned())
   match self.extras.vertex_props.search_by(vp => vp.0 == name) {
     Some(i) => self.extras.vertex_props[i] = (name, value)
     None => self.extras.vertex_props.push((name, value))

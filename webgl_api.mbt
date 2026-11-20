@@ -1130,9 +1130,123 @@ pub fn P5::load_model(
   if lower.has_suffix(".stl") {
     @dom.fetch_bytes(path, bytes => finish(@webgl.parse_stl(bytes)), failed)
   } else {
-    @dom.fetch_text(path, text => finish(@webgl.parse_obj(text)), failed)
+    @dom.fetch_text(
+      path,
+      text => {
+        self.load_obj_materials(path, text, materials => {
+          finish(@webgl.parse_obj(text, materials~))
+        })
+      },
+      failed,
+    )
   }
   model
+}
+
+///|
+/// Loads the MTL files an OBJ names with `mtllib`, then their texture
+/// maps, and calls `done` with the materials (p5's `getMaterials` and
+/// `loadMaterialTextures`). Missing files are skipped with a warning.
+fn P5::load_obj_materials(
+  self : P5,
+  obj_path : String,
+  text : String,
+  done : (Map[String, @webgl.Material]) -> Unit,
+) -> Unit {
+  let folder = match obj_path.rev_find("/") {
+    Some(i) => String::from_array(obj_path.to_array()[:i])
+    None => ""
+  }
+  let resolve = (file : String) => {
+    let file = file.replace_all(old="\\", new="/")
+    if folder == "" {
+      file
+    } else {
+      folder + "/" + file
+    }
+  }
+  let libs : Array[String] = []
+  for line in text.split("\n") {
+    let line = line.trim().to_owned()
+    if line.has_prefix("mtllib ") {
+      libs.push(
+        String::from_array(line.to_array()[7:]).trim_space().to_string(),
+      )
+    }
+  }
+  let materials : Map[String, @webgl.Material] = Map([])
+  if libs.is_empty() {
+    done(materials)
+    return
+  }
+  let load_textures = () => {
+    let jobs : Array[(String, (@webgl.TexSource) -> Unit)] = []
+    for _, m in materials {
+      for job in m.texture_maps() {
+        jobs.push(job)
+      }
+    }
+    if jobs.is_empty() {
+      done(materials)
+      return
+    }
+    let pending = Ref(jobs.length())
+    let one_done = () => {
+      pending.val -= 1
+      if pending.val == 0 {
+        done(materials)
+      }
+    }
+    for job in jobs {
+      let (file, set) = job
+      let url = resolve(file)
+      self.begin_load()
+      @dom.fetch_text(
+        url,
+        _ => {
+          ignore(
+            self.load_image(url, on_load=img => {
+              if tex_source(img) is Some(src) {
+                set(src)
+              }
+              one_done()
+            }),
+          )
+          self.end_load()
+        },
+        _ => {
+          warn("Texture not found, skipping: \{url}")
+          one_done()
+          self.end_load()
+        },
+      )
+    }
+  }
+  let pending = Ref(libs.length())
+  for lib in libs {
+    let url = resolve(lib)
+    @dom.fetch_text(
+      url,
+      mtl => {
+        for name, m in @webgl.parse_mtl(mtl) {
+          materials[name] = m
+        }
+        pending.val -= 1
+        if pending.val == 0 {
+          load_textures()
+        }
+      },
+      _ => {
+        warn(
+          "MTL file not found or error in parsing; proceeding without materials: \{url}",
+        )
+        pending.val -= 1
+        if pending.val == 0 {
+          load_textures()
+        }
+      },
+    )
+  }
 }
 
 ///|

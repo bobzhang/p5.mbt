@@ -179,7 +179,7 @@ pub fn Geometry::vertex_property(
   size? : Int32,
 ) -> Unit {
   let prop = self.user_prop(name, size.unwrap_or(data.length()))
-  prop.data.append(data.to_array())
+  prop.data.append(data.to_owned())
   self.dirty = true
 }
 

@@ -24,6 +24,8 @@ package that imports `bobzhang/p5` and compiles to JavaScript.
 | [`swarm`](swarm/main.mbt) | GPU instancing: 8,000 boxes in one draw call (`instances`, `gl_InstanceID` in a shader hook) |
 | [`ribbons`](ribbons/main.mbt) | a custom per-vertex attribute (`vertex_property`) read by shader hooks |
 | [`crt`](crt/main.mbt) | a custom filter shader over a 2D sketch (`create_filter_shader`, `filter_shader`) |
+| [`materials`](materials/main.mbt) | an OBJ model with MTL materials, a texture and a normal map (`load_model`) |
+| [`portals`](portals/main.mbt) | clipping in WEBGL (`begin_clip`, `end_clip`, `invert`) |
 | [`accessible`](accessible/main.mbt) | screen-reader descriptions and generated outputs (`describe`, `text_output`, `grid_output`) |
 
 ## Running

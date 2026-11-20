@@ -41,7 +41,9 @@ pub fn js_string(Double) -> String
 
 pub fn libtess_triangulate(Array[Array[FixedArray[Double]]], Int32) -> Array[Double]
 
-pub fn parse_obj(String) -> Geometry
+pub fn parse_mtl(String) -> Map[String, Material]
+
+pub fn parse_obj(String, materials? : Map[String, Material]) -> Geometry
 
 pub fn parse_stl(FixedArray[Byte]) -> Geometry
 
@@ -222,6 +224,8 @@ pub struct Geometry {
   line_vertex_colors : Array[Double]
   vertex_tangents : Array[Double]
   user_props : Array[VertexProperty]
+  parts : Array[Geometry]
+  mut part_state : PartState?
   // private fields
 }
 pub fn Geometry::assign(Self, Self) -> Unit
@@ -251,9 +255,47 @@ pub fn Geometry::to_stl(Self, name? : String) -> String
 pub fn Geometry::to_stl_binary(Self) -> FixedArray[Byte]
 pub fn Geometry::vertex_property(Self, String, ArrayView[Double], size? : Int32) -> Unit
 
+pub struct Material {
+  mut diffuse : (Double, Double, Double)?
+  mut ambient : (Double, Double, Double)?
+  mut specular : (Double, Double, Double)?
+  mut shininess : Double?
+  mut opacity : Double?
+  mut illumination : Int32?
+  mut texture_path : String?
+  mut ambient_texture_path : String?
+  mut specular_texture_path : String?
+  mut shininess_texture_path : String?
+  mut bump_texture_path : String?
+  mut normal_texture_path : String?
+  mut bump_scale : Double?
+  mut texture : TexSource?
+  mut ambient_texture : TexSource?
+  mut specular_texture : TexSource?
+  mut shininess_texture : TexSource?
+  mut bump_texture : TexSource?
+  mut normal_texture : TexSource?
+}
+pub fn Material::texture_maps(Self) -> Array[(String, (TexSource) -> Unit)]
+pub fn Material::to_part_state(Self) -> PartState
+
 pub(all) enum NormalMode {
   KeepConnections
   Smooth
+}
+
+pub struct PartState {
+  fill : FixedArray[Double]?
+  ambient : FixedArray[Double]?
+  specular : FixedArray[Double]?
+  shininess : Double?
+  texture : TexSource?
+  specular_texture : TexSource?
+  ambient_texture : TexSource?
+  shininess_texture : TexSource?
+  normal_texture : TexSource?
+  normal_scale : Double
+  normal_map_mode : Int32
 }
 
 #derive(@debug.Debug)

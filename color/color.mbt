@@ -511,9 +511,9 @@ pub(all) enum ContrastMethod {
 pub fn Color::contrast(
   self : Color,
   other : Color,
-  method~ : ContrastMethod = Wcag21,
+  measure~ : ContrastMethod = Wcag21,
 ) -> Bool {
-  match method {
+  match measure {
     Wcag21 => self.contrast_ratio(other) >= 4.5
     Apca => self.contrast_apca(other).abs() >= 75
   }

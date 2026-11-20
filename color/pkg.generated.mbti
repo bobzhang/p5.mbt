@@ -21,7 +21,7 @@ pub struct Color {
 pub fn Color::alpha(Self, max? : Double) -> Double
 pub fn Color::blue(Self, max? : Double) -> Double
 pub fn Color::brightness(Self, max? : Double) -> Double
-pub fn Color::contrast(Self, Self, method? : ContrastMethod) -> Bool
+pub fn Color::contrast(Self, Self, measure? : ContrastMethod) -> Bool
 pub fn Color::contrast_apca(Self, Self) -> Double
 pub fn Color::contrast_ratio(Self, Self) -> Double
 pub fn Color::contrast_report(Self, Self) -> ContrastReport

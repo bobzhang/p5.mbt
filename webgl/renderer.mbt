@@ -910,7 +910,26 @@ pub fn Renderer3D::draw_geometry(
   let dirty = g.dirty
   g.dirty = false
   if style.fill is Some(fill) && g.vertices.length() >= 3 && !skip_fill {
-    self.draw_fills(b, fill, style, mode, count, dirty)
+    // a model with several materials draws each part with its own
+    let parts = if g.parts.is_empty() { [g] } else { g.parts }
+    for part in parts {
+      let (pb, pdirty) = if physical_equal(part, g) {
+        (b, dirty)
+      } else {
+        let d = part.dirty
+        part.dirty = false
+        (self.cached(part), d)
+      }
+      match part.part_state {
+        Some(ps) if ps.has_material() || ps.normal_texture is Some(_) => {
+          self.push()
+          let f = self.apply_part_state(ps, fill)
+          self.draw_fills(pb, f, style, mode, count, pdirty)
+          self.pop()
+        }
+        _ => self.draw_fills(pb, fill, style, mode, count, pdirty)
+      }
+    }
   }
   if style.stroke is Some(stroke) && g.line_vertices.length() >= 1 {
     self.draw_strokes(b, stroke, style, count, dirty)
@@ -1368,5 +1387,51 @@ pub fn Renderer3D::apply_stencil_if_clipping(self : Renderer3D) -> Unit {
   if applied != self.stencil_on {
     @gl.set_stencil_test(self.gl, applied)
     self.stencil_on = applied
+  }
+}
+
+///|
+/// Applies a part's material (p5's `_applyPartState`); returns the fill
+/// to draw with.
+fn Renderer3D::apply_part_state(
+  self : Renderer3D,
+  ps : PartState,
+  fill : FixedArray[Double],
+) -> FixedArray[Double] {
+  let s = self.state
+  if ps.texture is Some(t) {
+    s.tex = Some(t)
+    s.normal_material = false
+  }
+  if ps.ambient is Some(a) {
+    s.ambient_color = a
+    s.has_set_ambient = true
+  }
+  if ps.ambient_texture is Some(t) {
+    s.ambient_tex = Some(t)
+    s.has_set_ambient = true
+  }
+  if ps.specular is Some(c) {
+    s.specular_color = c
+    s.use_specular = true
+  }
+  if ps.specular_texture is Some(t) {
+    s.specular_tex = Some(t)
+    s.use_specular = true
+  }
+  if ps.shininess is Some(v) {
+    s.shininess = v
+  }
+  if ps.shininess_texture is Some(t) {
+    s.shininess_tex = Some(t)
+  }
+  if ps.normal_texture is Some(t) {
+    s.normal_tex = Some(t)
+    s.normal_scale = ps.normal_scale
+    s.normal_map_mode = ps.normal_map_mode
+  }
+  match ps.fill {
+    Some(f) => f
+    None => fill
   }
 }

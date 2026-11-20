@@ -143,13 +143,14 @@ arguments (`ellipse(…, h=…)`), separate functions (`random_max`,
 | --- | --- | --- |
 | `bobzhang/p5` | the sketch API (`P5`, `run`, `Image`, `Element`, …) | js |
 | `bobzhang/p5/math` | `Vector`, `Noise`, `Random` (p5's LCG), `Matrix2D`, `map`/`lerp`/… | all |
-| `bobzhang/p5/color` | `Color`: RGB/HSB/HSL/HWB/Lab/LCH/OKLab/OKLCH, CSS parsing, `lerp` | all |
+| `bobzhang/p5/color` | `Color`: RGB/HSB/HSL/HWB/Lab/LCH/OKLab/OKLCH/Display P3, CSS parsing, `lerp`, WCAG and APCA contrast | all |
+| `bobzhang/p5/a11y` | accessible outputs: color names, text and grid descriptions of a drawing | all |
 | `bobzhang/p5/shape` | the p5 2.x shape model and its conversion to canvas path commands | all |
 | `bobzhang/p5/filters` | CPU image filters (threshold, gray, invert, posterize, erode, dilate, blur) | all |
 | `bobzhang/p5/font` | font files (TrueType, CFF/OpenType, WOFF via a DEFLATE decoder), glyph outlines, kerning, arc-length sampling (ports of Typr.js and bezier-path) | all |
 | `bobzhang/p5/gif` | GIF encoding (gifenc) and decoding (omggif) | all |
 | `bobzhang/p5/io` | CSV, `Table`, `XML` | all |
-| `bobzhang/p5/webgl` | the WEBGL renderer: geometry, primitives, camera, shaders, lights, textures, framebuffers, libtess, text | js |
+| `bobzhang/p5/webgl` | the WEBGL renderer: geometry, primitives, camera, shaders, lights, image-based lighting, texture maps, framebuffers, clipping, OBJ/MTL/STL, libtess, text | js |
 | `bobzhang/p5/gl` | a thin WebGL binding | js |
 | `bobzhang/p5/dom` | JavaScript FFI bindings (canvas, events, images, DOM) | js |
 
@@ -178,16 +179,20 @@ rec.take() // ["…", "fill #ff0000 R10,10,20,20", "stroke #000000 w=1 …"]
   contours; `rect_mode`, `ellipse_mode`, stroke weight/cap/join,
   `bezier_point`/`bezier_tangent`/`spline_point`/`spline_tangent`.
 - **Color**: `color`, `fill`, `stroke`, `background`, `clear`, `erase`,
-  `blend_mode`, `color_mode` with custom maxes, `lerp_color`,
-  `palette_lerp`, `red`/`green`/`blue`/`alpha`/`hue`/`saturation`/
-  `brightness`/`lightness`.
+  `blend_mode`, `color_mode` with custom maxes (RGB, HSB, HSL, HWB, LAB, LCH,
+  OKLAB, OKLCH, and Display P3 with `RGBP3` on a `P2DP3` canvas),
+  `lerp_color`, `palette_lerp`, `red`/`green`/`blue`/`alpha`/`hue`/
+  `saturation`/`brightness`/`lightness`, `Color::contrast` (WCAG 2.1 and
+  APCA).
 - **Transform**: `translate`, `rotate`, `scale`, `shear_x`/`shear_y`,
   `apply_matrix`, `reset_matrix`, `angle_mode`.
 - **Typography**: `text` (multi-line, wrapped in a box, truncated),
   `text_size`, `text_leading`, `text_font`, `load_font`, `text_style`,
   `text_weight`, `text_align`, `text_wrap`, `text_width`, `font_width`,
-  `text_bounds`, `font_bounds`, `text_ascent`, `text_descent`; with a
-  loaded font: `Font::text_to_points`, `text_to_contours`, `text_to_paths`.
+  `text_bounds`, `font_bounds`, `text_ascent`, `text_descent`,
+  `text_property`/`text_properties` (letter and word spacing, kerning, …);
+  with a loaded font: `Font::text_to_points`, `text_to_contours`,
+  `text_to_paths`, `text_to_model` (3D, optionally extruded).
 - **WEBGL** (`create_canvas(w, h, renderer=WebGL)`): `box`, `sphere`,
   `ellipsoid`, `cylinder`, `cone`, `torus`, `plane`, 2D primitives and
   custom shapes in 3D (`vertex(x, y, z=…, u=…, v=…)`, `normal`); 3D
@@ -195,22 +200,34 @@ rec.take() // ["…", "fill #ff0000 R10,10,20,20", "stroke #000000 w=1 …"]
   `set_camera`, `orbit_control`; `ambient_light`, `directional_light`,
   `point_light`, `spot_light`, `lights`, `light_falloff`,
   `normal_material`, `ambient_material`, `emissive_material`,
-  `specular_material`, `shininess`, `metalness`; `texture`,
-  `texture_mode`, `texture_wrap`, `image`, `tint`; `create_shader`,
-  `shader`, `set_uniform`, `base_material_shader().modify(…)` with GLSL
-  hooks; `create_framebuffer` (`begin`/`end`/`draw`, antialiasing, use as a
-  texture); `filter` with p5's shader filters; `build_geometry`,
-  `load_model` (OBJ, STL), `model`; `text` with a loaded font;
-  `load_pixels`/`get`.
-- **Image**: `load_image`, `create_image`, `image`/`image_region`,
+  `specular_material`, `shininess`, `metalness`; `image_light` and
+  `panorama`; texture maps (`normal_texture`, `bump_texture`,
+  `specular_texture`, `ambient_texture`, `shininess_texture`); `texture`,
+  `texture_mode`, `texture_wrap`, `texture_interpolation`, `image`, `tint`;
+  `create_shader`, `load_shader`, `shader`, `set_uniform`,
+  `base_material_shader().modify(…)` with GLSL hooks and declarations,
+  `create_filter_shader`/`filter_shader` (also on 2D canvases);
+  `create_framebuffer` (`begin`/`end`/`draw`, antialiasing, use as a
+  texture); `filter` with p5's shader filters; clipping (`begin_clip`,
+  `end_clip`); `instances` (GPU instancing); `vertex_property` (custom
+  attributes); `stroke_mode`; `debug_mode`; `roll`; `set_attributes`;
+  `build_geometry`, `load_model` (OBJ with MTL materials and texture maps,
+  STL), `model`; `Geometry` tools (`compute_tangents`,
+  `calculate_bounding_box`, `average_normals`, `save_obj`, `save_stl`, …);
+  `text` with a loaded font; `load_pixels`/`get`.
+- **Image**: `load_image`, `create_image`, `image`/`image_region` (with
+  `Contain`/`Cover` fitting),
   `image_mode`, `tint`, `pixels`/`load_pixels`/`update_pixels`, `get`/`set`,
   `filter` (p5's WebGL shader filters by default, CPU with
   `use_webgl=false`), `copy`, `blend`, `create_graphics`, `save_canvas`,
   animated GIFs (`load_image`, playback control, `save_gif`), `Image`
   `resize`/`copy`/`copy_from`/`mask`/`filter`/`save`.
 - **SVG**: `load_svg`/`create_svg` and `shape()`, `build_shape`,
-  `get_svg`/`save_svg`.
-- **Media**: `create_video`, `create_audio`, `create_capture`.
+  `create_shape` with `begin`/`end`, `get_svg`/`save_svg`.
+- **Media**: `create_video`, `create_audio`, `create_capture`; Web Audio
+  routing with `connect`/`disconnect`.
+- **Accessibility**: `describe`, `describe_element`, `text_output` and
+  `grid_output` (as fallback content or visible labels).
 - **Events**: mouse/pointer (`mouse_x`, `pmouse_x`, `mouse_button`,
   `moved_x`, `touches`, pressed/released/clicked/double-clicked/moved/
   dragged/wheel, touch callbacks), keyboard (`key`, `code`, `key_code`,
@@ -218,7 +235,9 @@ rec.take() // ["…", "fill #ff0000 R10,10,20,20", "stroke #000000 w=1 …"]
 - **Recording**: `record` for frame-exact offline rendering to video.
 - **Environment**: `frame_rate`, `delta_time`, `millis`, `cursor`,
   `no_cursor`, `fullscreen`, `pixel_density`, `display_density`,
-  `window_width`/`window_height`, `resize_canvas`, `focused`.
+  `window_width`/`window_height`, `resize_canvas`, `no_canvas`, `focused`,
+  `get_url`/`get_url_path`/`get_url_params`, `webgl_version`,
+  `renderer_type`, `drawing_context`.
 - **Math**: `Vector` (all p5.Vector 2D/3D operations, `slerp`, `reflect`,
   `angle_between`, …), `noise`/`noise_detail`/`noise_seed`, `random*`,
   `random_seed`, `random_gaussian`, `map`, `constrain`, `lerp`, `dist`,
@@ -234,13 +253,22 @@ rec.take() // ["…", "fill #ff0000 R10,10,20,20", "stroke #000000 w=1 …"]
 
 ## Not ported
 
-WebGPU; p5.strands (shaders written as JavaScript functions; GLSL string
-hooks through `modify` are supported, and the built-in filters use the GLSL
-strands generates); `imageLight`; clipping and `debugMode` in WEBGL; MTL
-materials and multi-material parts in models; variable-font axes; WOFF2;
-accessibility outputs (`describe`, `gridOutput`); and the Friendly Error
-System. Color strings for non-RGB colors are serialized as CSS `rgb()`
-instead of color.js's formats.
+- **p5.strands** (shaders written as JavaScript functions, and the
+  `build*Shader`/`load*Shader` functions built on it): it works by reading
+  JavaScript source, which has no MoonBit equivalent. Write GLSL hooks with
+  `Shader::modify` instead; the built-in filters and `panorama` use the GLSL
+  strands generates.
+- **WebGPU**, compute shaders and storage buffers (beta in p5.js 2.4).
+- JavaScript-specific helpers that MoonBit has natively: `int`, `float`,
+  `str`, `byte`, `char`, `abs`, `floor`, `ceil`, `min`; the Friendly Error
+  System, `registerAddon`, translations and the loading animation.
+- Variable-font axes and WOFF2 fonts. Colors in spaces other than RGB and
+  Display P3 serialize as CSS `rgb()` rather than color.js's formats.
+
+Some names differ because of MoonBit keywords or conventions: `loop_`,
+`Camera::move_by`, `File::file_type`, `texture_interpolation` (p5.Texture's
+`setInterpolation`), and `==` / `to_string` for `Vector.equals` and
+`toString`.
 
 ## Development
 

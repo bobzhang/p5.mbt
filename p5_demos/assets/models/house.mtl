@@ -1,0 +1,20 @@
+# materials for house.obj
+newmtl wall
+Kd 1.0 1.0 1.0
+Ks 0.1 0.1 0.1
+Ns 8
+map_Kd bricks.png
+norm bricks_normal.png
+
+newmtl roof
+Kd 0.75 0.18 0.14
+Ks 0.6 0.5 0.5
+Ns 60
+
+newmtl door
+Kd 0.35 0.22 0.12
+Ks 0.2 0.2 0.2
+Ns 20
+
+newmtl grass
+Kd 0.30 0.55 0.25

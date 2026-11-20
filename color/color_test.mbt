@@ -165,7 +165,7 @@ test "contrast" {
     ),
   )
   inspect(
-    white.contrast(black, method=Apca),
+    white.contrast(black, measure=Apca),
     content=(
       #|true
     ),

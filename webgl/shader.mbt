@@ -242,7 +242,7 @@ fn populate_hooks(
     None => rest
   }
   let hooks = StringBuilder()
-  if declarations.trim_space().length() > 0 {
+  if declarations.trim().length() > 0 {
     hooks.write_string(declarations + "\n")
   }
   let defines = StringBuilder()

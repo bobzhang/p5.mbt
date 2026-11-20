@@ -37,6 +37,11 @@ pub struct Geometry {
   /// Custom per-vertex attributes, uploaded under their names
   /// (`vertex_property`).
   user_props : Array[VertexProperty]
+  /// Sub-meshes with their own materials (OBJ models with several MTL
+  /// materials); empty when the geometry is drawn as a whole.
+  parts : Array[Geometry]
+  /// The material of this geometry or part, from its MTL file.
+  mut part_state : PartState?
   priv mut dirty : Bool
 }
 
@@ -73,6 +78,8 @@ pub fn Geometry::new(detail_x~ : Int32 = 1, detail_y~ : Int32 = 1) -> Geometry {
     line_vertex_colors: [],
     vertex_tangents: [],
     user_props: [],
+    parts: [],
+    part_state: None,
     dirty: true,
   }
 }

@@ -15,7 +15,7 @@ pub fn P5::get_url_path(self : P5) -> Array[String] {
   @dom.location_pathname()
   .split("/")
   .filter(v => v != "")
-  .map(v => v.to_string())
+  .map(v => v.to_owned())
   .collect()
 }
 
@@ -27,13 +27,13 @@ pub fn P5::get_url_params(self : P5) -> Map[String, String] {
   let out : Map[String, String] = Map([])
   let search = @dom.location_search()
   for part in search.split("&") {
-    let part = part.to_string()
+    let part = part.to_owned()
     let part = if part.has_prefix("?") {
       String::from_array(part.to_array()[1:])
     } else {
       part
     }
-    let kv = part.split("=").map(s => s.to_string()).collect()
+    let kv = part.split("=").map(s => s.to_owned()).collect()
     if kv.length() >= 2 && kv[0] != "" && kv[1] != "" {
       out[kv[0]] = kv[1]
     }
