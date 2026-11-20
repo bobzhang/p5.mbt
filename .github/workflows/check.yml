@@ -93,8 +93,5 @@ jobs:
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s -- latest
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
       - run: moon update
-      - name: Package bobzhang/p5
-        run: moon package --list
-      - name: Package bobzhang/p5_demos
-        working-directory: p5_demos
-        run: moon package --list
+      - name: Package bobzhang/p5 and bobzhang/p5_demos
+        run: tools/publish.sh package
