@@ -1,6 +1,6 @@
 name = "bobzhang/p5_demos"
 
-version = "0.1.0"
+version = "0.2.0"
 
 readme = "README.md"
 
@@ -24,5 +24,5 @@ preferred_target = "js"
 warnings = "-79"
 
 import {
-  "bobzhang/p5@0.2.2",
+  "bobzhang/p5@0.3.0",
 }
