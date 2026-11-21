@@ -4,7 +4,7 @@
 //
 // A tiny local server serves the page; the sketch (opened with ?record)
 // renders every frame at a fixed time step and POSTs it as a PNG to /frame,
-// which is piped straight into ffmpeg together with assets/soundtrack.wav.
+// which is piped straight into ffmpeg. The film is silent.
 const fs = require('fs'), path = require('path'), http = require('http');
 const { spawn } = require('child_process');
 const { chromium } = require(process.env.PLAYWRIGHT_PATH || '/Users/dii/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
@@ -12,7 +12,6 @@ const FFMPEG = process.env.FFMPEG || '/Users/dii/git/video/node_modules/@remotio
 const ROOT = path.resolve(__dirname, '..'); // the demo
 const REPO = path.resolve(ROOT, '..', '..'); // served, so ../../_build resolves
 const OUT = path.resolve(process.argv[2] || path.join(ROOT, 'output', 'made-in-moonbit.mp4'));
-const AUDIO = path.join(ROOT, 'assets', 'soundtrack.wav');
 const FPS = 30;
 
 // Refuse to record unless every MoonBit snippet on screen is verified code.
@@ -22,7 +21,6 @@ const types = { '.html': 'text/html', '.js': 'text/javascript', '.wav': 'audio/w
 
 function startEncoder() {
   const args = ['-y', '-v', 'error', '-f', 'image2pipe', '-c:v', 'png', '-framerate', String(FPS), '-i', 'pipe:0'];
-  if (fs.existsSync(AUDIO)) args.push('-i', AUDIO, '-c:a', 'aac', '-b:a', '192k', '-shortest');
   args.push('-c:v', 'libx264', '-preset', 'slow', '-crf', '17', '-pix_fmt', 'yuv420p',
     '-metadata', 'title=Made in MoonBit', '-movflags', '+faststart', OUT);
   return spawn(FFMPEG, args, { env: { ...process.env, DYLD_LIBRARY_PATH: path.dirname(FFMPEG) }, stdio: ['pipe', 'inherit', 'inherit'] });

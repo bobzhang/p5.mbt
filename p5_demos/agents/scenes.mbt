@@ -84,99 +84,6 @@ fn opening(p : @p5.P5, t : Double) -> Unit {
   }
 }
 
-// ---------------------------------------------------------- the inheritance
-
-///|
-/// When the "In MoonBit" panel appears beside language `i`.
-fn link_time(i : Int32) -> Double {
-  arrival(i) + 2.6
-}
-
-///|
-/// Beside each language, what MoonBit took from it: no frame, just the code
-/// in MoonBit's colours, floating in the night. World coordinates.
-fn link_panel(p : @p5.P5, i : Int32, t : Double) -> Unit {
-  let s = t - link_time(i)
-  let fade = plate_alpha()
-  if s <= 0 || fade < 0.05 {
-    return
-  }
-  let link = link_of(langs[i].name)
-  let (nx, ny) = positions[i]
-  let x0 = nx + 620
-  let y0 = ny - 300
-  let a = smooth(s / 0.8) * fade
-  // a thread of light from the screen
-  p.no_fill()
-  p.stroke(rgba(moon_purple, 160 * a))
-  p.stroke_weight(2)
-  let (lx0, ly0) = (nx + 505, ny + 40)
-  let (lx1, ly1) = (x0 - 20, y0 + 20)
-  let u = clamp01(s / 0.5)
-  p.bezier(
-    lx0,
-    ly0,
-    lx0 + 40,
-    ly0,
-    lx1 - 40,
-    ly1,
-    lerp(lx0, lx1, u),
-    lerp(ly0, ly1, u),
-  )
-  // a soft glow behind the code
-  p.no_stroke()
-  for k in 0..<8 {
-    p.fill(rgba((90, 60, 180), 7 * a))
-    p.ellipse(
-      x0 + 360,
-      y0 + 180,
-      820 - k.to_double() * 70,
-      h=520 - k.to_double() * 45,
-    )
-  }
-  crescent_icon(p, x0 + 14, y0 + 18, 14, a)
-  p.no_stroke()
-  p.text_font(serif)
-  p.text_style(Italic)
-  p.text_size(30)
-  p.text_align(Left, vertical=VCenter)
-  p.fill(rgba(moon_purple, 255 * a))
-  p.text("MoonBit", x0 + 42, y0 + 18)
-  p.text_style(Normal)
-  let shown = (clamp01((s - 0.3) / 1.8) * char_count(link.code).to_double())
-    .floor()
-    .to_int()
-  if link.terminal {
-    let ink = (_ : Tok) => (200, 225, 215)
-    draw_code(p, link.code, shown, x0, y0 + 90, 25, 38, mono, plain_tokens, ink)
-    |> ignore
-  } else {
-    let colorize = (line : String) => {
-      tokenize(
-        line,
-        [
-          "fn", "let", "mut", "for", "in", "match", "enum", "return", "if", "test",
-        ],
-        "//",
-        "\"",
-      )
-    }
-    draw_code(
-      p,
-      link.code,
-      shown,
-      x0,
-      y0 + 90,
-      25,
-      38,
-      mono,
-      colorize,
-      palette(Moon),
-    )
-    |> ignore
-  }
-}
-
 ///|
 /// Code pours along every line of influence, then gathers where MoonBit
 /// appears. Drawn in world coordinates.
@@ -366,10 +273,10 @@ fn orbit(p : @p5.P5, cx : Double, cy : Double, t : Double) -> Unit {
 /// The four promises, one at a time, as the narrator says them.
 fn poem(p : @p5.P5, cx : Double, y : Double, t : Double) -> Unit {
   let words = [
-    ("Designed for AI", "Designed for AI."),
-    ("Safe", "Safe."),
-    ("Verifiable", "Verifiable."),
-    ("Fast to compile", "Fast."),
+    ("为 AI", "Designed for AI."),
+    ("安全", "Safe."),
+    ("可验证", "Verifiable."),
+    ("快", "Fast."),
   ]
   p.no_stroke()
   p.text_font(serif)
@@ -407,7 +314,7 @@ fn tagline_card(p : @p5.P5, t : Double) -> Unit {
   let rows = [
     ("Unix", "C", "Unix", cream),
     ("GPU", "CUDA", "GPU", cream),
-    ("Agents", "MoonBit", "agents", moon_purple),
+    ("Agents", "MoonBit", "智能体", moon_purple),
   ]
   for k, row in rows {
     let (age, lang, phrase, colour) = row
@@ -425,7 +332,7 @@ fn tagline_card(p : @p5.P5, t : Double) -> Unit {
       1 -
       0.55 *
       smooth(
-        (t - @story.phrase_time(@story.tagline_line, "agents") + 0.2) / 0.6,
+        (t - @story.phrase_time(@story.tagline_line, "智能体") + 0.2) / 0.6,
       )
     }
     p.no_stroke()
@@ -460,13 +367,6 @@ let all_glyphs : Array[(Char, Int32)] = {
       for c in line {
         if c != ' ' {
           out.push((c, i))
-        }
-      }
-    }
-    for line in link_of(l.name).code {
-      for c in line {
-        if c != ' ' {
-          out.push((c, @story.moon_node))
         }
       }
     }
@@ -549,7 +449,7 @@ fn finale(p : @p5.P5, t : Double) -> Unit {
     p.pop()
   }
   // the title stays up to the very last frame
-  let at = @story.phrase_time(@story.finale_line, "made") - 0.3
+  let at = @story.finale_start + 1.4
   let a = ease_in_out((t - at) / 0.8)
   if a > 0 {
     p.push()

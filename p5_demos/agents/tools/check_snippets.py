@@ -2,8 +2,7 @@
 
     python3 p5_demos/agents/tools/check_snippets.py
 
-Each snippet drawn on screen (the "MoonBit" code beside each language in
-languages.mbt, and MoonBit's own editor in scenes.mbt)
+The MoonBit code drawn on screen (MoonBit's editor in scenes.mbt)
 must appear line for line in snippets/snippets.mbt, which `moon test`
 compiles and tests. Block separators (`///|`) are ignored when matching.
 Exits non-zero on the first snippet that is not found.
@@ -42,21 +41,9 @@ def bracket(src, start):
 
 
 def snippets():
-    out = []
-    langs = open(os.path.join(ROOT, "languages.mbt")).read()
-    body = langs[langs.index("fn link_of("):]
-    for m in re.finditer(r'"([^"]+)" =>|_ =>', body):
-        name = m.group(1) or "WebAssembly"
-        rest = body[m.end():]
-        code = strings(bracket(rest, rest.index("code:")))
-        terminal = re.search(r"terminal:\s*(true|false)", rest).group(1) == "true"
-        if not terminal:
-            out.append((name, code))
-        if m.group(0) == "_ =>":
-            break
     scenes = open(os.path.join(ROOT, "scenes.mbt")).read()
-    out.append(("MoonBit editor", strings(bracket(scenes, scenes.index("= [", scenes.index("let moonbit_code"))))))
-    return out
+    start = scenes.index("= [", scenes.index("let moonbit_code"))
+    return [("MoonBit editor", strings(bracket(scenes, start)))]
 
 
 def lines(text):

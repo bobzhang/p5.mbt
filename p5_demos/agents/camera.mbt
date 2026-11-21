@@ -3,9 +3,13 @@
 
 ///|
 fn node_view(i : Int32) -> View {
-  // the screen sits left of centre; what MoonBit took from it goes on the right
   let (x, y) = positions[i]
-  { x: x + 420, y: y - 20, zoom: 0.84, rot: 0, }
+  if i == @story.moon_node {
+    // MoonBit's editor on the left, the agent's orbit on the right
+    { x: x + 420, y: y - 20, zoom: 0.84, rot: 0, }
+  } else {
+    { x, y: y - 10, zoom: 0.85, rot: 0, }
+  }
 }
 
 ///|

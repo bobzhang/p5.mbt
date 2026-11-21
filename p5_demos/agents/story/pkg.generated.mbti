@@ -6,8 +6,6 @@ pub let ai_converge : Double
 
 pub let ai_start : Double
 
-pub fn cues_json() -> String
-
 pub let finale_line : Int32
 
 pub let finale_start : Double
@@ -44,7 +42,6 @@ pub let total : Double
 pub(all) struct Line {
   start : Double
   end : Double
-  text : String
   zh : String
 }
 
@@ -70,7 +67,6 @@ pub(all) enum Style {
   Ink
   Leak
 }
-pub fn Style::name(Self) -> String
 
 // Type aliases
 

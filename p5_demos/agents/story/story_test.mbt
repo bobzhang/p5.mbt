@@ -44,19 +44,10 @@ test "narration slots do not overlap" {
 test "phrase_time" {
   let l = @story.lines()[@story.moon_line]
   assert_eq(@story.phrase_time(@story.moon_line, "MoonBit"), l.start)
-  let t = @story.phrase_time(@story.moon_line, "Verifiable")
+  let t = @story.phrase_time(@story.moon_line, "可验证")
   assert_true(t > l.start && t < l.end)
   assert_true(
-    @story.phrase_time(@story.moon_line, "Safe") >
-    @story.phrase_time(@story.moon_line, "Designed"),
+    @story.phrase_time(@story.moon_line, "安全") >
+    @story.phrase_time(@story.moon_line, "为 AI"),
   )
-}
-
-///|
-test "cues_json is valid JSON" {
-  let json = @json.parse(@story.cues_json()) catch { _ => panic() }
-  guard json
-    is { "shots": [_, ..], "lines": [_, ..], "events": { "finale": _, .. }, .. } else {
-    fail("unexpected shape")
-  }
 }
