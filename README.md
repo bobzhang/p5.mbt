@@ -81,7 +81,7 @@ Then open <http://localhost:8765/examples/>. The examples are:
 | [`data`](examples/data/main.mbt) | `load_json`, `load_strings`, CSV tables, XML |
 | [`dom`](examples/dom/main.mbt) | video as pixels, radio buttons, file input, dropping files |
 
-More elaborate demos — WEBGL scenes, shaders, flocking, two short films —
+More elaborate demos — WEBGL scenes, shaders, flocking, three short films —
 live in the [`p5_demos`](p5_demos/) module of this repository (published as
 [`bobzhang/p5_demos`](https://mooncakes.io/docs/bobzhang/p5_demos)). The
 repository is a `moon.work` workspace, so the same build compiles both; open

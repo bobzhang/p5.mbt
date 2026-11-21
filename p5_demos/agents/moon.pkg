@@ -1,0 +1,10 @@
+import {
+  "bobzhang/p5",
+  "bobzhang/p5_demos/agents/story",
+  "moonbitlang/core/string",
+  "moonbitlang/core/math" @cmath,
+}
+
+supported_targets = "js"
+
+pkgtype(kind: "executable")

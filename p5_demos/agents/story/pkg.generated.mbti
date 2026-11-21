@@ -1,0 +1,77 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5_demos/agents/story"
+
+// Values
+pub let ai_converge : Double
+
+pub let ai_start : Double
+
+pub fn cues_json() -> String
+
+pub let finale_line : Int32
+
+pub let finale_start : Double
+
+pub fn lines() -> Array[Line]
+
+pub let moon_arrive : Double
+
+pub let moon_born : Double
+
+pub let moon_line : Int32
+
+pub let moon_node : Int32
+
+pub let overview_end : Double
+
+pub let overview_start : Double
+
+pub fn phrase_time(Int32, String) -> Double
+
+pub fn shots() -> Array[Shot]
+
+pub let tagline_line : Int32
+
+pub let tagline_start : Double
+
+pub let title_start : Double
+
+pub let total : Double
+
+// Errors
+
+// Types and methods
+pub(all) struct Line {
+  start : Double
+  end : Double
+  text : String
+  zh : String
+}
+
+pub(all) struct Shot {
+  node : Int32
+  start : Double
+  trans : Double
+  style : Style
+}
+pub fn Shot::arrive(Self) -> Double
+
+pub(all) enum Style {
+  Ignite
+  Swoop
+  Flip
+  Whip
+  Dive
+  Spin
+  Swing
+  Glitch
+  Iris
+  Dissolve
+  Ink
+  Leak
+}
+pub fn Style::name(Self) -> String
+
+// Type aliases
+
+// Traits
