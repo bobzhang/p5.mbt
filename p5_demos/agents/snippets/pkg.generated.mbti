@@ -6,7 +6,6 @@ package "bobzhang/p5_demos/agents/snippets"
 // Errors
 
 // Types and methods
-type Shape
 
 // Type aliases
 

@@ -234,69 +234,6 @@ let picked : Array[String] = [
 ]
 
 ///|
-/// What MoonBit inherited from a language, shown beside it.
-struct Link {
-  code : Array[String]
-  terminal : Bool // a shell session rather than source code
-}
-
-///|
-fn link_of(name : String) -> Link {
-  match name {
-    "FORTRAN" =>
-      {
-        code: [
-          "fn sum_squares(n : Int32) -> Int32 {", "  let mut s = 0", "  for i in 1..<=n {",
-          "    s += i * i", "  }", "  s", "}",
-        ],
-        terminal: false,
-      }
-    "LISP" =>
-      {
-        code: [
-          "fn adder(n : Int32) -> (Int32) -> Int32 {", "  x => x + n", "}", "", "test {",
-          "  let add2 = adder(2)", "  assert_eq([1, 2, 3].map(add2), [3, 4, 5])",
-          "}",
-        ],
-        terminal: false,
-      }
-    "C" =>
-      {
-        code: [
-          "fn checksum(data : Bytes) -> Int32 {", "  let mut sum = 0", "  for b in data {",
-          "    sum = (sum + b.to_int()) & 0xFFFF", "  }", "  sum", "}",
-        ],
-        terminal: false,
-      }
-    "ML" =>
-      {
-        code: [
-          "enum Shape {", "  Circle(Double)", "  Rect(Double, Double)", "}", "",
-          "fn area(s : Shape) -> Double {", "  match s {", "    Circle(r) => 3.14 * r * r",
-          "    Rect(w, h) => w * h", "  }", "}",
-        ],
-        terminal: false,
-      }
-    "Rust" =>
-      {
-        code: [
-          "fn find(xs : Array[Int32], x : Int32) -> Int32? {", "  for i, v in xs {",
-          "    if v == x {", "      return Some(i)", "    }", "  }", "  None", "}",
-        ],
-        terminal: false,
-      }
-    _ =>
-      {
-        code: [
-          "$ moon build --target wasm-gc", "Finished. moon: ran 4 tasks, now up to date",
-          "Artifacts:", "  cmd/main  wasm-gc  …/main.wasm",
-        ],
-        terminal: true,
-      }
-  }
-}
-
-///|
 fn era_background(era : Era) -> (Int32, Int32, Int32) {
   match era {
     Paper => (26, 19, 14)

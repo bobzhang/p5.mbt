@@ -262,6 +262,9 @@ fn draw_edges(p : @p5.P5, v : View, t : Double) -> Unit {
       p.vertex(x, y)
     }
     p.end_shape()
+    if b == @story.moon_node {
+      idea_label(p, v, t, a, grow)
+    }
     // a spark runs along the line while it is drawn, or when the wave passes
     let spark = if grow < 1 { grow } else { -1.0 }
     if spark >= 0 || wave > 0.2 {
@@ -378,7 +381,7 @@ fn plate_label(
 /// How many characters of node `i`'s program are on screen at `t`.
 fn shown_chars(i : Int32, code : Array[String], t : Double) -> Int32 {
   let start = arrival(i) - 0.15
-  let dur = ((hold_end(i) - start) * 0.8).max(0.35).min(2.6)
+  let dur = ((hold_end(i) - start) * 0.7).max(0.35).min(4.2)
   (clamp01((t - start) / dur) * char_count(code).to_double()).floor().to_int()
 }
 
@@ -459,9 +462,6 @@ fn draw_node(p : @p5.P5, i : Int32, t : Double) -> Unit {
     p.fill(rgba(bg, 255 * (1 - smooth(boot))))
     p.rect(nx - 560, ny - 360, 1120, 840)
   }
-  if detail.val {
-    link_panel(p, i, t)
-  }
 }
 
 ///|
@@ -489,4 +489,40 @@ fn target(p : @p5.P5, v : View, t : Double) -> Unit {
     rgba(moon_purple, 230 * a * smooth((t - @story.overview_end - 3.0) / 0.6)),
   )
   p.text("?", mx, my + 40 + 90 / z)
+}
+
+///|
+/// The idea each language passed on, written along its line into MoonBit.
+/// Shown only once the whole map is in view.
+let ideas : Array[String] = [
+  "speed", "functions as values", "close to the machine", "types inferred", "safety by default",
+  "runs anywhere",
+]
+
+///|
+fn idea_label(
+  p : @p5.P5,
+  v : View,
+  t : Double,
+  a : Int32,
+  grow : Double,
+) -> Unit {
+  let alpha = smooth((grow - 0.35) / 0.4) *
+    map_alpha() *
+    (1 - smooth((t - @story.ai_start) / 0.6))
+  if alpha <= 0 {
+    return
+  }
+  // LISP's line runs behind ML's screen, so its label sits earlier on it
+  let u = if a == 1 { 0.15 } else { 0.42 }
+  let (x, y) = edge_point(a, @story.moon_node, u)
+  let z = v.zoom.max(0.05)
+  p.no_stroke()
+  p.text_font(serif)
+  p.text_style(Italic)
+  p.text_size(27 / z)
+  p.text_align(HCenter, vertical=Bottom)
+  p.fill(rgba((205, 190, 255), 235 * alpha))
+  p.text(ideas[a], x, y - 12 / z)
+  p.text_style(Normal)
 }

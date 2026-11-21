@@ -14,8 +14,6 @@ type Era
 
 type Lang
 
-type Link
-
 #derive(Eq, @debug.Debug)
 type Tok
 

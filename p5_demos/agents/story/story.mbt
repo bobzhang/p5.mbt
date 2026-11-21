@@ -1,6 +1,5 @@
-// The film's timeline: when each language arrives and how, what the narrator
-// says and when. The picture (the agents package) and the sound
-// (tools/audio.py, via the cues package) are both driven by this one table.
+// The film's timeline: when each language arrives and how, and the caption
+// for each moment. The film is silent; the captions tell the story.
 
 ///|
 /// How the camera travels to the next language.
@@ -20,24 +19,6 @@ pub(all) enum Style {
 }
 
 ///|
-pub fn Style::name(self : Style) -> String {
-  match self {
-    Ignite => "ignite"
-    Swoop => "swoop"
-    Flip => "flip"
-    Whip => "whip"
-    Dive => "dive"
-    Spin => "spin"
-    Swing => "swing"
-    Glitch => "glitch"
-    Iris => "iris"
-    Dissolve => "dissolve"
-    Ink => "ink"
-    Leak => "leak"
-  }
-}
-
-///|
 /// The camera arrives at language `node`: the move starts at `start` and
 /// takes `trans` seconds.
 pub(all) struct Shot {
@@ -53,11 +34,10 @@ pub fn Shot::arrive(self : Shot) -> Double {
 }
 
 ///|
-/// One narrated line, its Chinese subtitle, and the slot it must fit.
+/// One caption and when it is on screen.
 pub(all) struct Line {
   start : Double
   end : Double
-  text : String
   zh : String
 }
 
@@ -102,7 +82,7 @@ pub let finale_start : Double = 85.2
 pub let moon_node : Int32 = 6
 
 ///|
-/// Narration lines with a special role.
+/// Captions with a special role.
 pub let moon_line : Int32 = 9
 
 ///|
@@ -126,86 +106,54 @@ pub fn shots() -> Array[Shot] {
 ///|
 pub fn lines() -> Array[Line] {
   [
+    { start: 1.0, end: 7.4, zh: "每个时代，都有自己的语言。", },
     {
-      start: 1.0,
-      end: 3.0,
-      text: "Every age has its own language.",
-      zh: "每个时代，都有自己的语言。",
-    },
-    {
-      start: 9.4,
-      end: 15.4,
-      text: "1957. FORTRAN showed that compiled code could be fast. MoonBit keeps that speed.",
+      start: 9.6,
+      end: 16.2,
       zh: "FORTRAN：编译出的代码，也能很快。",
     },
     {
-      start: 16.9,
-      end: 22.7,
-      text: "1958. LISP gave us closures, garbage collection, and the first dreams of AI.",
-      zh: "LISP：闭包、垃圾回收，与最初的 AI 梦想。",
+      start: 17.4,
+      end: 24.0,
+      zh: "LISP：函数即是值，最初的 AI 梦想。",
     },
+    { start: 25.6, end: 32.2, zh: "C：贴近机器，造就了 Unix。", },
+    { start: 33.8, end: 40.2, zh: "ML：类型，可以自己推导。", },
+    { start: 41.8, end: 48.2, zh: "Rust：安全，成为默认。", },
     {
-      start: 24.9,
-      end: 30.5,
-      text: "1972. C brought code close to the machine, and gave us Unix.",
-      zh: "C：贴近机器，造就了 Unix。",
-    },
-    {
-      start: 32.9,
-      end: 38.8,
-      text: "1973. ML taught the compiler to infer types. That idea is MoonBit's heart.",
-      zh: "ML：类型自己推导，这是 MoonBit 的核心。",
-    },
-    {
-      start: 40.9,
-      end: 45.5,
-      text: "2015. Rust made safety the default. So does MoonBit.",
-      zh: "Rust：安全，成为默认。MoonBit 亦然。",
-    },
-    {
-      start: 48.9,
-      end: 55.0,
-      text: "2017. WebAssembly let code run anywhere, safely. MoonBit was born for it.",
-      zh: "WebAssembly：处处安全运行。MoonBit 为它而生。",
+      start: 49.6,
+      end: 55.8,
+      zh: "WebAssembly：代码，处处安全运行。",
     },
     {
       start: 56.8,
-      end: 61.1,
-      text: "Step back. Sixty years of ideas, all pointing to one place.",
-      zh: "退后一步：六十年，指向同一处。",
+      end: 62.8,
+      zh: "退后一步：六十年的思想，汇向同一处。",
     },
     {
       start: 63.6,
-      end: 67.7,
-      text: "Now, AI writes code too. It needs a language it can trust.",
-      zh: "如今 AI 也写代码，它需要可信的语言。",
+      end: 69.2,
+      zh: "如今，AI 也在写代码。它需要可信的语言。",
     },
     {
       start: 70.6,
-      end: 77.1,
-      text: "MoonBit. Designed for AI. Safe. Verifiable. Fast to compile, and fast to run.",
+      end: 79.0,
       zh: "MoonBit：为 AI 而生。安全，可验证，快。",
     },
     {
       start: 79.6,
-      end: 83.7,
-      text: "Unix had C. The GPU had CUDA. The age of agents has MoonBit.",
+      end: 84.8,
       zh: "Unix 有 C，GPU 有 CUDA，智能体时代有 MoonBit。",
     },
-    {
-      start: 86.0,
-      end: 87.8,
-      text: "This film was made in MoonBit.",
-      zh: "这部影片，用 MoonBit 制作。",
-    },
+    { start: 86.0, end: 90.0, zh: "这部影片，用 MoonBit 制作。", },
   ]
 }
 
 ///|
-/// When the narrator reaches `phrase` in line `i`, assuming an even pace.
+/// When a reader reaches `phrase` in caption `i`, assuming an even pace.
 pub fn phrase_time(i : Int32, phrase : String) -> Double {
   let l = lines()[i]
-  let text = l.text.to_array()
+  let text = l.zh.to_array()
   let pat = phrase.to_array()
   let mut at = 0
   for k in 0..<=(text.length() - pat.length()) {
@@ -222,47 +170,4 @@ pub fn phrase_time(i : Int32, phrase : String) -> Double {
     }
   }
   l.start + (l.end - l.start) * at.to_double() / text.length().to_double()
-}
-
-///|
-fn json_string(s : String) -> String {
-  let buf = StringBuilder()
-  buf.write_char('"')
-  for c in s {
-    match c {
-      '"' => buf.write_string("\\\"")
-      '\\' => buf.write_string("\\\\")
-      _ => buf.write_char(c)
-    }
-  }
-  buf.write_char('"')
-  buf.to_string()
-}
-
-///|
-/// The timeline as JSON, for tools/audio.py.
-pub fn cues_json() -> String {
-  let shots = shots()
-    .map(s => {
-      "{\"node\":\{s.node},\"start\":\{s.start},\"trans\":\{s.trans},\"style\":\"\{s.style.name()}\"}"
-    })
-    .join(",")
-  let lines = lines()
-    .map(l => {
-      "{\"start\":\{l.start},\"end\":\{l.end},\"text\":\{json_string(l.text)},\"zh\":\{json_string(l.zh)}}"
-    })
-    .join(",")
-  let events = [
-      ("overview", overview_start),
-      ("ai", ai_start),
-      ("converge", ai_converge),
-      ("born", moon_born),
-      ("moon", moon_arrive),
-      ("title", title_start),
-      ("tagline", tagline_start),
-      ("finale", finale_start),
-    ]
-    .map(e => "\"\{e.0}\":\{e.1}")
-    .join(",")
-  "{\"total\":\{total},\"moon_line\":\{moon_line},\"tagline_line\":\{tagline_line},\"finale_line\":\{finale_line},\"shots\":[\{shots}],\"lines\":[\{lines}],\"events\":{\{events}}}"
 }
