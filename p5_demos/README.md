@@ -2,13 +2,14 @@
 
 Demos for [p5.mbt](https://github.com/bobzhang/p5.mbt), MoonBit's port of
 [p5.js](https://p5js.org): WEBGL scenes, custom shaders, framebuffers,
-particles, generative art and two short films. Every demo is an executable
+particles, generative art and three short films. Every demo is an executable
 package that imports `bobzhang/p5` and compiles to JavaScript.
 
 | Demo | What it shows |
 | --- | --- |
 | [`asia`](asia/) | *Five Thousand Years of Asia*, a two-minute WEBGL film in 13 chapters, with lit 3D scenes and CJK captions |
 | [`history`](history/) | *A Short History of Computation*, a 104-second 2D film |
+| [`agents`](agents/) | *From Punched Cards to AI Agents*, a 90-second film: FORTRAN, LISP, C, ML, Rust and WebAssembly, what MoonBit took from each, and MoonBit for AI agents. Narration, Chinese subtitles and score from [`tools/`](agents/tools/); every MoonBit snippet on screen is compiled and tested in [`snippets`](agents/snippets/) |
 | [`galaxy`](galaxy/main.mbt) | 12,000 stars as `POINTS` with per-vertex colors, `orbit_control` |
 | [`lorenz`](lorenz/main.mbt) | the Lorenz attractor as a 3D line colored by speed |
 | [`orrery`](orrery/main.mbt) | lights, emissive/specular materials, generated textures, font-shader labels |

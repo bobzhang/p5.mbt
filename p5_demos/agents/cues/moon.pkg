@@ -1,0 +1,7 @@
+import {
+  "bobzhang/p5_demos/agents/story",
+}
+
+supported_targets = "js"
+
+pkgtype(kind: "executable")

@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "bobzhang/p5_demos/agents"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+type Era
+
+type Lang
+
+type Link
+
+#derive(Eq, @debug.Debug)
+type Tok
+
+type View
+
+// Type aliases
+
+// Traits

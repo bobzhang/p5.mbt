@@ -17,7 +17,7 @@ keywords = [
   "generative-art",
 ]
 
-description = "Demos for p5.mbt (MoonBit's port of p5.js): WEBGL scenes, shaders, particles, generative art and two short films."
+description = "Demos for p5.mbt (MoonBit's port of p5.js): WEBGL scenes, shaders, particles, generative art and three short films."
 
 preferred_target = "js"
 

@@ -1,0 +1,3 @@
+// The MoonBit code shown on screen, compiled and tested. tools/check_snippets.py
+// checks that every snippet in the film appears here verbatim.
+warnings = "-unused_constructor-missing_priv-unused_value"
