@@ -110,7 +110,6 @@ pub struct Renderer3D {
   priv filter_shaders : Map[String, Shader]
   priv mut filter_layer : Framebuffer?
   priv mut filter_layer_temp : Framebuffer?
-  priv mut drawing_filter : Bool
   /// The canvas element (for using the canvas as a texture).
   canvas : @dom.ImageElement
   /// Whether the context is antialiased (framebuffer default).
@@ -213,7 +212,6 @@ pub fn Renderer3D::new(
     filter_shaders: Map([]),
     filter_layer: None,
     filter_layer_temp: None,
-    drawing_filter: false,
     canvas,
     antialias,
     user_sampler: false,
@@ -958,7 +956,6 @@ fn Renderer3D::draw_fills(
     dirty = true
   }
   let sh = self.fill_shader_for()
-  sh.kind = "fill"
   guard sh.init(self.gl) is Some(p) else { return }
   @gl.use_program(p)
   self.user_sampler = self.apply_user_uniforms(sh, p)
@@ -1061,7 +1058,6 @@ fn Renderer3D::draw_strokes(
     Some(s) => s
     None => self.shader("line")
   }
-  sh.kind = "stroke"
   guard sh.init(self.gl) is Some(p) else { return }
   @gl.use_program(p)
   ignore(self.apply_user_uniforms(sh, p))

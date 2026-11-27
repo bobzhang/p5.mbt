@@ -3,7 +3,7 @@ test "color names" {
   let name = (r : Double, g : Double, b : Double) => {
     @a11y.color_name([r, g, b, 255])
   }
-  inspect(
+  assert_eq(
     [
       name(255, 0, 0),
       name(0, 128, 0),
@@ -14,9 +14,9 @@ test "color names" {
       name(255, 200, 0),
       name(128, 0, 128),
     ],
-    content=(
-      #|[red, dark green, blue, black, white, white, yellow, dark fuchsia]
-    ),
+    [
+      "red", "dark green", "blue", "black", "white", "white", "yellow", "dark fuchsia",
+    ],
   )
 }
 

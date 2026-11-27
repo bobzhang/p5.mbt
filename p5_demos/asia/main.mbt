@@ -43,9 +43,6 @@ let vermilion : (Int32, Int32, Int32) = (227, 66, 52)
 let gold : (Int32, Int32, Int32) = (232, 184, 92)
 
 ///|
-let jade : (Int32, Int32, Int32) = (88, 178, 150)
-
-///|
 let dim : (Int32, Int32, Int32) = (140, 140, 160)
 
 ///|

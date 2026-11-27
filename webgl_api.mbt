@@ -1169,7 +1169,7 @@ fn P5::load_obj_materials(
   for line in text.split("\n") {
     let line = line.trim().to_owned()
     if line.has_prefix("mtllib ") {
-      libs.push(String::from_array(line.to_array()[7:]).trim_space().to_owned())
+      libs.push(String::from_array(line.to_array()[7:]).trim().to_owned())
     }
   }
   let materials : Map[String, @webgl.Material] = Map([])
