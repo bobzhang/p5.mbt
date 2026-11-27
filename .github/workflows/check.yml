@@ -49,7 +49,7 @@ jobs:
       # The repository is a moon.work workspace (the library and p5_demos),
       # so each command below covers both modules.
       - name: Type check
-        run: moon check --target js
+        run: moon check --target js --deny-warn
 
       - name: Formatting
         run: moon fmt --check

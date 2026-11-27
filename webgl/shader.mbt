@@ -18,7 +18,6 @@ pub struct Shader {
   /// GLSL added before the fragment hooks only.
   fragment_declarations : String
   priv mut program : @gl.Program?
-  priv mut kind : String
   priv raw : Bool
   priv uniforms : Map[String, UniformValue]
 }
@@ -132,7 +131,6 @@ pub fn Shader::new(vert : String, frag : String) -> Shader {
     vertex_declarations: "",
     fragment_declarations: "",
     program: None,
-    kind: "",
     uniforms: Map([]),
     raw: false,
   }
@@ -204,7 +202,6 @@ pub fn Shader::modify(
       self.fragment_declarations + "\n" + fragment_declarations
     },
     program: None,
-    kind: "",
     uniforms: Map([]),
   }
 }

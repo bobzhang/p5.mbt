@@ -135,14 +135,14 @@ test "parse" {
 }
 
 ///|
-test "contrast" {
+test "WCAG contrast ratio" {
   let black = @color.Color::rgb(0, 0, 0)
   let white = @color.Color::rgb(255, 255, 255)
   inspect(black.contrast_ratio(white), content="21")
 }
 
 ///|
-test "contrast" {
+test "APCA contrast and thresholds" {
   let black = @color.Color::rgb(0, 0, 0)
   let white = @color.Color::rgb(255, 255, 255)
   let gray = @color.Color::rgb(136, 136, 136)
@@ -182,15 +182,13 @@ test "display p3" {
     ),
   )
   let (r, g, b, _) = red.to_srgb()
-  inspect(
+  assert_eq(
     (
       @math.round(r, decimals=3),
       @math.round(g, decimals=3),
       @math.round(b, decimals=3),
     ),
-    content=(
-      #|(1.093, -0.227, -0.15)
-    ),
+    (1.093, -0.227, -0.15),
   )
   let srgb_red = @color.Color::rgb(255, 0, 0).to_mode(RGBP3)
   inspect(

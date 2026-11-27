@@ -181,7 +181,6 @@ pub fn Renderer3D::filter(
   }
   self.set_camera(cam)
   self.reset_matrix()
-  self.drawing_filter = true
   self.image(
     fbo.source(),
     0,
@@ -194,7 +193,6 @@ pub fn Renderer3D::filter(
     th,
     { ..pass_style, fill: Some([1, 1, 1, 1]), },
   )
-  self.drawing_filter = false
   self.clear_depth()
   self.pop()
   self.pop()
@@ -206,7 +204,6 @@ pub fn Renderer3D::filter(
 /// Runs p5's filter shaders over a 2D canvas on a helper WebGL canvas.
 pub struct Filter2D {
   priv gl : @gl.GL
-  priv canvas : @dom.Canvas
   priv shaders : Map[String, Shader]
   priv vbuf : @gl.Buffer
   priv tbuf : @gl.Buffer
@@ -221,7 +218,7 @@ pub fn Filter2D::new(w : Double, h : Double) -> Filter2D {
   @gl.array_buffer_data(gl, vbuf, [-1, -1, 1, -1, -1, 1, 1, 1])
   let tbuf = @gl.create_buffer(gl)
   @gl.array_buffer_data(gl, tbuf, [0, 1, 1, 1, 0, 0, 1, 0])
-  { gl, canvas, shaders: Map([]), vbuf, tbuf, }
+  { gl, shaders: Map([]), vbuf, tbuf, }
 }
 
 ///|
