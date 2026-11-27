@@ -24,5 +24,5 @@ preferred_target = "js"
 warnings = "-79"
 
 import {
-  "bobzhang/p5@0.3.0",
+  "bobzhang/p5@0.3.1",
 }
